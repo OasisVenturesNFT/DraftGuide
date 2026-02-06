@@ -54,6 +54,12 @@ function PlayerRow({ player, posRank, index, isPositionView }) {
             background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
           }}>P{posRank}</span>
         )}
+        {isPositionView && (
+          <span style={{
+            fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
+            background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
+          }}>#{player.r}</span>
+        )}
       </div>
       <PosBadge pos={player.p} />
       <div style={{
@@ -446,9 +452,10 @@ export default function App() {
     <div style={{minHeight:"100vh"}}>
       {/* ── Sticky Header ── */}
       <header style={{
-        background:"linear-gradient(180deg, #111b33 0%, #0f1729 100%)",
-        borderBottom:"1px solid rgba(45,212,191,0.15)",
+        background:"#ffffff",
+        borderBottom:"1px solid #e5e7eb",
         padding:"0 24px",position:"sticky",top:0,zIndex:100,
+        boxShadow:"0 1px 3px rgba(0,0,0,0.08)",
       }}>
         <div style={{
           maxWidth:"960px",margin:"0 auto",
@@ -464,7 +471,7 @@ export default function App() {
             <div>
               <div style={{
                 fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
-                color:"#f1f5f9",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.1,
+                color:"#1B2A4A",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.1,
               }}>Draft Guide</div>
               <div style={{
                 fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",
@@ -479,8 +486,8 @@ export default function App() {
               const active = activePage===pg;
               return (
                 <button key={pg} onClick={()=>setActivePage(pg)} style={{
-                  background: active ? "rgba(45,212,191,0.1)" : "transparent",
-                  color: active ? "#2dd4bf" : "#94a3b8",
+                  background: active ? "rgba(27,42,74,0.08)" : "transparent",
+                  color: active ? "#1B2A4A" : "#94a3b8",
                   border:"none",
                   borderBottom: active ? "2px solid #2dd4bf" : "2px solid transparent",
                   padding:"18px 20px",cursor:"pointer",
