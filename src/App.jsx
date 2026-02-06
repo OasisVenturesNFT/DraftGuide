@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import PLAYERS from "./players.js";
+import PROFILES from "./profiles.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -27,54 +28,162 @@ function PosBadge({ pos }) {
   );
 }
 
-function PlayerRow({ player, posRank, index, isPositionView }) {
+function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle }) {
   const [hovered, setHovered] = useState(false);
+  const profile = PROFILES[player.n];
+  const hasProfile = !!profile;
+
   return (
-    <div
-      className="player-row"
-      onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}
-      style={{
-        display:"grid",
-        gridTemplateColumns:"70px 52px 1fr 1fr",
-        alignItems:"center",gap:"12px",padding:"12px 20px",
-        background: hovered ? "rgba(45,212,191,0.06)" : index%2===0 ? "transparent" : "rgba(255,255,255,0.015)",
-        borderBottom:"1px solid rgba(255,255,255,0.04)",
-        transition:"background 0.15s ease",cursor:"default",
-      }}
-    >
-      {/* Rank */}
-      <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-        <span className="rank-number" style={{
-          fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
-          color:"#2dd4bf",lineHeight:1,minWidth:"32px",textAlign:"right",
-        }}>#{isPositionView ? posRank : player.r}</span>
-        {!isPositionView && posRank && (
-          <span className="rank-badge" style={{
-            fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
-            background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
-          }}>P{posRank}</span>
-        )}
-        {isPositionView && (
-          <span className="rank-badge" style={{
-            fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
-            background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
-          }}>#{player.r}</span>
-        )}
+    <div>
+      <div
+        className="player-row"
+        onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}
+        onClick={()=>{ if(hasProfile && onToggle) onToggle(player.r); }}
+        style={{
+          display:"grid",
+          gridTemplateColumns:"70px 52px 1fr 1fr",
+          alignItems:"center",gap:"12px",padding:"12px 20px",
+          background: expanded ? "rgba(45,212,191,0.08)" : hovered ? "rgba(45,212,191,0.06)" : index%2===0 ? "transparent" : "rgba(255,255,255,0.015)",
+          borderBottom: expanded ? "none" : "1px solid rgba(255,255,255,0.04)",
+          transition:"background 0.15s ease",
+          cursor: hasProfile ? "pointer" : "default",
+        }}
+      >
+        {/* Rank */}
+        <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+          <span className="rank-number" style={{
+            fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
+            color:"#2dd4bf",lineHeight:1,minWidth:"32px",textAlign:"right",
+          }}>#{isPositionView ? posRank : player.r}</span>
+          {!isPositionView && posRank && (
+            <span className="rank-badge" style={{
+              fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
+              background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
+            }}>P{posRank}</span>
+          )}
+          {isPositionView && (
+            <span className="rank-badge" style={{
+              fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
+              background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
+            }}>#{player.r}</span>
+          )}
+        </div>
+        <PosBadge pos={player.p} />
+        <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+          <div className="player-name" style={{
+            fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:500,
+            color:"#f1f5f9",letterSpacing:"0.2px",
+          }}>{player.n}</div>
+          {hasProfile && (
+            <span style={{
+              fontSize:"10px",color: expanded ? "#2dd4bf" : "#475569",
+              transition:"transform 0.2s, color 0.2s",
+              transform: expanded ? "rotate(180deg)" : "rotate(0)",
+              display:"inline-block",
+            }}>▼</span>
+          )}
+        </div>
+        <div className="player-school" style={{
+          fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",
+          color:"#94a3b8",textAlign:"right",
+        }}>
+          {player.s}
+          {isPositionView && (
+            <span style={{marginLeft:"12px",color:"#475569",fontSize:"11px"}}>OVR #{player.r}</span>
+          )}
+        </div>
       </div>
-      <PosBadge pos={player.p} />
-      <div className="player-name" style={{
-        fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:500,
-        color:"#f1f5f9",letterSpacing:"0.2px",
-      }}>{player.n}</div>
-      <div className="player-school" style={{
-        fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",
-        color:"#94a3b8",textAlign:"right",
-      }}>
-        {player.s}
-        {isPositionView && (
-          <span style={{marginLeft:"12px",color:"#475569",fontSize:"11px"}}>OVR #{player.r}</span>
-        )}
-      </div>
+
+      {/* Expanded Profile Card */}
+      {expanded && profile && (
+        <div style={{
+          background:"linear-gradient(180deg, rgba(45,212,191,0.06) 0%, rgba(27,42,74,0.3) 100%)",
+          borderBottom:"1px solid rgba(45,212,191,0.12)",
+          padding:"20px 24px",
+        }}>
+          {/* Bio bar */}
+          <div className="profile-bio-bar" style={{
+            display:"flex",flexWrap:"wrap",gap:"16px",alignItems:"center",
+            marginBottom:"16px",paddingBottom:"14px",
+            borderBottom:"1px solid rgba(255,255,255,0.06)",
+          }}>
+            <div style={{display:"flex",gap:"12px",flexWrap:"wrap"}}>
+              {[
+                {label:"AGE",value:profile.age},
+                {label:"HT",value:profile.height},
+                {label:"WT",value:`${profile.weight} lbs`},
+                {label:"CLASS",value:profile.class},
+              ].map(stat=>(
+                <div key={stat.label} style={{textAlign:"center"}}>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>{stat.label}</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"#f1f5f9",marginTop:"1px"}}>{stat.value}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{marginLeft:"auto",display:"flex",gap:"12px",flexWrap:"wrap",alignItems:"center"}}>
+              {profile.projected && (
+                <div style={{
+                  background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.2)",
+                  borderRadius:"6px",padding:"4px 12px",
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#2dd4bf",fontWeight:600,
+                }}>{profile.projected}</div>
+              )}
+              {profile.comp && (
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px"}}>NFL COMP</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"#f59e0b"}}>{profile.comp}</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Summary */}
+          <p style={{
+            fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8",
+            lineHeight:1.7,margin:"0 0 16px",
+          }}>{profile.summary}</p>
+
+          {/* Pros & Cons */}
+          <div className="profile-pros-cons" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px"}}>
+            {/* Pros */}
+            <div>
+              <div style={{
+                display:"flex",alignItems:"center",gap:"6px",marginBottom:"8px",
+              }}>
+                <span style={{color:"#22c55e",fontSize:"14px",fontWeight:700}}>✓</span>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#22c55e",letterSpacing:"0.5px",textTransform:"uppercase"}}>Strengths</span>
+              </div>
+              {profile.pros.map((pro,i)=>(
+                <div key={i} style={{
+                  display:"flex",gap:"8px",marginBottom:"6px",
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#cbd5e1",lineHeight:1.5,
+                }}>
+                  <span style={{color:"#22c55e",flexShrink:0,marginTop:"1px"}}>•</span>
+                  <span>{pro}</span>
+                </div>
+              ))}
+            </div>
+            {/* Cons */}
+            <div>
+              <div style={{
+                display:"flex",alignItems:"center",gap:"6px",marginBottom:"8px",
+              }}>
+                <span style={{color:"#ef4444",fontSize:"14px",fontWeight:700}}>✗</span>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#ef4444",letterSpacing:"0.5px",textTransform:"uppercase"}}>Weaknesses</span>
+              </div>
+              {profile.cons.map((con,i)=>(
+                <div key={i} style={{
+                  display:"flex",gap:"8px",marginBottom:"6px",
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#cbd5e1",lineHeight:1.5,
+                }}>
+                  <span style={{color:"#ef4444",flexShrink:0,marginTop:"1px"}}>•</span>
+                  <span>{con}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -285,6 +394,7 @@ function BigBoardPage() {
   const [activePos, setActivePos] = useState("ALL");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
+  const [expandedPlayer, setExpandedPlayer] = useState(null);
   const PER_PAGE = 50;
 
   useEffect(()=>{ setPage(0); },[activePos, search]);
@@ -389,7 +499,10 @@ function BigBoardPage() {
       <div>
         {pageData.map((player,i)=>{
           const posRank = isPositionView ? filtered.indexOf(player)+1 : positionRanks[player.r];
-          return <PlayerRow key={player.r} player={player} posRank={posRank} index={page*PER_PAGE+i} isPositionView={isPositionView}/>;
+          return <PlayerRow key={player.r} player={player} posRank={posRank} index={page*PER_PAGE+i} isPositionView={isPositionView}
+            expanded={expandedPlayer===player.r}
+            onToggle={(id)=>setExpandedPlayer(expandedPlayer===id?null:id)}
+          />;
         })}
       </div>
 
