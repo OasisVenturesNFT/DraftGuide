@@ -470,6 +470,7 @@ function MockDraftPage() {
   const [search, setSearch] = useState("");
   const [posFilter, setPosFilter] = useState("ALL");
   const [confirmPlayer, setConfirmPlayer] = useState(null);
+  const [showResults, setShowResults] = useState(false);
 
   const pickedPlayerIds = useMemo(()=> new Set(Object.values(picks).map(p=>p.r)), [picks]);
 
@@ -517,6 +518,7 @@ function MockDraftPage() {
     setSearch("");
     setPosFilter("ALL");
     setConfirmPlayer(null);
+    setShowResults(false);
   };
 
   // Pre-draft overview
@@ -676,7 +678,7 @@ function MockDraftPage() {
       )}
 
       {/* Draft complete overlay */}
-      {draftComplete && (
+      {draftComplete && !showResults && (
         <div style={{
           background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.2)",
           borderRadius:"10px",margin:"12px 20px",padding:"16px 20px",
@@ -685,11 +687,148 @@ function MockDraftPage() {
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:600,color:"#2dd4bf",textTransform:"uppercase",letterSpacing:"0.5px"}}>
             Draft Complete!
           </div>
-          <button onClick={resetDraft} style={{
-            background:"#2dd4bf",border:"none",borderRadius:"6px",padding:"8px 20px",
-            cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#0c1222",
-            fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",
-          }}>Start Over</button>
+          <div style={{display:"flex",gap:"8px"}}>
+            <button onClick={resetDraft} style={{
+              background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+              borderRadius:"6px",padding:"8px 20px",
+              cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#94a3b8",
+              fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",
+            }}>Start Over</button>
+            <button onClick={()=>setShowResults(true)} style={{
+              background:"#2dd4bf",border:"none",borderRadius:"6px",padding:"8px 20px",
+              cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#0c1222",
+              fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",
+            }}>View Results →</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── RESULTS SCREEN ── */}
+      {showResults && (
+        <div style={{
+          position:"fixed",top:0,left:0,right:0,bottom:0,
+          background:"#0c1222",zIndex:300,overflowY:"auto",
+        }}>
+          <div id="draft-results" style={{
+            maxWidth:"640px",margin:"0 auto",padding:"24px 20px 20px",
+          }}>
+            {/* Results header */}
+            <div style={{textAlign:"center",marginBottom:"20px"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"10px",marginBottom:"8px"}}>
+                <img src="/logo.png" alt="Draft Guide" style={{height:"28px",width:"auto"}}/>
+                <div style={{
+                  fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,
+                  color:"#f1f5f9",letterSpacing:"1px",textTransform:"uppercase",
+                }}>Draft Guide</div>
+              </div>
+              <div style={{
+                fontFamily:"'Oswald',sans-serif",fontSize:"clamp(20px,4vw,28px)",fontWeight:700,
+                color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.2,
+              }}>2026 Mock Draft</div>
+              <div style={{
+                fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",
+                letterSpacing:"1px",textTransform:"uppercase",marginTop:"4px",
+              }}>Round 1 · 32 Picks</div>
+            </div>
+
+            {/* Results grid - two columns */}
+            <div style={{
+              display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0",
+              border:"1px solid rgba(255,255,255,0.08)",borderRadius:"10px",
+              overflow:"hidden",
+            }}>
+              {DRAFT_ORDER.map((slot) => {
+                const player = picks[slot.pick];
+                if (!player) return null;
+                const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
+                return (
+                  <div key={slot.pick} style={{
+                    display:"flex",alignItems:"center",gap:"8px",
+                    padding:"7px 10px",
+                    background: slot.pick % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                    borderBottom:"1px solid rgba(255,255,255,0.04)",
+                    borderRight: slot.pick % 2 === 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                  }}>
+                    {/* Pick # */}
+                    <span style={{
+                      fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:700,
+                      color:"#2dd4bf",minWidth:"18px",textAlign:"right",
+                    }}>{slot.pick}</span>
+
+                    {/* Team badge */}
+                    <span style={{
+                      width:"28px",height:"17px",borderRadius:"3px",
+                      background:TEAM_COLORS[slot.abbr]||"#333",
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,
+                      color:"#fff",letterSpacing:"0.3px",flexShrink:0,
+                    }}>{slot.abbr}</span>
+
+                    {/* Position badge */}
+                    <span style={{
+                      background:pc.bg,color:pc.text,
+                      padding:"1px 5px",borderRadius:"3px",
+                      fontSize:"8px",fontWeight:700,letterSpacing:"0.3px",
+                      fontFamily:"'JetBrains Mono',monospace",
+                      minWidth:"30px",textAlign:"center",flexShrink:0,
+                    }}>{player.p}</span>
+
+                    {/* Player name */}
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{
+                        fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:500,
+                        color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                      }}>{player.n}</div>
+                      <div style={{
+                        fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#64748b",
+                      }}>{player.s}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer with branding */}
+            <div style={{
+              marginTop:"16px",paddingTop:"12px",
+              borderTop:"1px solid rgba(255,255,255,0.06)",
+              display:"flex",alignItems:"center",justifyContent:"space-between",
+            }}>
+              <div style={{
+                fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",
+              }}>draft-guide.com</div>
+              <div style={{
+                display:"flex",alignItems:"center",gap:"6px",
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#475569">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                <span style={{
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",
+                  color:"#2dd4bf",fontWeight:500,
+                }}>@DraftGuide_</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons - outside the screenshot area */}
+          <div style={{
+            maxWidth:"640px",margin:"0 auto",padding:"16px 20px 40px",
+            display:"flex",gap:"10px",justifyContent:"center",
+          }}>
+            <button onClick={()=>setShowResults(false)} style={{
+              background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+              borderRadius:"8px",padding:"10px 24px",cursor:"pointer",
+              fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",
+              letterSpacing:"0.5px",textTransform:"uppercase",
+            }}>← Back to Draft</button>
+            <button onClick={resetDraft} style={{
+              background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+              borderRadius:"8px",padding:"10px 24px",cursor:"pointer",
+              fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",
+              letterSpacing:"0.5px",textTransform:"uppercase",
+            }}>New Draft</button>
+          </div>
         </div>
       )}
 
