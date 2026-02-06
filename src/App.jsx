@@ -930,7 +930,7 @@ function MockDraftPage() {
           {!draftComplete && currentSlot && (
             <div style={{
               padding:"14px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)",
-              background:"rgba(45,212,191,0.04)",
+              background:"#0c1222",
               position:"sticky",top:0,zIndex:10,
             }}>
               <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
