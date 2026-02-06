@@ -104,4 +104,9 @@ input::placeholder {
   .rank-number { font-size: 15px !important; min-width: 26px !important; }
   .rank-badge { font-size: 9px !important; padding: 1px 4px !important; }
   .pos-badge { font-size: 10px !important; padding: 2px 6px !important; min-width: 36px !important; }
+
+  /* Draft split screen - stack on mobile */
+  .draft-split { grid-template-columns: 1fr !important; }
+  .draft-split > div:first-child { max-height: 35vh !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .draft-split > div:last-child { max-height: 55vh !important; }
 }
