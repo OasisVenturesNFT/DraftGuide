@@ -249,6 +249,79 @@ function HomePage({ setPage }) {
   },[]);
 
   const top10 = PLAYERS.slice(0,10);
+  const [expandedPlayer, setExpandedPlayer] = useState(null);
+  const togglePlayer = (id) => setExpandedPlayer(expandedPlayer===id?null:id);
+
+  const renderProfile = (profile) => (
+    <div style={{
+      background:"linear-gradient(180deg, rgba(45,212,191,0.06) 0%, rgba(27,42,74,0.3) 100%)",
+      borderBottom:"1px solid rgba(45,212,191,0.12)",
+      padding:"16px 12px",marginTop:"4px",borderRadius:"8px",
+    }}>
+      <div className="profile-bio-bar" style={{
+        display:"flex",flexWrap:"wrap",gap:"12px",alignItems:"center",
+        marginBottom:"12px",paddingBottom:"10px",
+        borderBottom:"1px solid rgba(255,255,255,0.06)",
+      }}>
+        <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
+          {[
+            {label:"AGE",value:profile.age},
+            {label:"HT",value:profile.height},
+            {label:"WT",value:`${profile.weight} lbs`},
+            {label:"CLASS",value:profile.class},
+          ].map(stat=>(
+            <div key={stat.label} style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px"}}>{stat.label}</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9",marginTop:"1px"}}>{stat.value}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{marginLeft:"auto",display:"flex",gap:"10px",flexWrap:"wrap",alignItems:"center"}}>
+          {profile.projected && (
+            <div style={{
+              background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.2)",
+              borderRadius:"6px",padding:"3px 10px",
+              fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",fontWeight:600,
+            }}>{profile.projected}</div>
+          )}
+          {profile.comp && (
+            <div style={{textAlign:"right"}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px"}}>NFL COMP</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f59e0b"}}>{profile.comp}</div>
+            </div>
+          )}
+        </div>
+      </div>
+      <p style={{
+        fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",
+        lineHeight:1.7,margin:"0 0 12px",
+      }}>{profile.summary}</p>
+      <div className="profile-pros-cons" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+        <div>
+          <div style={{display:"flex",alignItems:"center",gap:"4px",marginBottom:"6px"}}>
+            <span style={{color:"#22c55e",fontSize:"12px",fontWeight:700}}>✓</span>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:600,color:"#22c55e",letterSpacing:"0.5px",textTransform:"uppercase"}}>Strengths</span>
+          </div>
+          {profile.pros.map((pro,i)=>(
+            <div key={i} style={{display:"flex",gap:"6px",marginBottom:"4px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#cbd5e1",lineHeight:1.5}}>
+              <span style={{color:"#22c55e",flexShrink:0}}>•</span><span>{pro}</span>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div style={{display:"flex",alignItems:"center",gap:"4px",marginBottom:"6px"}}>
+            <span style={{color:"#ef4444",fontSize:"12px",fontWeight:700}}>✗</span>
+            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:600,color:"#ef4444",letterSpacing:"0.5px",textTransform:"uppercase"}}>Weaknesses</span>
+          </div>
+          {profile.cons.map((con,i)=>(
+            <div key={i} style={{display:"flex",gap:"6px",marginBottom:"4px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#cbd5e1",lineHeight:1.5}}>
+              <span style={{color:"#ef4444",flexShrink:0}}>•</span><span>{con}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"24px 24px 60px"}}>
@@ -310,25 +383,45 @@ function HomePage({ setPage }) {
               fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",
             }}>View All →</button>
           </div>
-          {top10.map((p,i)=>(
-            <div key={p.r} style={{
-              display:"flex",alignItems:"center",gap:"12px",
-              padding:"8px 0",borderBottom: i<9 ? "1px solid rgba(255,255,255,0.04)" : "none",
-            }}>
-              <span style={{
-                fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,
-                color:"#2dd4bf",minWidth:"28px",textAlign:"right",
-              }}>#{p.r}</span>
-              <PosBadge pos={p.p}/>
-              <span style={{
-                fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,
-                color:"#f1f5f9",flex:1,
-              }}>{p.n}</span>
-              <span style={{
-                fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",
-              }}>{p.s}</span>
-            </div>
-          ))}
+          {top10.map((p,i)=>{
+            const profile = PROFILES[p.n];
+            const isExpanded = expandedPlayer === `top-${p.r}`;
+            return (
+              <div key={p.r}>
+                <div onClick={()=>{ if(profile) togglePlayer(`top-${p.r}`); }} style={{
+                  display:"flex",alignItems:"center",gap:"12px",
+                  padding:"8px 0",borderBottom: i<9 && !isExpanded ? "1px solid rgba(255,255,255,0.04)" : isExpanded ? "none" : "none",
+                  cursor: profile ? "pointer" : "default",
+                  background: isExpanded ? "rgba(45,212,191,0.04)" : "transparent",
+                  borderRadius: isExpanded ? "6px 6px 0 0" : "0",
+                  padding: isExpanded ? "8px 8px" : "8px 0",
+                  transition:"background 0.15s",
+                }}>
+                  <span style={{
+                    fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,
+                    color:"#2dd4bf",minWidth:"28px",textAlign:"right",
+                  }}>#{p.r}</span>
+                  <PosBadge pos={p.p}/>
+                  <span style={{
+                    fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,
+                    color:"#f1f5f9",flex:1,
+                  }}>{p.n}</span>
+                  {profile && (
+                    <span style={{
+                      fontSize:"9px",color: isExpanded ? "#2dd4bf" : "#475569",
+                      transform: isExpanded ? "rotate(180deg)" : "rotate(0)",
+                      display:"inline-block",transition:"transform 0.2s, color 0.2s",marginRight:"4px",
+                    }}>▼</span>
+                  )}
+                  <span style={{
+                    fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",
+                  }}>{p.s}</span>
+                </div>
+                {isExpanded && profile && renderProfile(profile)}
+                {(i<9 && !isExpanded) && <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)"}}/>}
+              </div>
+            );
+          })}
         </div>
 
         {/* Position Leaders */}
@@ -344,19 +437,35 @@ function HomePage({ setPage }) {
           {[...OFF_POSITIONS,...DEF_POSITIONS].map((pos,i,arr)=>{
             const p = topByPos[pos];
             if(!p) return null;
+            const profile = PROFILES[p.n];
+            const isExpanded = expandedPlayer === `pos-${pos}`;
             return (
-              <div key={pos} style={{
-                display:"flex",alignItems:"center",gap:"12px",
-                padding:"8px 0",
-                borderBottom: i<arr.length-1 ? "1px solid rgba(255,255,255,0.04)" : "none",
-              }}>
-                <PosBadge pos={pos}/>
-                <span style={{
-                  fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,
-                  color:"#f1f5f9",flex:1,
-                }}>{p.n}</span>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b"}}>{p.s}</span>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#475569"}}>#{p.r}</span>
+              <div key={pos}>
+                <div onClick={()=>{ if(profile) togglePlayer(`pos-${pos}`); }} style={{
+                  display:"flex",alignItems:"center",gap:"12px",
+                  padding: isExpanded ? "8px 8px" : "8px 0",
+                  cursor: profile ? "pointer" : "default",
+                  background: isExpanded ? "rgba(45,212,191,0.04)" : "transparent",
+                  borderRadius: isExpanded ? "6px 6px 0 0" : "0",
+                  transition:"background 0.15s",
+                }}>
+                  <PosBadge pos={pos}/>
+                  <span style={{
+                    fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,
+                    color:"#f1f5f9",flex:1,
+                  }}>{p.n}</span>
+                  {profile && (
+                    <span style={{
+                      fontSize:"9px",color: isExpanded ? "#2dd4bf" : "#475569",
+                      transform: isExpanded ? "rotate(180deg)" : "rotate(0)",
+                      display:"inline-block",transition:"transform 0.2s, color 0.2s",
+                    }}>▼</span>
+                  )}
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b"}}>{p.s}</span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#475569"}}>#{p.r}</span>
+                </div>
+                {isExpanded && profile && renderProfile(profile)}
+                {(i<arr.length-1 && !isExpanded) && <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)"}}/>}
               </div>
             );
           })}
@@ -844,7 +953,7 @@ function MockDraftPage() {
             {/* Results header */}
             <div style={{textAlign:"center",marginBottom:"20px"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"10px",marginBottom:"8px"}}>
-                <img src="/logo.png" alt="Draft Guide" style={{height:"28px",width:"auto"}}/>
+                <img src="/logo-light.png" alt="Draft Guide" style={{height:"28px",width:"auto"}}/>
                 <div style={{
                   fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,
                   color:"#f1f5f9",letterSpacing:"1px",textTransform:"uppercase",
