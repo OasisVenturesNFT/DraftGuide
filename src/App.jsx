@@ -480,6 +480,7 @@ const TEAM_NEEDS = {
 };
 
 function MockDraftPage() {
+  const [drafting, setDrafting] = useState(false);
   const [picks, setPicks] = useState({});
   const [currentPick, setCurrentPick] = useState(1);
   const [search, setSearch] = useState("");
