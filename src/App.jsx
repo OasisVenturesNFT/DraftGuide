@@ -458,13 +458,9 @@ export default function App() {
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:"12px",cursor:"pointer"}}
             onClick={()=>setActivePage("HOME")}>
-            <div style={{
-              width:"36px",height:"36px",borderRadius:"8px",
-              background:"linear-gradient(135deg,#1B2A4A,#234)",
-              border:"1.5px solid #2dd4bf",display:"flex",alignItems:"center",
-              justifyContent:"center",fontFamily:"'Oswald',sans-serif",
-              fontWeight:700,fontSize:"14px",color:"#2dd4bf",flexShrink:0,
-            }}>DG</div>
+            <img src="/logo.png" alt="Draft Guide" style={{
+              height:"36px",width:"auto",flexShrink:0,
+            }}/>
             <div>
               <div style={{
                 fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
