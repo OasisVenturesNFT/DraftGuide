@@ -463,8 +463,23 @@ const TEAM_COLORS = {
   SEA:"#002244",NE:"#002244",
 };
 
+const TEAM_NEEDS = {
+  ARI:["QB","RB","G","T"],ATL:["WR","TE","DI","CB"],BAL:["WR","G","DL"],
+  BUF:["WR","ED","LB","DB"],CAR:["WR","DL","LB"],CHI:["DL","LB","S"],
+  CIN:["C","G","DI","S"],CLE:["QB","WR","G","T"],DAL:["RB","ED","LB","S"],
+  DEN:["RB","TE","C","LB"],DET:["C","T","ED","CB"],GB:["T","DI","CB"],
+  HOU:["RB","C","G","DI"],IND:["QB","DI","LB","S"],JAX:["C","G","DI","S"],
+  KC:["RB","WR","G","T","DL"],LV:["QB","WR","G","T","DI","LB","CB"],
+  LAC:["G","C","DL"],LAR:["QB","T","CB"],MIA:["QB","WR","G","CB"],
+  MIN:["RB","C","DB"],NE:["G","T","ED","LB"],NO:["WR","G","DL"],
+  NYG:["WR","G","T","CB"],NYJ:["QB","WR","DI","LB","CB"],
+  PHI:["TE","G","ED","CB"],PIT:["QB","WR","T","DB"],
+  SF:["WR","G","ED","S"],SEA:["RB","C","G","LB","CB"],
+  TB:["TE","G","ED","LB","CB"],TEN:["RB","WR","C","G","ED","CB"],
+  WAS:["TE","G","ED","LB","DB"],
+};
+
 function MockDraftPage() {
-  const [drafting, setDrafting] = useState(false);
   const [picks, setPicks] = useState({});
   const [currentPick, setCurrentPick] = useState(1);
   const [search, setSearch] = useState("");
@@ -915,20 +930,40 @@ function MockDraftPage() {
             <div style={{
               padding:"14px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)",
               background:"rgba(45,212,191,0.04)",
-              display:"flex",alignItems:"center",gap:"12px",
               position:"sticky",top:0,zIndex:10,
             }}>
-              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"#2dd4bf"}}>#{currentPick}</span>
-              <span style={{
-                width:"40px",height:"26px",borderRadius:"5px",
-                background:TEAM_COLORS[currentSlot.abbr]||"#333",
-                display:"flex",alignItems:"center",justifyContent:"center",
-                fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:700,color:"#fff",
-              }}>{currentSlot.abbr}</span>
-              <div>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:600,color:"#f1f5f9"}}>{currentSlot.team}</div>
-                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b"}}>On the clock · Select a player below</div>
+              <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"#2dd4bf"}}>#{currentPick}</span>
+                <span style={{
+                  width:"40px",height:"26px",borderRadius:"5px",
+                  background:TEAM_COLORS[currentSlot.abbr]||"#333",
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:700,color:"#fff",
+                }}>{currentSlot.abbr}</span>
+                <div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:600,color:"#f1f5f9"}}>{currentSlot.team}</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b"}}>On the clock · Select a player below</div>
+                </div>
               </div>
+              {/* Team Needs */}
+              {TEAM_NEEDS[currentSlot.abbr] && (
+                <div style={{
+                  marginTop:"10px",display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",
+                }}>
+                  <span style={{
+                    fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",
+                    letterSpacing:"1px",textTransform:"uppercase",
+                  }}>NEEDS</span>
+                  {TEAM_NEEDS[currentSlot.abbr].map(need=>(
+                    <span key={need} style={{
+                      background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.08)",
+                      borderRadius:"4px",padding:"2px 8px",
+                      fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:600,
+                      color:"#f59e0b",letterSpacing:"0.3px",
+                    }}>{need}</span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -936,7 +971,7 @@ function MockDraftPage() {
           <div style={{
             padding:"12px 20px",borderBottom:"1px solid rgba(255,255,255,0.04)",
             display:"flex",gap:"8px",flexWrap:"wrap",alignItems:"center",
-            position:"sticky",top: draftComplete ? 0 : "62px",zIndex:9,background:"#0c1222",
+            position:"sticky",top: draftComplete ? 0 : "90px",zIndex:9,background:"#0c1222",
           }}>
             <div style={{
               display:"flex",alignItems:"center",gap:"6px",flex:1,minWidth:"160px",
