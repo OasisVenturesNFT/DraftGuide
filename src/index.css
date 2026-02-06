@@ -37,3 +37,71 @@ body {
 input::placeholder {
   color: #475569;
 }
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+  /* Hide "Draft Guide / 2026 NFL Draft" text next to logo on mobile */
+  .logo-text { display: none !important; }
+
+  /* Smaller nav buttons */
+  .nav-btn { padding: 14px 12px !important; font-size: 12px !important; letter-spacing: 0.5px !important; }
+
+  /* Header padding */
+  .site-header { padding: 0 12px !important; }
+  .site-header > div { height: 52px !important; }
+
+  /* Content padding */
+  .page-content { padding-left: 12px !important; padding-right: 12px !important; }
+
+  /* Home page two-column → single column */
+  .home-grid { grid-template-columns: 1fr !important; }
+
+  /* Stats bar → 3 col still but tighter */
+  .stats-grid { gap: 8px !important; }
+  .stats-grid > div { padding: 14px 8px !important; }
+  .stats-grid .stat-value { font-size: 24px !important; }
+
+  /* Player rows - tighter grid */
+  .player-row { 
+    grid-template-columns: 60px 44px 1fr !important; 
+    padding: 10px 12px !important; 
+    gap: 8px !important; 
+  }
+  .player-school { display: none !important; }
+  .player-name { font-size: 13px !important; }
+
+  /* Table header */
+  .table-header { 
+    grid-template-columns: 60px 44px 1fr !important; 
+    padding: 8px 12px !important; 
+  }
+  .table-header-school { display: none !important; }
+
+  /* Position filter - tighter */
+  .pos-filter { padding: 10px 10px !important; }
+  .pos-filter-btn { padding: 5px 8px !important; font-size: 10px !important; }
+  .pos-divider { display: none !important; }
+
+  /* Hero card */
+  .hero-section { padding: 28px 20px !important; }
+
+  /* Source badge */
+  .source-badge { font-size: 10px !important; }
+
+  /* Position hero */
+  .pos-hero { padding: 16px !important; }
+  .pos-hero-name { font-size: 20px !important; }
+  .pos-hero-big { font-size: 32px !important; }
+
+  /* Search bar */
+  .search-bar { padding: 7px 10px !important; }
+}
+
+@media (max-width: 480px) {
+  .nav-btn { padding: 14px 8px !important; font-size: 11px !important; }
+  .player-row { grid-template-columns: 52px 40px 1fr !important; padding: 8px 8px !important; }
+  .table-header { grid-template-columns: 52px 40px 1fr !important; padding: 8px 8px !important; }
+  .rank-number { font-size: 15px !important; min-width: 26px !important; }
+  .rank-badge { font-size: 9px !important; padding: 1px 4px !important; }
+  .pos-badge { font-size: 10px !important; padding: 2px 6px !important; min-width: 36px !important; }
+}

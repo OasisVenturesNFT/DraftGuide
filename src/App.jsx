@@ -19,8 +19,7 @@ const PAGES = ["HOME","BIG BOARD","MOCK DRAFT"];
 function PosBadge({ pos }) {
   const c = POS_COLORS[pos] || {bg:"#555",text:"#fff"};
   return (
-    <span style={{
-      background:c.bg,color:c.text,padding:"3px 10px",borderRadius:"4px",
+    <span className="pos-badge" style={{
       fontSize:"11px",fontWeight:700,letterSpacing:"0.5px",
       fontFamily:"'JetBrains Mono',monospace",display:"inline-block",
       minWidth:"42px",textAlign:"center",
@@ -32,6 +31,7 @@ function PlayerRow({ player, posRank, index, isPositionView }) {
   const [hovered, setHovered] = useState(false);
   return (
     <div
+      className="player-row"
       onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}
       style={{
         display:"grid",
@@ -44,29 +44,29 @@ function PlayerRow({ player, posRank, index, isPositionView }) {
     >
       {/* Rank */}
       <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-        <span style={{
+        <span className="rank-number" style={{
           fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
           color:"#2dd4bf",lineHeight:1,minWidth:"32px",textAlign:"right",
         }}>#{isPositionView ? posRank : player.r}</span>
         {!isPositionView && posRank && (
-          <span style={{
+          <span className="rank-badge" style={{
             fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
             background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
           }}>P{posRank}</span>
         )}
         {isPositionView && (
-          <span style={{
+          <span className="rank-badge" style={{
             fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
             background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
           }}>#{player.r}</span>
         )}
       </div>
       <PosBadge pos={player.p} />
-      <div style={{
+      <div className="player-name" style={{
         fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:500,
         color:"#f1f5f9",letterSpacing:"0.2px",
       }}>{player.n}</div>
-      <div style={{
+      <div className="player-school" style={{
         fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",
         color:"#94a3b8",textAlign:"right",
       }}>
@@ -103,28 +103,28 @@ function PositionFilter({ activePos, setActivePos }) {
   };
 
   return (
-    <div style={{
+    <div className="pos-filter" style={{
       display:"flex",flexDirection:"column",gap:"10px",
       background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
       borderRadius:"10px",padding:"14px 16px",marginBottom:"16px",
     }}>
       <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}}>
-        <button onClick={()=>setActivePos("ALL")} style={btnStyle("ALL")}>ALL</button>
-        <div style={{width:"1px",height:"20px",background:"rgba(255,255,255,0.08)",margin:"0 4px"}}/>
+        <button className="pos-filter-btn" onClick={()=>setActivePos("ALL")} style={btnStyle("ALL")}>ALL</button>
+        <div className="pos-divider" style={{width:"1px",height:"20px",background:"rgba(255,255,255,0.08)",margin:"0 4px"}}/>
         <span style={{
           fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",
           letterSpacing:"1.5px",textTransform:"uppercase",marginRight:"2px",
         }}>OFF</span>
         {OFF_POSITIONS.map(pos=>(
-          <button key={pos} onClick={()=>setActivePos(activePos===pos?"ALL":pos)} style={btnStyle(pos)}>{pos}</button>
+          <button className="pos-filter-btn" key={pos} onClick={()=>setActivePos(activePos===pos?"ALL":pos)} style={btnStyle(pos)}>{pos}</button>
         ))}
-        <div style={{width:"1px",height:"20px",background:"rgba(255,255,255,0.08)",margin:"0 4px"}}/>
+        <div className="pos-divider" style={{width:"1px",height:"20px",background:"rgba(255,255,255,0.08)",margin:"0 4px"}}/>
         <span style={{
           fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",
           letterSpacing:"1.5px",textTransform:"uppercase",marginRight:"2px",
         }}>DEF</span>
         {DEF_POSITIONS.map(pos=>(
-          <button key={pos} onClick={()=>setActivePos(activePos===pos?"ALL":pos)} style={btnStyle(pos)}>{pos}</button>
+          <button className="pos-filter-btn" key={pos} onClick={()=>setActivePos(activePos===pos?"ALL":pos)} style={btnStyle(pos)}>{pos}</button>
         ))}
       </div>
     </div>
@@ -142,9 +142,9 @@ function HomePage({ setPage }) {
   const top10 = PLAYERS.slice(0,10);
 
   return (
-    <div style={{maxWidth:"960px",margin:"0 auto",padding:"24px 24px 60px"}}>
+    <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"24px 24px 60px"}}>
       {/* Hero */}
-      <div style={{
+      <div className="hero-section" style={{
         background:"linear-gradient(135deg, rgba(45,212,191,0.06) 0%, rgba(27,42,74,0.5) 50%, rgba(45,212,191,0.03) 100%)",
         border:"1px solid rgba(45,212,191,0.12)",borderRadius:"16px",
         padding:"40px 32px",marginBottom:"32px",textAlign:"center",
@@ -181,7 +181,7 @@ function HomePage({ setPage }) {
       </div>
 
       {/* Two-column: Top 10 + Position Leaders */}
-      <div style={{
+      <div className="home-grid" style={{
         display:"grid",gridTemplateColumns:"1fr 1fr",gap:"24px",marginBottom:"32px",
       }}>
         {/* Top 10 Overall */}
@@ -255,7 +255,7 @@ function HomePage({ setPage }) {
       </div>
 
       {/* Stats bar */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"16px"}}>
+      <div className="stats-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"16px"}}>
         {[
           {label:"Total Prospects",value:PLAYERS.length},
           {label:"Expert Sources",value:92},
@@ -265,7 +265,7 @@ function HomePage({ setPage }) {
             background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
             borderRadius:"10px",padding:"20px",textAlign:"center",
           }}>
-            <div style={{
+            <div className="stat-value" style={{
               fontFamily:"'Oswald',sans-serif",fontSize:"32px",fontWeight:700,
               color:"#2dd4bf",lineHeight:1,
             }}>{stat.value}</div>
@@ -315,13 +315,13 @@ function BigBoardPage() {
   const posTopPlayer = isPositionView && filtered.length>0 ? filtered[0] : null;
 
   return (
-    <div style={{maxWidth:"960px",margin:"0 auto",padding:"16px 24px 40px"}}>
+    <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"16px 24px 40px"}}>
       {/* Position filter */}
       <PositionFilter activePos={activePos} setActivePos={setActivePos}/>
 
       {/* Position Hero */}
       {isPositionView && posTopPlayer && (
-        <div style={{
+        <div className="pos-hero" style={{
           background:"linear-gradient(135deg, rgba(45,212,191,0.08) 0%, rgba(27,42,74,0.4) 100%)",
           border:"1px solid rgba(45,212,191,0.12)",borderRadius:"12px",
           padding:"20px 24px",marginBottom:"16px",
@@ -331,7 +331,7 @@ function BigBoardPage() {
             <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"4px"}}>
               #{activePos}1 · Overall #{posTopPlayer.r}
             </div>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"24px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px"}}>
+            <div className="pos-hero-name" style={{fontFamily:"'Oswald',sans-serif",fontSize:"24px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px"}}>
               {posTopPlayer.n}
             </div>
             <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8",marginTop:"2px"}}>
@@ -339,7 +339,7 @@ function BigBoardPage() {
             </div>
           </div>
           <div style={{textAlign:"right"}}>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"42px",fontWeight:700,color:"rgba(45,212,191,0.2)",lineHeight:1}}>
+            <div className="pos-hero-big" style={{fontFamily:"'Oswald',sans-serif",fontSize:"42px",fontWeight:700,color:"rgba(45,212,191,0.2)",lineHeight:1}}>
               {activePos}
             </div>
             <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginTop:"2px"}}>
@@ -351,7 +351,7 @@ function BigBoardPage() {
 
       {/* Search */}
       <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"12px",flexWrap:"wrap"}}>
-        <div style={{
+        <div className="search-bar" style={{
           display:"flex",alignItems:"center",gap:"8px",flex:"1",minWidth:"200px",
           background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
           borderRadius:"8px",padding:"8px 14px",
@@ -372,7 +372,7 @@ function BigBoardPage() {
       </div>
 
       {/* Table Header */}
-      <div style={{
+      <div className="table-header" style={{
         display:"grid",gridTemplateColumns:"70px 52px 1fr 1fr",
         gap:"12px",padding:"8px 20px",
         borderBottom:"1px solid rgba(45,212,191,0.15)",
@@ -382,7 +382,7 @@ function BigBoardPage() {
         <div>{isPositionView?"POS RNK":"RANK"}</div>
         <div>POS</div>
         <div>PLAYER</div>
-        <div style={{textAlign:"right"}}>{isPositionView?"SCHOOL / OVR":"SCHOOL"}</div>
+        <div className="table-header-school" style={{textAlign:"right"}}>{isPositionView?"SCHOOL / OVR":"SCHOOL"}</div>
       </div>
 
       {/* Rows */}
@@ -420,7 +420,7 @@ function BigBoardPage() {
 /* ───── Mock Draft Page (placeholder) ───── */
 function MockDraftPage() {
   return (
-    <div style={{maxWidth:"960px",margin:"0 auto",padding:"40px 24px",textAlign:"center"}}>
+    <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"40px 24px",textAlign:"center"}}>
       <div style={{
         background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
         borderRadius:"16px",padding:"60px 32px",
@@ -451,7 +451,7 @@ export default function App() {
   return (
     <div style={{minHeight:"100vh"}}>
       {/* ── Sticky Header ── */}
-      <header style={{
+      <header className="site-header" style={{
         background:"#ffffff",
         borderBottom:"1px solid #e5e7eb",
         padding:"0 24px",position:"sticky",top:0,zIndex:100,
@@ -468,7 +468,7 @@ export default function App() {
             <img src="/logo.png" alt="Draft Guide" style={{
               height:"36px",width:"auto",flexShrink:0,
             }}/>
-            <div>
+            <div className="logo-text">
               <div style={{
                 fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
                 color:"#1B2A4A",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.1,
@@ -485,7 +485,7 @@ export default function App() {
             {PAGES.map(pg=>{
               const active = activePage===pg;
               return (
-                <button key={pg} onClick={()=>setActivePage(pg)} style={{
+                <button className="nav-btn" key={pg} onClick={()=>setActivePage(pg)} style={{
                   background: active ? "rgba(27,42,74,0.08)" : "transparent",
                   color: active ? "#1B2A4A" : "#94a3b8",
                   border:"none",
@@ -507,7 +507,7 @@ export default function App() {
       {/* ── Source Badge (below header on Big Board) ── */}
       {activePage==="BIG BOARD" && (
         <div style={{maxWidth:"960px",margin:"0 auto",padding:"16px 24px 0"}}>
-          <div style={{
+          <div className="source-badge" style={{
             display:"inline-flex",alignItems:"center",gap:"6px",
             background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.15)",
             borderRadius:"6px",padding:"5px 12px",
