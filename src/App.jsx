@@ -28,10 +28,11 @@ function PosBadge({ pos }) {
   );
 }
 
-function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle }) {
+function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle, navigateToTeam }) {
   const [hovered, setHovered] = useState(false);
   const profile = PROFILES[player.n];
   const hasProfile = !!profile;
+  const fitTeams = (POS_TO_TEAMS[player.p] || []).slice(0, 4);
 
   return (
     <div>
@@ -84,12 +85,28 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle 
           )}
         </div>
         <div className="player-school" style={{
+          display:"flex",alignItems:"center",justifyContent:"flex-end",gap:"8px",
           fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",
           color:"#94a3b8",textAlign:"right",
         }}>
-          {player.s}
+          <span>{player.s}</span>
           {isPositionView && (
-            <span style={{marginLeft:"12px",color:"#475569",fontSize:"11px"}}>OVR #{player.r}</span>
+            <span style={{color:"#475569",fontSize:"11px"}}>OVR #{player.r}</span>
+          )}
+          {fitTeams.length > 0 && navigateToTeam && (
+            <span className="team-fits" style={{display:"inline-flex",gap:"2px",marginLeft:"4px"}}>
+              {fitTeams.map(a => (
+                <span key={a} onClick={e=>{e.stopPropagation();navigateToTeam(a);}} title={`${TEAM_INFO[a]?.name || a} needs ${player.p}`} style={{
+                  width:"22px",height:"14px",borderRadius:"2px",background:TEAM_COLORS[a]||"#333",
+                  display:"inline-flex",alignItems:"center",justifyContent:"center",
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff",
+                  cursor:"pointer",opacity:0.7,transition:"opacity 0.15s",
+                }}
+                onMouseEnter={e=>{e.currentTarget.style.opacity="1";}}
+                onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";}}
+                >{a}</span>
+              ))}
+            </span>
           )}
         </div>
       </div>
@@ -360,6 +377,25 @@ function HomePage({ setPage, navigateToTeam }) {
             transition:"all 0.2s ease",
           }}>Mock Draft</button>
         </div>
+        {/* Team Quick Access */}
+        {navigateToTeam && (
+          <div style={{marginTop:"20px"}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"8px"}}>Pick a Team</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:"4px",justifyContent:"center",maxWidth:"600px",margin:"0 auto"}}>
+              {Object.entries(TEAM_INFO).sort((a,b) => a[1].name.localeCompare(b[1].name)).map(([ab]) => (
+                <span key={ab} onClick={()=>navigateToTeam(ab)} title={TEAM_INFO[ab]?.name} style={{
+                  width:"30px",height:"20px",borderRadius:"3px",background:TEAM_COLORS[ab]||"#333",
+                  display:"inline-flex",alignItems:"center",justifyContent:"center",
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff",
+                  cursor:"pointer",opacity:0.65,transition:"all 0.15s",
+                }}
+                onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="scale(1.15)";}}
+                onMouseLeave={e=>{e.currentTarget.style.opacity="0.65";e.currentTarget.style.transform="scale(1)";}}
+                >{ab}</span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Two-column: Top 10 + Position Leaders */}
@@ -538,7 +574,7 @@ function HomePage({ setPage, navigateToTeam }) {
 }
 
 /* ───── Big Board Page ───── */
-function BigBoardPage() {
+function BigBoardPage({ navigateToTeam }) {
   const [activePos, setActivePos] = useState("ALL");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -650,6 +686,7 @@ function BigBoardPage() {
           return <PlayerRow key={player.r} player={player} posRank={posRank} index={page*PER_PAGE+i} isPositionView={isPositionView}
             expanded={expandedPlayer===player.r}
             onToggle={(id)=>setExpandedPlayer(expandedPlayer===id?null:id)}
+            navigateToTeam={navigateToTeam}
           />;
         })}
       </div>
@@ -964,6 +1001,28 @@ const TEAM_NEEDS = {
   TB:["TE","G","ED","LB","CB"],TEN:["RB","WR","C","G","ED","CB"],
   WAS:["TE","G","ED","LB","DB"],
 };
+
+// Reverse lookup: player position → teams that need it
+const NEEDS_MAP = {"QB":"QB","RB":"RB","WR":"WR","TE":"TE","OT":"T","IOL":"G","DL":"DL","EDGE":"ED","LB":"LB","CB":"CB","S":"S"};
+const POS_TO_TEAMS = {};
+Object.entries(TEAM_NEEDS).forEach(([abbr, needs]) => {
+  needs.forEach(need => {
+    // Map need codes to player positions
+    const posKeys = Object.entries(NEEDS_MAP).filter(([,v]) => v === need).map(([k]) => k);
+    // Also handle direct matches
+    if (!POS_TO_TEAMS[need]) POS_TO_TEAMS[need] = [];
+    POS_TO_TEAMS[need].push(abbr);
+    posKeys.forEach(pk => {
+      if (!POS_TO_TEAMS[pk]) POS_TO_TEAMS[pk] = [];
+      if (!POS_TO_TEAMS[pk].includes(abbr)) POS_TO_TEAMS[pk].push(abbr);
+    });
+  });
+});
+// Extra mappings for position names used in PLAYERS vs TEAM_NEEDS
+["DI","DL"].forEach(k=>{if(POS_TO_TEAMS[k]){if(!POS_TO_TEAMS["DL"])POS_TO_TEAMS["DL"]=[];POS_TO_TEAMS[k].forEach(a=>{if(!POS_TO_TEAMS["DL"].includes(a))POS_TO_TEAMS["DL"].push(a);});}});
+["ED","EDGE"].forEach(k=>{if(POS_TO_TEAMS[k]){if(!POS_TO_TEAMS["EDGE"])POS_TO_TEAMS["EDGE"]=[];POS_TO_TEAMS[k].forEach(a=>{if(!POS_TO_TEAMS["EDGE"].includes(a))POS_TO_TEAMS["EDGE"].push(a);});}});
+["DB","CB","S"].forEach(k=>{if(POS_TO_TEAMS[k]){["CB","S"].forEach(pk=>{if(!POS_TO_TEAMS[pk])POS_TO_TEAMS[pk]=[];POS_TO_TEAMS[k].forEach(a=>{if(!POS_TO_TEAMS[pk].includes(a))POS_TO_TEAMS[pk].push(a);});});}});
+["G","C","T"].forEach(k=>{if(POS_TO_TEAMS[k]){["IOL","OT"].forEach(pk=>{if(!POS_TO_TEAMS[pk])POS_TO_TEAMS[pk]=[];POS_TO_TEAMS[k].forEach(a=>{if(!POS_TO_TEAMS[pk].includes(a))POS_TO_TEAMS[pk].push(a);});});}});
 
 const PICK_VALUES = {1:3000,2:2600,3:2200,4:1800,5:1700,6:1600,7:1500,8:1400,9:1350,10:1300,11:1250,12:1200,13:1150,14:1100,15:1050,16:1000,17:950,18:900,19:875,20:850,21:800,22:780,23:760,24:740,25:720,26:700,27:680,28:660,29:640,30:620,31:600,32:585,33:580,34:560,35:550,36:540,37:530,38:520,39:510,40:500,41:490,42:480,43:470,44:460,45:450,46:440,47:430,48:420,49:410,50:400,51:390,52:380,53:370,54:360,55:350,56:340,57:330,58:320,59:310,60:300,61:292,62:284,63:276,64:270,65:265,66:260,67:255,68:250,69:245,70:240,71:235,72:230,73:225,74:220,75:215,76:210,77:205,78:200,79:195,80:190,81:185,82:180,83:175,84:170,85:165,86:160,87:155,88:150,89:145,90:140,91:136,92:132,93:128,94:124,95:120,96:116,97:112,98:108,99:104,100:100,101:96,102:92,103:88,104:86,105:84,106:82,107:80,108:78,109:76,110:74,111:72,112:70,113:68,114:66,115:64,116:62,117:60,118:58,119:56,120:54,121:52,122:50,123:49,124:48,125:47,126:46,127:45,128:44,129:43,130:42,131:41,132:40,133:39.5,134:39,135:38.5,136:38,137:37.5,138:37,139:36.5,140:36,141:35.5,142:35,143:34.5,144:34,145:33.5,146:33,147:32.5,148:32,149:31.5,150:31,151:30.5,152:30,153:29.5,154:29,155:28.5,156:28,157:27.5,158:27,159:26.5,160:26,161:25.5,162:25,163:24.5,164:24,165:23.5,166:23,167:22.5,168:22,169:21.5,170:21,171:20.5,172:20,173:19.5,174:19,175:18.5,176:18,177:17.5,178:17,179:16.5,180:16,181:15.6,182:15.2,183:14.8,184:14.4,185:14,186:13.6,187:13.2,188:12.8,189:12.4,190:12,191:11.6,192:11.2,193:10.8,194:10.4,195:10,196:9.6,197:9.2,198:8.8,199:8.4,200:8,201:7.8,202:7.6,203:7.4,204:7.2,205:7,206:6.8,207:6.6,208:6.4,209:6.2,210:6,211:5.8,212:5.6,213:5.4,214:5.2,215:5,216:4.8,217:4.6,218:4.5,219:4.4,220:4.4,221:4.3,222:4.2,223:4.1,224:4,225:4,226:3.9,227:3.8,228:3.7,229:3.6,230:3.6,231:3.5,232:3.4,233:3.3,234:3.2,235:3.2,236:3.1,237:3,238:2.9,239:2.8,240:2.8,241:2.7,242:2.6,243:2.5,244:2.4,245:2.4,246:2.3,247:2.2,248:2.1,249:2,250:2,251:1.9,252:1.8,253:1.7,254:1.6,255:1.6,256:1.5,257:1.4};
 
@@ -1720,7 +1779,8 @@ function MockDraftPage() {
                         const shortName = slot ? slot.team.split(" ").pop() : abbr;
                         const totalTeamPicks = DRAFT_ORDER.filter(s=>s.abbr===abbr).length;
                         return (
-                          <div key={abbr} onClick={()=>startDraft("team", abbr)}
+                          <div key={abbr} style={{display:"flex",flexDirection:"column",gap:"0"}}>
+                          <div onClick={()=>startDraft("team", abbr)}
                             style={{display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px",borderRadius:"8px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)",cursor:"pointer",transition:"all 0.15s"}}
                             onMouseEnter={e=>{e.currentTarget.style.background="rgba(45,212,191,0.08)";e.currentTarget.style.borderColor="rgba(45,212,191,0.2)";}}
                             onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.02)";e.currentTarget.style.borderColor="rgba(255,255,255,0.04)";}}
@@ -1728,6 +1788,13 @@ function MockDraftPage() {
                             <span style={{width:"32px",height:"20px",borderRadius:"4px",background:TEAM_COLORS[abbr]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,color:"#fff",letterSpacing:"0.3px",flexShrink:0}}>{abbr}</span>
                             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:500,color:"#f1f5f9",flex:1}}>{shortName}</span>
                             <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{totalTeamPicks} picks</span>
+                          </div>
+                          <div style={{paddingLeft:"50px",paddingBottom:"2px"}}>
+                            <span onClick={e=>{e.stopPropagation();window.location.hash=`/team/${abbr}`;window.scrollTo(0,0);}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",cursor:"pointer",opacity:0.6,transition:"opacity 0.15s"}}
+                              onMouseEnter={e=>{e.currentTarget.style.opacity="1";}}
+                              onMouseLeave={e=>{e.currentTarget.style.opacity="0.6";}}
+                            >View draft profile →</span>
+                          </div>
                           </div>
                         );
                       })}
@@ -2496,7 +2563,7 @@ export default function App() {
 
       {/* ── Page Content ── */}
       {activePage==="HOME" && <HomePage setPage={handleSetPage} navigateToTeam={navigateToTeam}/>}
-      {activePage==="BIG BOARD" && <BigBoardPage/>}
+      {activePage==="BIG BOARD" && <BigBoardPage navigateToTeam={navigateToTeam}/>}
       {activePage==="MOCK DRAFT" && <MockDraftPage/>}
       {activePage==="TEAM" && teamPageAbbr && <TeamPage abbr={teamPageAbbr} setActivePage={handleSetPage} navigateToTeam={navigateToTeam}/>}
 
