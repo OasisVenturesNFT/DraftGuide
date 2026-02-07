@@ -391,8 +391,9 @@ function HomePage({ setPage, navigateToTeam }) {
         </div>
         {/* Team Quick Access */}
         {navigateToTeam && (
-          <div style={{marginTop:"20px"}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"8px"}}>Pick a Team</div>
+          <div style={{marginTop:"28px",paddingTop:"20px",borderTop:"1px solid rgba(45,212,191,0.08)"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase",marginBottom:"4px"}}>Team Draft Profiles</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"0.5px",marginBottom:"12px"}}>Draft capital · team needs · prospect fits</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:"4px",justifyContent:"center",maxWidth:"600px",margin:"0 auto"}}>
               {Object.entries(TEAM_INFO).sort((a,b) => a[1].name.localeCompare(b[1].name)).map(([ab]) => (
                 <span key={ab} onClick={()=>navigateToTeam(ab)} title={TEAM_INFO[ab]?.name} style={{
@@ -542,45 +543,6 @@ function HomePage({ setPage, navigateToTeam }) {
           </div>
         ))}
       </div>
-
-      {/* Team Draft Profiles */}
-      {navigateToTeam && (
-        <div style={{
-          background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
-          borderRadius:"14px",marginTop:"24px",overflow:"hidden",
-        }}>
-          <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Team Draft Profiles</div>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>Draft capital, team needs & prospect fits for all 32 teams</div>
-            </div>
-          </div>
-          <div style={{padding:"16px 20px"}}>
-            <div className="home-team-grid" style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"6px"}}>
-              {Object.entries(TEAM_INFO).sort((a,b) => a[1].name.localeCompare(b[1].name)).map(([abbr, info]) => {
-                const picks = DRAFT_ORDER.filter(s => s.abbr === abbr);
-                const firstPick = picks[0]?.pick;
-                return (
-                  <div key={abbr} onClick={()=>navigateToTeam(abbr)} style={{
-                    display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px",
-                    background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)",
-                    borderRadius:"8px",cursor:"pointer",transition:"all 0.15s",
-                  }}
-                  onMouseEnter={e=>{e.currentTarget.style.background="rgba(45,212,191,0.06)";e.currentTarget.style.borderColor="rgba(45,212,191,0.15)";}}
-                  onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.02)";e.currentTarget.style.borderColor="rgba(255,255,255,0.04)";}}
-                  >
-                    <span style={{width:"28px",height:"18px",borderRadius:"3px",background:TEAM_COLORS[abbr]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,color:"#fff",flexShrink:0}}>{abbr}</span>
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{info.name.split(" ").pop()}</div>
-                    </div>
-                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",flexShrink:0}}>#{firstPick}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -2076,10 +2038,10 @@ function MockDraftPage() {
                             <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{totalTeamPicks} picks</span>
                           </div>
                           <div style={{paddingLeft:"50px",paddingBottom:"2px"}}>
-                            <span onClick={e=>{e.stopPropagation();window.location.hash=`/team/${abbr}`;window.scrollTo(0,0);}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",cursor:"pointer",opacity:0.6,transition:"opacity 0.15s"}}
+                            <span onClick={e=>{e.stopPropagation();window.open(`${window.location.origin}${window.location.pathname}#/team/${abbr}`,'_blank');}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",cursor:"pointer",opacity:0.7,transition:"opacity 0.15s"}}
                               onMouseEnter={e=>{e.currentTarget.style.opacity="1";}}
-                              onMouseLeave={e=>{e.currentTarget.style.opacity="0.6";}}
-                            >View draft profile →</span>
+                              onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";}}
+                            >View team profile ↗</span>
                           </div>
                           </div>
                         );
@@ -2128,6 +2090,10 @@ function MockDraftPage() {
             <span style={{display:"inline-flex",alignItems:"center",gap:"6px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"3px 10px"}}>
               <span style={{width:"22px",height:"14px",borderRadius:"3px",background:TEAM_COLORS[userTeam]||"#333",display:"inline-flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff"}}>{userTeam}</span>
               <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>{userTeamSlot.team}</span>
+              <span onClick={()=>{window.open(`${window.location.origin}${window.location.pathname}#/team/${userTeam}`,'_blank');}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#2dd4bf",cursor:"pointer",opacity:0.7,borderLeft:"1px solid rgba(255,255,255,0.08)",paddingLeft:"6px",marginLeft:"2px"}}
+                onMouseEnter={e=>{e.currentTarget.style.opacity="1";}}
+                onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";}}
+              >Profile ↗</span>
             </span>
           )}
           <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b"}}>{picksCount}/{lastPickInScope}</span>
