@@ -70,13 +70,13 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle,
           }}>#{isPositionView ? posRank : player.r}</span>
           {!isPositionView && posRank && (
             <span className="rank-badge" style={{
-              fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
+              fontSize:"10px",color:"var(--dg-text-dim)",fontFamily:"'JetBrains Mono',monospace",
               background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
             }}>P{posRank}</span>
           )}
           {isPositionView && (
             <span className="rank-badge" style={{
-              fontSize:"10px",color:"#64748b",fontFamily:"'JetBrains Mono',monospace",
+              fontSize:"10px",color:"var(--dg-text-dim)",fontFamily:"'JetBrains Mono',monospace",
               background:"rgba(45,212,191,0.08)",padding:"2px 6px",borderRadius:"3px",
             }}>#{player.r}</span>
           )}
@@ -85,7 +85,7 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle,
         <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
           <div className="player-name" style={{
             fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:500,
-            color:"#f1f5f9",letterSpacing:"0.2px",
+            color:"var(--dg-text)",letterSpacing:"0.2px",
           }}>{player.n}</div>
           {hasProfile && (
             <span style={{
@@ -99,11 +99,11 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle,
         <div className="player-school" style={{
           display:"flex",alignItems:"center",justifyContent:"flex-end",gap:"8px",
           fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",
-          color:"#94a3b8",textAlign:"right",
+          color:"var(--dg-text-muted)",textAlign:"right",
         }}>
           <span>{player.s}</span>
           {isPositionView && (
-            <span style={{color:"#475569",fontSize:"11px"}}>OVR #{player.r}</span>
+            <span style={{color:"var(--dg-text-faint)",fontSize:"11px"}}>OVR #{player.r}</span>
           )}
           {fitTeams.length > 0 && navigateToTeam && (
             <span className="team-fits" style={{display:"inline-flex",gap:"2px",marginLeft:"4px"}}>
@@ -134,7 +134,7 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle,
           <div className="profile-bio-bar" style={{
             display:"flex",flexWrap:"wrap",gap:"16px",alignItems:"center",
             marginBottom:"16px",paddingBottom:"14px",
-            borderBottom:"1px solid rgba(255,255,255,0.06)",
+            borderBottom:"1px solid var(--dg-card-border)",
           }}>
             <div style={{display:"flex",gap:"12px",flexWrap:"wrap"}}>
               {[
@@ -144,8 +144,8 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle,
                 {label:"CLASS",value:profile.class},
               ].map(stat=>(
                 <div key={stat.label} style={{textAlign:"center"}}>
-                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>{stat.label}</div>
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"#f1f5f9",marginTop:"1px"}}>{stat.value}</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>{stat.label}</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"var(--dg-text)",marginTop:"1px"}}>{stat.value}</div>
                 </div>
               ))}
             </div>
@@ -159,7 +159,7 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle,
               )}
               {profile.comp && (
                 <div style={{textAlign:"right"}}>
-                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px"}}>NFL COMP</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px"}}>NFL COMP</div>
                   <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"#f59e0b"}}>{profile.comp}</div>
                 </div>
               )}
@@ -168,7 +168,7 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle,
 
           {/* Summary */}
           <p style={{
-            fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8",
+            fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-muted)",
             lineHeight:1.7,margin:"0 0 16px",
           }}>{profile.summary}</p>
 
@@ -232,7 +232,7 @@ function PositionFilter({ activePos, setActivePos }) {
     const isAll = pos === "ALL";
     return {
       background: active ? (isAll ? "#2dd4bf" : (POS_COLORS[pos]?.bg || "#2dd4bf")) : "rgba(255,255,255,0.04)",
-      color: active ? (isAll ? "#0c1222" : (POS_COLORS[pos]?.text || "#fff")) : "#94a3b8",
+      color: active ? (isAll ? "#0c1222" : (POS_COLORS[pos]?.text || "#fff")) : "var(--dg-text-muted)",
       border: active ? "none" : "1px solid rgba(255,255,255,0.06)",
       borderRadius:"6px",padding:"6px 12px",cursor:"pointer",
       fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",fontWeight:600,
@@ -243,14 +243,14 @@ function PositionFilter({ activePos, setActivePos }) {
   return (
     <div className="pos-filter" style={{
       display:"flex",flexDirection:"column",gap:"10px",
-      background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+      background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",
       borderRadius:"10px",padding:"14px 16px",marginBottom:"16px",
     }}>
       <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}}>
         <button className="pos-filter-btn" onClick={()=>setActivePos("ALL")} style={btnStyle("ALL")}>ALL</button>
         <div className="pos-divider" style={{width:"1px",height:"20px",background:"rgba(255,255,255,0.08)",margin:"0 4px"}}/>
         <span style={{
-          fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",
+          fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",
           letterSpacing:"1.5px",textTransform:"uppercase",marginRight:"2px",
         }}>OFF</span>
         {OFF_POSITIONS.map(pos=>(
@@ -258,7 +258,7 @@ function PositionFilter({ activePos, setActivePos }) {
         ))}
         <div className="pos-divider" style={{width:"1px",height:"20px",background:"rgba(255,255,255,0.08)",margin:"0 4px"}}/>
         <span style={{
-          fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",
+          fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",
           letterSpacing:"1.5px",textTransform:"uppercase",marginRight:"2px",
         }}>DEF</span>
         {DEF_POSITIONS.map(pos=>(
@@ -290,7 +290,7 @@ function HomePage({ setPage, navigateToTeam }) {
       <div className="profile-bio-bar" style={{
         display:"flex",flexWrap:"wrap",gap:"12px",alignItems:"center",
         marginBottom:"12px",paddingBottom:"10px",
-        borderBottom:"1px solid rgba(255,255,255,0.06)",
+        borderBottom:"1px solid var(--dg-card-border)",
       }}>
         <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
           {[
@@ -300,8 +300,8 @@ function HomePage({ setPage, navigateToTeam }) {
             {label:"CLASS",value:profile.class},
           ].map(stat=>(
             <div key={stat.label} style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px"}}>{stat.label}</div>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9",marginTop:"1px"}}>{stat.value}</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px"}}>{stat.label}</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"var(--dg-text)",marginTop:"1px"}}>{stat.value}</div>
             </div>
           ))}
         </div>
@@ -315,14 +315,14 @@ function HomePage({ setPage, navigateToTeam }) {
           )}
           {profile.comp && (
             <div style={{textAlign:"right"}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px"}}>NFL COMP</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px"}}>NFL COMP</div>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f59e0b"}}>{profile.comp}</div>
             </div>
           )}
         </div>
       </div>
       <p style={{
-        fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",
+        fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",
         lineHeight:1.7,margin:"0 0 12px",
       }}>{profile.summary}</p>
       <div className="profile-pros-cons" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
@@ -366,10 +366,10 @@ function HomePage({ setPage, navigateToTeam }) {
         }}>2026 NFL Draft</div>
         <h2 style={{
           fontFamily:"'Oswald',sans-serif",fontSize:"clamp(28px,5vw,42px)",fontWeight:700,
-          color:"#f1f5f9",margin:"0 0 8px",letterSpacing:"1px",textTransform:"uppercase",
+          color:"var(--dg-text)",margin:"0 0 8px",letterSpacing:"1px",textTransform:"uppercase",
         }}>Consensus Big Board</h2>
         <p style={{
-          fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",color:"#64748b",
+          fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",color:"var(--dg-text-dim)",
           maxWidth:"500px",margin:"0 auto 24px",lineHeight:1.6,
         }}>
           Rankings aggregated from 92 expert big boards. Updated weekly.
@@ -392,8 +392,8 @@ function HomePage({ setPage, navigateToTeam }) {
         {/* Team Quick Access */}
         {navigateToTeam && (
           <div style={{marginTop:"28px",paddingTop:"20px",borderTop:"1px solid rgba(45,212,191,0.08)"}}>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase",marginBottom:"4px"}}>Team Draft Profiles</div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"0.5px",marginBottom:"12px"}}>Draft capital · team needs · prospect fits</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase",marginBottom:"4px"}}>Team Draft Profiles</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",letterSpacing:"0.5px",marginBottom:"12px"}}>Draft capital · team needs · prospect fits</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:"4px",justifyContent:"center",maxWidth:"600px",margin:"0 auto"}}>
               {Object.entries(TEAM_INFO).sort((a,b) => a[1].name.localeCompare(b[1].name)).map(([ab]) => (
                 <span key={ab} onClick={()=>navigateToTeam(ab)} title={TEAM_INFO[ab]?.name} style={{
@@ -417,7 +417,7 @@ function HomePage({ setPage, navigateToTeam }) {
       }}>
         {/* Top 10 Overall */}
         <div style={{
-          background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+          background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",
           borderRadius:"12px",padding:"20px",
         }}>
           <div style={{
@@ -425,7 +425,7 @@ function HomePage({ setPage, navigateToTeam }) {
           }}>
             <h3 style={{
               fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:600,
-              color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase",margin:0,
+              color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase",margin:0,
             }}>Top 10 Overall</h3>
             <button onClick={()=>setPage("BIG BOARD")} style={{
               background:"none",border:"none",color:"#2dd4bf",cursor:"pointer",
@@ -453,7 +453,7 @@ function HomePage({ setPage, navigateToTeam }) {
                   <PosBadge pos={p.p}/>
                   <span style={{
                     fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,
-                    color:"#f1f5f9",flex:1,
+                    color:"var(--dg-text)",flex:1,
                   }}>{p.n}</span>
                   {profile && (
                     <span style={{
@@ -463,11 +463,11 @@ function HomePage({ setPage, navigateToTeam }) {
                     }}>▼</span>
                   )}
                   <span style={{
-                    fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",
+                    fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",
                   }}>{p.s}</span>
                 </div>
                 {isExpanded && profile && renderProfile(profile)}
-                {(i<9 && !isExpanded) && <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)"}}/>}
+                {(i<9 && !isExpanded) && <div style={{borderBottom:"1px solid var(--dg-divider)"}}/>}
               </div>
             );
           })}
@@ -475,12 +475,12 @@ function HomePage({ setPage, navigateToTeam }) {
 
         {/* Position Leaders */}
         <div style={{
-          background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+          background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",
           borderRadius:"12px",padding:"20px",
         }}>
           <h3 style={{
             fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:600,
-            color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase",
+            color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase",
             margin:"0 0 16px",
           }}>#1 at Each Position</h3>
           {[...OFF_POSITIONS,...DEF_POSITIONS].map((pos,i,arr)=>{
@@ -501,7 +501,7 @@ function HomePage({ setPage, navigateToTeam }) {
                   <PosBadge pos={pos}/>
                   <span style={{
                     fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,
-                    color:"#f1f5f9",flex:1,
+                    color:"var(--dg-text)",flex:1,
                   }}>{p.n}</span>
                   {profile && (
                     <span style={{
@@ -510,11 +510,11 @@ function HomePage({ setPage, navigateToTeam }) {
                       display:"inline-block",transition:"transform 0.2s, color 0.2s",
                     }}>▼</span>
                   )}
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b"}}>{p.s}</span>
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#475569"}}>#{p.r}</span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)"}}>{p.s}</span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-faint)"}}>#{p.r}</span>
                 </div>
                 {isExpanded && profile && renderProfile(profile)}
-                {(i<arr.length-1 && !isExpanded) && <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)"}}/>}
+                {(i<arr.length-1 && !isExpanded) && <div style={{borderBottom:"1px solid var(--dg-divider)"}}/>}
               </div>
             );
           })}
@@ -529,7 +529,7 @@ function HomePage({ setPage, navigateToTeam }) {
           {label:"Positions Tracked",value:11},
         ].map(stat=>(
           <div key={stat.label} style={{
-            background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+            background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",
             borderRadius:"10px",padding:"20px",textAlign:"center",
           }}>
             <div className="stat-value" style={{
@@ -537,7 +537,7 @@ function HomePage({ setPage, navigateToTeam }) {
               color:"#2dd4bf",lineHeight:1,
             }}>{stat.value}</div>
             <div style={{
-              fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",
+              fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",
               letterSpacing:"1px",textTransform:"uppercase",marginTop:"6px",
             }}>{stat.label}</div>
           </div>
@@ -628,19 +628,19 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
   // Builder Results Screen
   if (showBuilderResults) {
     return (
-      <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"#0c1222",zIndex:300,display:"flex",flexDirection:"column"}}>
+      <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"var(--dg-bg)",zIndex:300,display:"flex",flexDirection:"column"}}>
         <div style={{flex:1,overflowY:"auto",display:"flex",alignItems:"flex-start",justifyContent:"center"}}>
           <div style={{width:"100%",maxWidth:"820px",margin:"0 auto",padding:"clamp(10px,2vw,20px)"}}>
             <div style={{textAlign:"center",marginBottom:"clamp(12px,2vw,20px)"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",marginBottom:"4px"}}>
                 <img src="/logo-light.png" alt="Draft Guide" style={{height:"clamp(20px,3vw,28px)",width:"auto"}}/>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(12px,2vw,16px)",fontWeight:700,color:"#f1f5f9",letterSpacing:"1px",textTransform:"uppercase"}}>Draft Guide</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(12px,2vw,16px)",fontWeight:700,color:"var(--dg-text)",letterSpacing:"1px",textTransform:"uppercase"}}>Draft Guide</div>
               </div>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,3vw,24px)",fontWeight:700,color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.2}}>My Big Board</div>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1.2vw,10px)",color:"#64748b",letterSpacing:"1px",textTransform:"uppercase",marginTop:"2px"}}>{myBoard.length} Prospects Ranked</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1.2vw,10px)",color:"var(--dg-text-dim)",letterSpacing:"1px",textTransform:"uppercase",marginTop:"2px"}}>{myBoard.length} Prospects Ranked</div>
             </div>
 
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"0",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"clamp(6px,1vw,10px)",overflow:"hidden"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"0",border:"1px solid var(--dg-card-border2)",borderRadius:"clamp(6px,1vw,10px)",overflow:"hidden"}}>
               {myBoard.map((player, idx) => {
                 const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
                 const diff = player.r - (idx + 1);
@@ -660,17 +660,17 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
                         {diff > 0 ? `↑${diff}` : diff < 0 ? `↓${Math.abs(diff)}` : "—"}
                       </span>
                     </div>
-                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:600,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.2}}>{player.n}</div>
-                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.85vw,9px)",color:"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.s}</div>
+                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:600,color:"var(--dg-text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.2}}>{player.n}</div>
+                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.85vw,9px)",color:"var(--dg-text-dim)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.s}</div>
                   </div>
                 );
               })}
             </div>
 
-            <div style={{marginTop:"clamp(8px,1.2vw,14px)",paddingTop:"clamp(6px,1vw,10px)",borderTop:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{marginTop:"clamp(8px,1.2vw,14px)",paddingTop:"clamp(6px,1vw,10px)",borderTop:"1px solid var(--dg-card-border)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(9px,1.1vw,11px)",color:"#94a3b8",fontWeight:500}}>draft-guide.com</span>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"#475569"}}>· Build your own big board</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(9px,1.1vw,11px)",color:"var(--dg-text-muted)",fontWeight:500}}>draft-guide.com</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"var(--dg-text-faint)"}}>· Build your own big board</span>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
                 <svg width="clamp(11px,1.5vw,14px)" height="clamp(11px,1.5vw,14px)" viewBox="0 0 24 24" fill="#475569"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -679,9 +679,9 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
             </div>
           </div>
         </div>
-        <div style={{borderTop:"1px solid rgba(255,255,255,0.06)",padding:"12px 20px",display:"flex",gap:"10px",justifyContent:"center",background:"#0c1222",flexShrink:0}}>
-          <button onClick={()=>setShowBuilderResults(false)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>← Back to Builder</button>
-          <button onClick={()=>{setBuilderMode(false);setShowBuilderResults(false);}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit Builder</button>
+        <div style={{borderTop:"1px solid var(--dg-card-border)",padding:"12px 20px",display:"flex",gap:"10px",justifyContent:"center",background:"var(--dg-bg)",flexShrink:0}}>
+          <button onClick={()=>setShowBuilderResults(false)} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>← Back to Builder</button>
+          <button onClick={()=>{setBuilderMode(false);setShowBuilderResults(false);}} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit Builder</button>
         </div>
       </div>
     );
@@ -694,14 +694,14 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
         {/* Builder Header */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px",flexWrap:"wrap",gap:"10px"}}>
           <div>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Big Board Builder</div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginTop:"2px"}}>Rank your top 100 prospects · {myBoard.length}/100 added</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Big Board Builder</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",marginTop:"2px"}}>Rank your top 100 prospects · {myBoard.length}/100 added</div>
           </div>
           <div style={{display:"flex",gap:"8px"}}>
             {myBoard.length > 0 && (
               <button onClick={()=>setShowBuilderResults(true)} style={{background:"#2dd4bf",border:"none",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#0c1222",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>View Board →</button>
             )}
-            <button onClick={()=>setBuilderMode(false)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"8px 16px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit</button>
+            <button onClick={()=>setBuilderMode(false)} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"8px 16px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit</button>
           </div>
         </div>
 
@@ -711,16 +711,16 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
         </div>
 
         {/* Split layout */}
-        <div className="draft-split" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"12px",overflow:"hidden",minHeight:"calc(100vh - 220px)"}}>
+        <div className="draft-split" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0",border:"1px solid var(--dg-card-border)",borderRadius:"12px",overflow:"hidden",minHeight:"calc(100vh - 220px)"}}>
           {/* Left - My Board */}
-          <div style={{borderRight:"1px solid rgba(255,255,255,0.06)",overflowY:"auto",maxHeight:"calc(100vh - 220px)"}}>
-            <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)",fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9",letterSpacing:"0.8px",textTransform:"uppercase",position:"sticky",top:0,background:"#0c1222",zIndex:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{borderRight:"1px solid var(--dg-card-border)",overflowY:"auto",maxHeight:"calc(100vh - 220px)"}}>
+            <div style={{padding:"12px 16px",borderBottom:"1px solid var(--dg-card-border)",fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"var(--dg-text)",letterSpacing:"0.8px",textTransform:"uppercase",position:"sticky",top:0,background:"var(--dg-bg)",zIndex:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
               <span>My Board ({myBoard.length})</span>
-              {myBoard.length > 0 && <button onClick={()=>setMyBoard([])} style={{background:"none",border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b",cursor:"pointer",letterSpacing:"0.5px",textTransform:"uppercase"}}>Clear All</button>}
+              {myBoard.length > 0 && <button onClick={()=>setMyBoard([])} style={{background:"none",border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-dim)",cursor:"pointer",letterSpacing:"0.5px",textTransform:"uppercase"}}>Clear All</button>}
             </div>
             {myBoard.length === 0 ? (
               <div style={{padding:"40px 20px",textAlign:"center"}}>
-                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#475569",lineHeight:1.6}}>Click "Add" on any player<br/>to start building your board</div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-faint)",lineHeight:1.6}}>Click "Add" on any player<br/>to start building your board</div>
               </div>
             ) : (
               myBoard.map((player, idx) => {
@@ -731,13 +731,13 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
                     display:"flex",alignItems:"center",gap:"8px",
                     padding:"8px 12px",
                     background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
-                    borderBottom:"1px solid rgba(255,255,255,0.03)",
+                    borderBottom:"1px solid var(--dg-divider)",
                   }}>
                     <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:"#2dd4bf",minWidth:"24px",textAlign:"right"}}>{idx+1}</span>
                     <span style={{background:pc.bg,color:pc.text,padding:"2px 5px",borderRadius:"3px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>{player.p}</span>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
-                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b"}}>{player.s}</div>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"var(--dg-text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-dim)"}}>{player.s}</div>
                     </div>
                     <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:600,color:diff>0?"#22c55e":diff<0?"#ef4444":"#475569",minWidth:"28px",textAlign:"center"}}>
                       {diff > 0 ? `↑${diff}` : diff < 0 ? `↓${Math.abs(diff)}` : "—"}
@@ -746,7 +746,7 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
                       <button onClick={()=>moveUp(idx)} disabled={idx===0} style={{background:"none",border:"none",color:idx===0?"#1e293b":"#64748b",cursor:idx===0?"default":"pointer",fontSize:"10px",padding:"0",lineHeight:1}}>▲</button>
                       <button onClick={()=>moveDown(idx)} disabled={idx>=myBoard.length-1} style={{background:"none",border:"none",color:idx>=myBoard.length-1?"#1e293b":"#64748b",cursor:idx>=myBoard.length-1?"default":"pointer",fontSize:"10px",padding:"0",lineHeight:1}}>▼</button>
                     </div>
-                    <button onClick={()=>removeFromBoard(idx)} style={{background:"none",border:"none",color:"#475569",cursor:"pointer",fontSize:"14px",padding:"0 2px",lineHeight:1}}>×</button>
+                    <button onClick={()=>removeFromBoard(idx)} style={{background:"none",border:"none",color:"var(--dg-text-faint)",cursor:"pointer",fontSize:"14px",padding:"0 2px",lineHeight:1}}>×</button>
                   </div>
                 );
               })
@@ -755,19 +755,19 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
 
           {/* Right - Available Players */}
           <div style={{overflowY:"auto",maxHeight:"calc(100vh - 220px)"}}>
-            <div style={{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",position:"sticky",top:0,background:"#0c1222",zIndex:10}}>
+            <div style={{padding:"10px 14px",borderBottom:"1px solid var(--dg-card-border)",position:"sticky",top:0,background:"var(--dg-bg)",zIndex:10}}>
               <div style={{display:"flex",gap:"6px",alignItems:"center",marginBottom:"8px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:"6px",flex:1,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"5px 8px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:"6px",flex:1,background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"5px 8px"}}>
                   <SearchIcon/>
-                  <input value={builderSearch} onChange={e=>setBuilderSearch(e.target.value)} placeholder="Search..." style={{background:"transparent",border:"none",outline:"none",color:"#f1f5f9",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",width:"100%"}}/>
-                  {builderSearch && <button onClick={()=>setBuilderSearch("")} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"12px",padding:"0"}}>×</button>}
+                  <input value={builderSearch} onChange={e=>setBuilderSearch(e.target.value)} placeholder="Search..." style={{background:"transparent",border:"none",outline:"none",color:"var(--dg-text)",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",width:"100%"}}/>
+                  {builderSearch && <button onClick={()=>setBuilderSearch("")} style={{background:"none",border:"none",color:"var(--dg-text-dim)",cursor:"pointer",fontSize:"12px",padding:"0"}}>×</button>}
                 </div>
-                <select value={builderPosFilter} onChange={e=>setBuilderPosFilter(e.target.value)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"5px 8px",color:"#f1f5f9",fontSize:"10px",fontFamily:"'JetBrains Mono',monospace",cursor:"pointer",outline:"none"}}>
+                <select value={builderPosFilter} onChange={e=>setBuilderPosFilter(e.target.value)} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"5px 8px",color:"var(--dg-text)",fontSize:"10px",fontFamily:"'JetBrains Mono',monospace",cursor:"pointer",outline:"none"}}>
                   <option value="ALL" style={{background:"#1a2332"}}>ALL</option>
                   {[...OFF_POSITIONS,...DEF_POSITIONS].map(pos=>(<option key={pos} value={pos} style={{background:"#1a2332"}}>{pos}</option>))}
                 </select>
               </div>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"0.5px"}}>{builderAvailable.length} available · {100 - myBoard.length} spots remaining</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"0.5px"}}>{builderAvailable.length} available · {100 - myBoard.length} spots remaining</div>
             </div>
             <div>
               {builderAvailable.slice(0, 100).map((player, i) => {
@@ -779,15 +779,15 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
                     display:"flex",alignItems:"center",gap:"8px",
                     padding:"8px 14px",
                     background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
-                    borderBottom:"1px solid rgba(255,255,255,0.03)",
+                    borderBottom:"1px solid var(--dg-divider)",
                   }}>
                     <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:700,color:"#2dd4bf",minWidth:"28px",textAlign:"right"}}>#{player.r}</span>
                     <span style={{background:pc.bg,color:pc.text,padding:"2px 5px",borderRadius:"3px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>{player.p}</span>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"var(--dg-text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
                       <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b"}}>{player.s}</span>
-                        {profile && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569"}}>{profile.height} · {profile.weight}</span>}
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-dim)"}}>{player.s}</span>
+                        {profile && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)"}}>{profile.height} · {profile.weight}</span>}
                       </div>
                     </div>
                     {canAdd && (
@@ -821,10 +821,10 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
             <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"4px"}}>
               #{activePos}1 · Overall #{posTopPlayer.r}
             </div>
-            <div className="pos-hero-name" style={{fontFamily:"'Oswald',sans-serif",fontSize:"24px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px"}}>
+            <div className="pos-hero-name" style={{fontFamily:"'Oswald',sans-serif",fontSize:"24px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px"}}>
               {posTopPlayer.n}
             </div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8",marginTop:"2px"}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-muted)",marginTop:"2px"}}>
               {posTopPlayer.s}
             </div>
           </div>
@@ -832,7 +832,7 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
             <div className="pos-hero-big" style={{fontFamily:"'Oswald',sans-serif",fontSize:"42px",fontWeight:700,color:"rgba(45,212,191,0.2)",lineHeight:1}}>
               {activePos}
             </div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginTop:"2px"}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",marginTop:"2px"}}>
               {filtered.length} prospects
             </div>
           </div>
@@ -843,7 +843,7 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
       <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"12px",flexWrap:"wrap"}}>
         <div className="search-bar" style={{
           display:"flex",alignItems:"center",gap:"8px",flex:"1",minWidth:"200px",
-          background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+          background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",
           borderRadius:"8px",padding:"8px 14px",
         }}>
           <SearchIcon/>
@@ -851,10 +851,10 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
             placeholder="Search player, school, or position..."
             style={{
               background:"transparent",border:"none",outline:"none",
-              color:"#f1f5f9",fontSize:"13px",fontFamily:"'JetBrains Mono',monospace",width:"100%",
+              color:"var(--dg-text)",fontSize:"13px",fontFamily:"'JetBrains Mono',monospace",width:"100%",
             }}
           />
-          {search && <button onClick={()=>setSearch("")} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"16px",padding:"0 4px"}}>×</button>}
+          {search && <button onClick={()=>setSearch("")} style={{background:"none",border:"none",color:"var(--dg-text-dim)",cursor:"pointer",fontSize:"16px",padding:"0 4px"}}>×</button>}
         </div>
         <button onClick={()=>setBuilderMode(true)} style={{
           background:"linear-gradient(135deg, rgba(45,212,191,0.12), rgba(45,212,191,0.06))",
@@ -870,7 +870,7 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
           fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap",
           transition:"all 0.15s",
         }}>{compareMode ? "Cancel" : "⚖ Compare"}</button>
-        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",whiteSpace:"nowrap"}}>
+        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",whiteSpace:"nowrap"}}>
           {filtered.length} player{filtered.length!==1?"s":""}
         </div>
       </div>
@@ -889,10 +889,10 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
             {compareSelections.map((p, i) => {
               const pc = POS_COLORS[p.p]||{bg:"#555",text:"#fff"};
               return (
-                <div key={p.r} style={{display:"flex",alignItems:"center",gap:"5px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"4px 8px"}}>
+                <div key={p.r} style={{display:"flex",alignItems:"center",gap:"5px",background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"4px 8px"}}>
                   <span style={{background:pc.bg,color:pc.text,padding:"1px 4px",borderRadius:"2px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{p.p}</span>
-                  <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#f1f5f9"}}>{p.n}</span>
-                  <button onClick={()=>setCompareSelections(prev=>prev.filter((_,j)=>j!==i))} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"12px",padding:0}}>×</button>
+                  <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text)"}}>{p.n}</span>
+                  <button onClick={()=>setCompareSelections(prev=>prev.filter((_,j)=>j!==i))} style={{background:"none",border:"none",color:"var(--dg-text-dim)",cursor:"pointer",fontSize:"12px",padding:0}}>×</button>
                 </div>
               );
             })}
@@ -912,7 +912,7 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
         display:"grid",gridTemplateColumns:"70px 52px 1fr 1fr",
         gap:"12px",padding:"8px 20px",
         borderBottom:"1px solid rgba(45,212,191,0.15)",
-        fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",
+        fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",
         letterSpacing:"1px",textTransform:"uppercase",
       }}>
         <div>{isPositionView?"POS RNK":"RANK"}</div>
@@ -946,16 +946,16 @@ function BigBoardPage({ navigateToTeam, openCompare }) {
       {totalPages>1 && (
         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",marginTop:"20px"}}>
           <button onClick={()=>setPage(Math.max(0,page-1))} disabled={page===0} style={{
-            background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+            background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",
             borderRadius:"6px",padding:"8px 16px",cursor:page===0?"default":"pointer",
             color:page===0?"#334155":"#f1f5f9",fontFamily:"'Oswald',sans-serif",fontSize:"13px",
             letterSpacing:"0.5px",opacity:page===0?0.4:1,transition:"all 0.15s",
           }}>← PREV</button>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#64748b",padding:"8px 16px"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-dim)",padding:"8px 16px"}}>
             {page*PER_PAGE+1}–{Math.min((page+1)*PER_PAGE,filtered.length)} of {filtered.length}
           </div>
           <button onClick={()=>setPage(Math.min(totalPages-1,page+1))} disabled={page>=totalPages-1} style={{
-            background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+            background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",
             borderRadius:"6px",padding:"8px 16px",cursor:page>=totalPages-1?"default":"pointer",
             color:page>=totalPages-1?"#334155":"#f1f5f9",fontFamily:"'Oswald',sans-serif",fontSize:"13px",
             letterSpacing:"0.5px",opacity:page>=totalPages-1?0.4:1,transition:"all 0.15s",
@@ -1299,7 +1299,7 @@ const TEAM_INFO = {
 
 function TeamPage({ abbr, setActivePage, navigateToTeam }) {
   const team = TEAM_INFO[abbr];
-  if (!team) return <div style={{padding:"60px",textAlign:"center",color:"#64748b",fontFamily:"'JetBrains Mono',monospace"}}>Team not found</div>;
+  if (!team) return <div style={{padding:"60px",textAlign:"center",color:"var(--dg-text-dim)",fontFamily:"'JetBrains Mono',monospace"}}>Team not found</div>;
 
   const teamColor = TEAM_COLORS[abbr] || "#333";
   const needs = TEAM_NEEDS[abbr] || [];
@@ -1340,7 +1340,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
       {/* Back nav */}
       <button onClick={()=>setActivePage("HOME")} style={{
         background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px",
-        fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginBottom:"20px",padding:0,
+        fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",marginBottom:"20px",padding:0,
       }}>
         ← All Teams
       </button>
@@ -1355,21 +1355,21 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
         <div style={{display:"flex",alignItems:"center",gap:"16px",flexWrap:"wrap"}}>
           <div style={{width:"60px",height:"60px",borderRadius:"12px",background:teamColor,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:"#fff",letterSpacing:"1px"}}>{abbr}</div>
           <div style={{flex:1}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"4px"}}>{team.div}</div>
-            <h1 style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(24px,4vw,36px)",fontWeight:700,color:"#f1f5f9",margin:"0 0 4px",letterSpacing:"1px",textTransform:"uppercase"}}>{team.name}</h1>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8"}}>2026 NFL Draft Profile</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"4px"}}>{team.div}</div>
+            <h1 style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(24px,4vw,36px)",fontWeight:700,color:"var(--dg-text)",margin:"0 0 4px",letterSpacing:"1px",textTransform:"uppercase"}}>{team.name}</h1>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-muted)"}}>2026 NFL Draft Profile</div>
           </div>
           <div style={{display:"flex",gap:"20px",flexWrap:"wrap"}}>
             <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>Picks</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>Picks</div>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"28px",fontWeight:700,color:"#2dd4bf"}}>{teamDraftPicks.length}</div>
             </div>
             <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>Capital</div>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"28px",fontWeight:700,color:"#f1f5f9"}}>{Math.round(totalValue)}</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>Capital</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"28px",fontWeight:700,color:"var(--dg-text)"}}>{Math.round(totalValue)}</div>
             </div>
             <div style={{textAlign:"center"}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>1st Pick</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>1st Pick</div>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"28px",fontWeight:700,color:"#f59e0b"}}>#{firstPick}</div>
             </div>
           </div>
@@ -1380,10 +1380,10 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
       <div className="team-page-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px"}}>
 
         {/* Draft Capital */}
-        <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"14px",overflow:"hidden"}}>
-          <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Draft Capital</div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>{teamDraftPicks.length} picks · {Math.round(totalValue)} total value</div>
+        <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden"}}>
+          <div style={{padding:"16px 20px",borderBottom:"1px solid var(--dg-card-border)"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Draft Capital</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",marginTop:"2px"}}>{teamDraftPicks.length} picks · {Math.round(totalValue)} total value</div>
           </div>
           <div style={{padding:"16px 20px"}}>
             {[1,2,3,4,5,6,7].map(r => {
@@ -1392,18 +1392,18 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
               return (
                 <div key={r} style={{marginBottom:"12px"}}>
                   <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"6px"}}>
-                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9"}}>Round {r}</span>
-                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{roundP.length} pick{roundP.length>1?"s":""}</span>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"var(--dg-text)"}}>Round {r}</span>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)"}}>{roundP.length} pick{roundP.length>1?"s":""}</span>
                   </div>
                   <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
                     {roundP.map(s => (
                       <div key={s.pick} style={{
                         display:"flex",alignItems:"center",gap:"6px",
-                        background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",
+                        background:"rgba(255,255,255,0.03)",border:"1px solid var(--dg-card-border)",
                         borderRadius:"8px",padding:"6px 10px",
                       }}>
                         <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:700,color:"#2dd4bf"}}>#{s.pick}</span>
-                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{Math.round(PICK_VALUES[s.pick]||0)} pts</span>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)"}}>{Math.round(PICK_VALUES[s.pick]||0)} pts</span>
                       </div>
                     ))}
                   </div>
@@ -1413,7 +1413,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
 
             {/* Value Comparison */}
             <div style={{marginTop:"16px",paddingTop:"14px",borderTop:"1px solid rgba(255,255,255,0.04)"}}>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px"}}>Division Capital Comparison</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px"}}>Division Capital Comparison</div>
               {[abbr, ...divTeams].map(a => {
                 const picks = DRAFT_ORDER.filter(s => s.abbr === a);
                 const val = picks.reduce((sum, s) => sum + (PICK_VALUES[s.pick] || 0), 0);
@@ -1421,7 +1421,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
                 return (
                   <div key={a} style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"6px"}}>
                     <span style={{width:"32px",height:"18px",borderRadius:"3px",background:TEAM_COLORS[a]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,color:"#fff",flexShrink:0}}>{a}</span>
-                    <div style={{flex:1,height:"6px",background:"rgba(255,255,255,0.04)",borderRadius:"3px",overflow:"hidden"}}>
+                    <div style={{flex:1,height:"6px",background:"var(--dg-input)",borderRadius:"3px",overflow:"hidden"}}>
                       <div style={{width:`${(val/maxVal)*100}%`,height:"100%",background:a===abbr?"#2dd4bf":"rgba(255,255,255,0.15)",borderRadius:"3px",transition:"width 0.3s"}}/>
                     </div>
                     <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:a===abbr?"#2dd4bf":"#64748b",fontWeight:a===abbr?600:400,minWidth:"40px",textAlign:"right"}}>{Math.round(val)}</span>
@@ -1436,9 +1436,9 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
         <div style={{display:"flex",flexDirection:"column",gap:"20px"}}>
 
           {/* Team Needs */}
-          <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"14px",overflow:"hidden"}}>
-            <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Team Needs</div>
+          <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden"}}>
+            <div style={{padding:"16px 20px",borderBottom:"1px solid var(--dg-card-border)"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Team Needs</div>
             </div>
             <div style={{padding:"16px 20px",display:"flex",gap:"8px",flexWrap:"wrap"}}>
               {needs.map((need, i) => (
@@ -1456,10 +1456,10 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
           </div>
 
           {/* Best Prospect Fits */}
-          <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"14px",overflow:"hidden",flex:1}}>
-            <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
-              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Best Prospect Fits</div>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>Consensus prospects matching team needs near draft position</div>
+          <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden",flex:1}}>
+            <div style={{padding:"16px 20px",borderBottom:"1px solid var(--dg-card-border)"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Best Prospect Fits</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",marginTop:"2px"}}>Consensus prospects matching team needs near draft position</div>
             </div>
             <div>
               {prospectFits.slice(0, 15).map((fit, i) => {
@@ -1472,19 +1472,19 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
                     display:"flex",alignItems:"center",gap:"10px",
                     padding:"10px 20px",
                     background: i%2===0 ? "transparent" : "rgba(255,255,255,0.015)",
-                    borderBottom:"1px solid rgba(255,255,255,0.03)",
+                    borderBottom:"1px solid var(--dg-divider)",
                   }}>
                     <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:700,color:"#2dd4bf",minWidth:"28px",textAlign:"right"}}>#{player.r}</span>
                     <span style={{background:pc.bg,color:pc.text,padding:"2px 6px",borderRadius:"3px",fontSize:"9px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>{player.p}</span>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"var(--dg-text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
                       <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b"}}>{player.s}</span>
-                        {profile && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{profile.height} · {profile.weight} lbs</span>}
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-dim)"}}>{player.s}</span>
+                        {profile && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)"}}>{profile.height} · {profile.weight} lbs</span>}
                       </div>
                     </div>
                     <div style={{textAlign:"right",flexShrink:0}}>
-                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>R{targetRound} · #{targetPick}</div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-muted)"}}>R{targetRound} · #{targetPick}</div>
                       <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:valueDiff<-5?"#22c55e":valueDiff>5?"#ef4444":"#475569"}}>
                         {valueDiff < -5 ? `↑ Value` : valueDiff > 5 ? `↓ Reach` : "≈ Match"}
                       </div>
@@ -1505,8 +1505,8 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
         display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"12px",
       }}>
         <div>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Draft for {team.name.split(" ").pop()}</div>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginTop:"2px"}}>Run a mock draft as the {abbr} GM</div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Draft for {team.name.split(" ").pop()}</div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",marginTop:"2px"}}>Run a mock draft as the {abbr} GM</div>
         </div>
         <button onClick={()=>setActivePage("MOCK DRAFT")} style={{
           background:"#2dd4bf",color:"#0c1222",border:"none",borderRadius:"8px",
@@ -1518,18 +1518,18 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
       {/* Division Rivals */}
       {navigateToTeam && divTeams.length > 0 && (
         <div style={{marginTop:"20px",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}}>
-          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>{team.div}</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>{team.div}</span>
           {divTeams.map(a => (
             <div key={a} onClick={()=>navigateToTeam(a)} style={{
               display:"flex",alignItems:"center",gap:"6px",padding:"6px 12px",
-              background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+              background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",
               borderRadius:"8px",cursor:"pointer",transition:"all 0.15s",
             }}
             onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(45,212,191,0.2)";}}
             onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.06)";}}
             >
               <span style={{width:"24px",height:"15px",borderRadius:"2px",background:TEAM_COLORS[a]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff"}}>{a}</span>
-              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#94a3b8"}}>{TEAM_INFO[a]?.name.split(" ").pop()}</span>
+              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text-muted)"}}>{TEAM_INFO[a]?.name.split(" ").pop()}</span>
             </div>
           ))}
         </div>
@@ -1571,6 +1571,7 @@ function MockDraftPage() {
   // Mock draft UI
   const [expandedMockPlayer, setExpandedMockPlayer] = useState(null);
   const [resultsView, setResultsView] = useState("my"); // "my" = my picks, "full" = full draft round-by-round
+  const [teamProfileOverlay, setTeamProfileOverlay] = useState(null); // team abbr to show as overlay
 
   const pickedPlayerIds = useMemo(()=> new Set(Object.values(picks).map(p=>p.r)), [picks]);
 
@@ -1971,13 +1972,13 @@ function MockDraftPage() {
           padding:"40px 32px",marginBottom:"32px",textAlign:"center",
         }}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#2dd4bf",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"12px"}}>2026 NFL Draft</div>
-          <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(28px,5vw,42px)",fontWeight:700,color:"#f1f5f9",margin:"0 0 8px",letterSpacing:"1px",textTransform:"uppercase"}}>Mock Draft Simulator</h2>
-          <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",color:"#64748b",maxWidth:"500px",margin:"0 auto 20px",lineHeight:1.6}}>
+          <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(28px,5vw,42px)",fontWeight:700,color:"var(--dg-text)",margin:"0 0 8px",letterSpacing:"1px",textTransform:"uppercase"}}>Mock Draft Simulator</h2>
+          <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",color:"var(--dg-text-dim)",maxWidth:"500px",margin:"0 auto 20px",lineHeight:1.6}}>
             Build your own mock draft. Select from {PLAYERS.length} consensus-ranked prospects.
           </p>
           {/* Round Selector */}
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
-            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>Rounds</span>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>Rounds</span>
             {[{label:"Round 1",val:1,picks:32},{label:"3 Rounds",val:3,picks:DRAFT_ORDER.filter(s=>s.round<=3).length},{label:"Full Draft",val:7,picks:TOTAL_PICKS}].map(opt => (
               <button key={opt.val} onClick={()=>setDraftRounds(opt.val)} style={{
                 background: draftRounds===opt.val ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.04)",
@@ -1991,14 +1992,14 @@ function MockDraftPage() {
           </div>
         </div>
 
-        <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"16px",overflow:"hidden"}}>
-          <div style={{padding:"20px 24px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"16px",overflow:"hidden"}}>
+          <div style={{padding:"20px 24px",borderBottom:"1px solid var(--dg-card-border)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div>
-              <h3 style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase",margin:"0 0 4px"}}>{fullDraftToggle ? "Full Draft Mode" : "Choose Your Team"}</h3>
-              <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",margin:0}}>{fullDraftToggle ? "You make every pick for all 32 teams" : "Draft for your team — AI handles the rest"}</p>
+              <h3 style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase",margin:"0 0 4px"}}>{fullDraftToggle ? "Full Draft Mode" : "Choose Your Team"}</h3>
+              <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",margin:0}}>{fullDraftToggle ? "You make every pick for all 32 teams" : "Draft for your team — AI handles the rest"}</p>
             </div>
             <div style={{display:"flex",alignItems:"center",gap:"10px",flexShrink:0}}>
-              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"0.5px",textTransform:"uppercase"}}>Full Draft</span>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Full Draft</span>
               <div onClick={()=>setFullDraftToggle(!fullDraftToggle)} style={{width:"44px",height:"24px",borderRadius:"12px",background:fullDraftToggle?"#2dd4bf":"rgba(255,255,255,0.1)",cursor:"pointer",position:"relative",transition:"background 0.2s",border:fullDraftToggle?"none":"1px solid rgba(255,255,255,0.15)"}}>
                 <div style={{width:"18px",height:"18px",borderRadius:"50%",background:fullDraftToggle?"#0c1222":"#64748b",position:"absolute",top:"3px",left:fullDraftToggle?"23px":"3px",transition:"all 0.2s"}}/>
               </div>
@@ -2010,7 +2011,7 @@ function MockDraftPage() {
               <div style={{width:"80px",height:"80px",borderRadius:"50%",margin:"0 auto 20px",background:"linear-gradient(135deg, rgba(45,212,191,0.15), rgba(45,212,191,0.05))",border:"2px solid rgba(45,212,191,0.3)",display:"flex",alignItems:"center",justifyContent:"center"}}>
                 <span style={{fontSize:"32px"}}>🏈</span>
               </div>
-              <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8",maxWidth:"400px",margin:"0 auto 24px",lineHeight:1.6}}>
+              <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-muted)",maxWidth:"400px",margin:"0 auto 24px",lineHeight:1.6}}>
                 Take full control. You'll make all {lastPickInScope} selections across {draftRounds === 1 ? "Round 1" : draftRounds === 7 ? "7 rounds" : `${draftRounds} rounds`} — pick the best player for each team.
               </p>
               <button onClick={()=>startDraft("full", null)} style={{background:"#2dd4bf",color:"#0c1222",border:"none",borderRadius:"8px",padding:"14px 36px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:600,letterSpacing:"1px",textTransform:"uppercase"}}>Start Full Draft →</button>
@@ -2020,7 +2021,7 @@ function MockDraftPage() {
               <div className="mock-team-grid" style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"12px"}}>
                 {Object.entries(divisions).map(([divName, teams]) => (
                   <div key={divName}>
-                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px",paddingBottom:"6px",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>{divName}</div>
+                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px",paddingBottom:"6px",borderBottom:"1px solid var(--dg-divider)"}}>{divName}</div>
                     <div className="mock-div-teams" style={{display:"flex",flexDirection:"column",gap:"4px"}}>
                       {teams.map(abbr => {
                         const slot = DRAFT_ORDER.find(s=>s.abbr===abbr);
@@ -2029,19 +2030,19 @@ function MockDraftPage() {
                         return (
                           <div key={abbr} style={{display:"flex",flexDirection:"column",gap:"0"}}>
                           <div onClick={()=>startDraft("team", abbr)}
-                            style={{display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px",borderRadius:"8px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)",cursor:"pointer",transition:"all 0.15s"}}
+                            style={{display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px",borderRadius:"8px",background:"var(--dg-card)",border:"1px solid rgba(255,255,255,0.04)",cursor:"pointer",transition:"all 0.15s"}}
                             onMouseEnter={e=>{e.currentTarget.style.background="rgba(45,212,191,0.08)";e.currentTarget.style.borderColor="rgba(45,212,191,0.2)";}}
                             onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.02)";e.currentTarget.style.borderColor="rgba(255,255,255,0.04)";}}
                           >
                             <span style={{width:"32px",height:"20px",borderRadius:"4px",background:TEAM_COLORS[abbr]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,color:"#fff",letterSpacing:"0.3px",flexShrink:0}}>{abbr}</span>
-                            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:500,color:"#f1f5f9",flex:1}}>{shortName}</span>
-                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{totalTeamPicks} picks</span>
+                            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:500,color:"var(--dg-text)",flex:1}}>{shortName}</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)"}}>{totalTeamPicks} picks</span>
                           </div>
                           <div style={{paddingLeft:"50px",paddingBottom:"2px"}}>
-                            <span onClick={e=>{e.stopPropagation();window.open(`${window.location.origin}${window.location.pathname}#/team/${abbr}`,'_blank');}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",cursor:"pointer",opacity:0.7,transition:"opacity 0.15s"}}
+                            <span onClick={e=>{e.stopPropagation();setTeamProfileOverlay(abbr);}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",cursor:"pointer",opacity:0.7,transition:"opacity 0.15s"}}
                               onMouseEnter={e=>{e.currentTarget.style.opacity="1";}}
                               onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";}}
-                            >View team profile ↗</span>
+                            >View team profile →</span>
                           </div>
                           </div>
                         );
@@ -2065,9 +2066,10 @@ function MockDraftPage() {
   const currentRoundPicks = roundPicks(activeRound);
 
   return (
+    <>
     <div style={{maxWidth:"1200px",margin:"0 auto",padding:"0"}}>
       {/* Draft header bar */}
-      <div style={{background:"rgba(255,255,255,0.03)",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
+      <div style={{background:"rgba(255,255,255,0.03)",borderBottom:"1px solid var(--dg-card-border)",padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
         <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
           {/* Round tabs */}
           <div style={{display:"flex",gap:"2px"}}>
@@ -2087,23 +2089,23 @@ function MockDraftPage() {
             })}
           </div>
           {draftMode === "team" && userTeamSlot && (
-            <span style={{display:"inline-flex",alignItems:"center",gap:"6px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"3px 10px"}}>
+            <span style={{display:"inline-flex",alignItems:"center",gap:"6px",background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"3px 10px"}}>
               <span style={{width:"22px",height:"14px",borderRadius:"3px",background:TEAM_COLORS[userTeam]||"#333",display:"inline-flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff"}}>{userTeam}</span>
-              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>{userTeamSlot.team}</span>
-              <span onClick={()=>{window.open(`${window.location.origin}${window.location.pathname}#/team/${userTeam}`,'_blank');}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#2dd4bf",cursor:"pointer",opacity:0.7,borderLeft:"1px solid rgba(255,255,255,0.08)",paddingLeft:"6px",marginLeft:"2px"}}
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-muted)"}}>{userTeamSlot.team}</span>
+              <span onClick={()=>{setTeamProfileOverlay(userTeam);}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#2dd4bf",cursor:"pointer",opacity:0.7,borderLeft:"1px solid var(--dg-card-border2)",paddingLeft:"6px",marginLeft:"2px"}}
                 onMouseEnter={e=>{e.currentTarget.style.opacity="1";}}
                 onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";}}
-              >Profile ↗</span>
+              >Profile</span>
             </span>
           )}
-          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b"}}>{picksCount}/{lastPickInScope}</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)"}}>{picksCount}/{lastPickInScope}</span>
           <div style={{width:"80px",height:"4px",background:"rgba(255,255,255,0.06)",borderRadius:"2px",overflow:"hidden"}}>
             <div style={{width:`${(picksCount/lastPickInScope)*100}%`,height:"100%",background:"#2dd4bf",borderRadius:"2px",transition:"width 0.3s ease"}}/>
           </div>
         </div>
         <div style={{display:"flex",gap:"8px"}}>
-          <button onClick={resetDraft} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Reset</button>
-          <button onClick={exitToModal} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit</button>
+          <button onClick={resetDraft} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Reset</button>
+          <button onClick={exitToModal} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit</button>
         </div>
       </div>
 
@@ -2112,10 +2114,10 @@ function MockDraftPage() {
         <div style={{background:"rgba(45,212,191,0.06)",border:"1px solid rgba(45,212,191,0.15)",margin:"0",padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"10px",borderBottom:"1px solid rgba(45,212,191,0.1)"}}>
           <div>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:700,color:"#2dd4bf",letterSpacing:"0.5px",textTransform:"uppercase"}}>Round {roundCompletePrompt} Complete</div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>{roundCompletePrompt < 7 ? `Continue to Round ${roundCompletePrompt + 1} or view your results` : "All rounds complete"}</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",marginTop:"2px"}}>{roundCompletePrompt < 7 ? `Continue to Round ${roundCompletePrompt + 1} or view your results` : "All rounds complete"}</div>
           </div>
           <div style={{display:"flex",gap:"8px"}}>
-            <button onClick={()=>{setShowResults(true);setResultRound(1);}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#f1f5f9",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>View Results</button>
+            <button onClick={()=>{setShowResults(true);setResultRound(1);}} style={{background:"var(--dg-input)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text)",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>View Results</button>
             {roundCompletePrompt < 7 && (
               <button onClick={()=>{
                 const nextRd = roundCompletePrompt + 1;
@@ -2145,16 +2147,16 @@ function MockDraftPage() {
       {confirmPlayer && currentSlot && (
         <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.7)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}} onClick={()=>setConfirmPlayer(null)}>
           <div onClick={e=>e.stopPropagation()} style={{background:"#1a2332",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"16px",padding:"32px",maxWidth:"400px",width:"100%",textAlign:"center"}}>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"8px"}}>Round {currentSlot.round} · Pick #{currentPick}</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"8px"}}>Round {currentSlot.round} · Pick #{currentPick}</div>
             <div style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"44px",height:"28px",borderRadius:"6px",background:TEAM_COLORS[currentSlot.abbr]||"#333",fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",fontWeight:700,color:"#fff",marginBottom:"12px"}}>{currentSlot.abbr}</div>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",color:"#94a3b8",marginBottom:"16px"}}>{currentSlot.team}</div>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#64748b",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>SELECTS</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",color:"var(--dg-text-muted)",marginBottom:"16px"}}>{currentSlot.team}</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"var(--dg-text-dim)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>SELECTS</div>
             <PosBadge pos={confirmPlayer.p}/>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"24px",fontWeight:700,color:"#f1f5f9",margin:"8px 0 4px"}}>{confirmPlayer.n}</div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8",marginBottom:"4px"}}>{confirmPlayer.s}</div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#475569",marginBottom:"24px"}}>Big Board #{confirmPlayer.r}</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"24px",fontWeight:700,color:"var(--dg-text)",margin:"8px 0 4px"}}>{confirmPlayer.n}</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-muted)",marginBottom:"4px"}}>{confirmPlayer.s}</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-faint)",marginBottom:"24px"}}>Big Board #{confirmPlayer.r}</div>
             <div style={{display:"flex",gap:"10px",justifyContent:"center"}}>
-              <button onClick={()=>setConfirmPlayer(null)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Cancel</button>
+              <button onClick={()=>setConfirmPlayer(null)} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Cancel</button>
               <button onClick={confirmPick} style={{background:"#2dd4bf",border:"none",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#0c1222",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>Confirm Pick</button>
             </div>
           </div>
@@ -2174,22 +2176,22 @@ function MockDraftPage() {
         <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.8)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}} onClick={()=>{setTradeModalOpen(false);setTradePartner(null);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());}}>
           <div onClick={e=>e.stopPropagation()} style={{background:"#1a2332",border:"1px solid rgba(249,115,22,0.2)",borderRadius:"16px",maxWidth:"700px",width:"100%",maxHeight:"85vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
             {/* Modal Header */}
-            <div style={{padding:"20px 24px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+            <div style={{padding:"20px 24px 16px",borderBottom:"1px solid var(--dg-card-border)"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}}>
                 <div>
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Propose Trade</div>
-                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>Select picks to trade · AI accepts within fair value range</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Propose Trade</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",marginTop:"2px"}}>Select picks to trade · AI accepts within fair value range</div>
                 </div>
-                <button onClick={()=>{setTradeModalOpen(false);setTradePartner(null);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());}} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"20px",padding:"4px"}}>×</button>
+                <button onClick={()=>{setTradeModalOpen(false);setTradePartner(null);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());}} style={{background:"none",border:"none",color:"var(--dg-text-dim)",cursor:"pointer",fontSize:"20px",padding:"4px"}}>×</button>
               </div>
 
               {/* Trade Partner Selector */}
               <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase",flexShrink:0}}>Trade with</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",flexShrink:0}}>Trade with</span>
                 <select
                   value={tradePartner || ""}
                   onChange={e=>{setTradePartner(e.target.value||null);setPartnerTradeOffers(new Set());}}
-                  style={{flex:1,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"8px 12px",color:"#f1f5f9",fontSize:"12px",fontFamily:"'Oswald',sans-serif",cursor:"pointer",outline:"none"}}
+                  style={{flex:1,background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"8px 12px",color:"var(--dg-text)",fontSize:"12px",fontFamily:"'Oswald',sans-serif",cursor:"pointer",outline:"none"}}
                 >
                   <option value="" style={{background:"#1a2332"}}>Select a team...</option>
                   {[...new Set(DRAFT_ORDER.map(s=>s.abbr))].sort().filter(a => {
@@ -2228,8 +2230,8 @@ function MockDraftPage() {
                             transition:"all 0.15s",
                           }}>
                             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:selected?"#2dd4bf":"#64748b"}}>#{pickNum}</span>
-                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>R{slot?.round}</span>
-                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",marginLeft:"auto"}}>{Math.round(PICK_VALUES[pickNum]||0)} pts</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-muted)"}}>R{slot?.round}</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",marginLeft:"auto"}}>{Math.round(PICK_VALUES[pickNum]||0)} pts</span>
                           </div>
                         );
                       })}
@@ -2246,7 +2248,7 @@ function MockDraftPage() {
                       const isBalanced = eval_.acceptable;
                       return (
                         <>
-                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>Value</div>
+                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>Value</div>
                           <div style={{width:"4px",height:"100px",background:"rgba(255,255,255,0.06)",borderRadius:"2px",position:"relative"}}>
                             <div style={{
                               position:"absolute",left:"-8px",right:"-8px",height:"20px",borderRadius:"3px",
@@ -2289,8 +2291,8 @@ function MockDraftPage() {
                             transition:"all 0.15s",
                           }}>
                             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:selected?"#f97316":"#64748b"}}>#{pickNum}</span>
-                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>R{slot?.round}</span>
-                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",marginLeft:"auto"}}>{Math.round(PICK_VALUES[pickNum]||0)} pts</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-muted)"}}>R{slot?.round}</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",marginLeft:"auto"}}>{Math.round(PICK_VALUES[pickNum]||0)} pts</span>
                           </div>
                         );
                       })}
@@ -2299,14 +2301,14 @@ function MockDraftPage() {
                 </div>
               ) : (
                 <div style={{textAlign:"center",padding:"40px 0"}}>
-                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#475569"}}>Select a team to start building a trade</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-faint)"}}>Select a team to start building a trade</div>
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div style={{padding:"16px 24px",borderTop:"1px solid rgba(255,255,255,0.06)",display:"flex",gap:"10px",justifyContent:"flex-end"}}>
-              <button onClick={()=>{setTradeModalOpen(false);setTradePartner(null);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Cancel</button>
+            <div style={{padding:"16px 24px",borderTop:"1px solid var(--dg-card-border)",display:"flex",gap:"10px",justifyContent:"flex-end"}}>
+              <button onClick={()=>{setTradeModalOpen(false);setTradePartner(null);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());}} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Cancel</button>
               <button
                 onClick={executeTrade}
                 disabled={!evaluateTrade([...userTradeOffers],[...partnerTradeOffers]).acceptable}
@@ -2328,7 +2330,7 @@ function MockDraftPage() {
         <div style={{background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"10px",margin:"12px 20px",padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:600,color:"#2dd4bf",textTransform:"uppercase",letterSpacing:"0.5px"}}>Draft Complete!</div>
           <div style={{display:"flex",gap:"8px"}}>
-            <button onClick={resetDraft} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#94a3b8",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>Start Over</button>
+            <button onClick={resetDraft} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text-muted)",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>Start Over</button>
             <button onClick={()=>setShowResults(true)} style={{background:"#2dd4bf",border:"none",borderRadius:"6px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#0c1222",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>View Results →</button>
           </div>
         </div>
@@ -2336,17 +2338,17 @@ function MockDraftPage() {
 
       {/* ── RESULTS SCREEN ── */}
       {showResults && (
-        <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"#0c1222",zIndex:300,display:"flex",flexDirection:"column"}}>
+        <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"var(--dg-bg)",zIndex:300,display:"flex",flexDirection:"column"}}>
           <div style={{flex:1,overflowY:"auto",display:"flex",alignItems:"flex-start",justifyContent:"center"}}>
             <div id="draft-results" style={{width:"100%",maxWidth:"820px",margin:"0 auto",padding:"clamp(10px,2vw,20px)"}}>
               {/* Header */}
               <div style={{textAlign:"center",marginBottom:"clamp(8px,1.5vw,14px)"}}>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",marginBottom:"4px"}}>
                   <img src="/logo-light.png" alt="Draft Guide" style={{height:"clamp(20px,3vw,28px)",width:"auto"}}/>
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(12px,2vw,16px)",fontWeight:700,color:"#f1f5f9",letterSpacing:"1px",textTransform:"uppercase"}}>Draft Guide</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(12px,2vw,16px)",fontWeight:700,color:"var(--dg-text)",letterSpacing:"1px",textTransform:"uppercase"}}>Draft Guide</div>
                 </div>
                 <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,3vw,24px)",fontWeight:700,color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.2}}>2026 Mock Draft</div>
-                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1.2vw,10px)",color:"#64748b",letterSpacing:"1px",textTransform:"uppercase",marginTop:"2px"}}>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1.2vw,10px)",color:"var(--dg-text-dim)",letterSpacing:"1px",textTransform:"uppercase",marginTop:"2px"}}>
                   {resultsView === "my" && draftMode === "team"
                     ? `${userTeamSlot?.team || ""} · ${teamPicksOwned(userTeam).filter(s=>picks[s.pick]).length} Picks`
                     : `Round ${resultRound} · ${roundPicks(resultRound).length} Picks`
@@ -2358,7 +2360,7 @@ function MockDraftPage() {
               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6px",marginBottom:"clamp(8px,1.2vw,12px)"}}>
                 {/* My Picks / Full Draft toggle */}
                 {draftMode === "team" && (
-                  <div style={{display:"flex",borderRadius:"6px",overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <div style={{display:"flex",borderRadius:"6px",overflow:"hidden",border:"1px solid var(--dg-card-border2)"}}>
                     <button onClick={()=>setResultsView("my")} style={{
                       background: resultsView==="my" ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.04)",
                       border:"none",borderRight:"1px solid rgba(255,255,255,0.08)",padding:"6px 16px",cursor:"pointer",
@@ -2398,11 +2400,11 @@ function MockDraftPage() {
                   : roundPicks(resultRound).filter(s => picks[s.pick]);
                 const cols = displaySlots.length <= 4 ? displaySlots.length : 4;
                 const rows = Math.ceil(displaySlots.length / cols);
-                if (displaySlots.length === 0) return <div style={{textAlign:"center",padding:"40px",fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#475569"}}>No picks to display</div>;
+                if (displaySlots.length === 0) return <div style={{textAlign:"center",padding:"40px",fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-faint)"}}>No picks to display</div>;
                 return (
                   <div style={{
                     display:"grid",gridTemplateColumns:`repeat(${cols}, 1fr)`,gap:"0",
-                    border:"1px solid rgba(255,255,255,0.08)",borderRadius:"clamp(6px,1vw,10px)",overflow:"hidden",
+                    border:"1px solid var(--dg-card-border2)",borderRadius:"clamp(6px,1vw,10px)",overflow:"hidden",
                   }}>
                     {displaySlots.map((slot, idx) => {
                       const player = picks[slot.pick];
@@ -2424,10 +2426,10 @@ function MockDraftPage() {
                             <span style={{width:"clamp(22px,3.5vw,30px)",height:"clamp(13px,2vw,17px)",borderRadius:"2px",background:TEAM_COLORS[owner]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(6px,0.9vw,8px)",fontWeight:700,color:"#fff",flexShrink:0}}>{owner}</span>
                             <span style={{background:pc.bg,color:pc.text,padding:"0px clamp(3px,0.5vw,5px)",borderRadius:"2px",fontSize:"clamp(6px,0.85vw,8px)",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",marginLeft:"auto"}}>{player.p}</span>
                           </div>
-                          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:600,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.2}}>{player.n}</div>
-                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.85vw,9px)",color:"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.3}}>{player.s}</div>
+                          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:600,color:"var(--dg-text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.2}}>{player.n}</div>
+                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.85vw,9px)",color:"var(--dg-text-dim)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.3}}>{player.s}</div>
                           {showMyPicks && (
-                            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.8vw,8px)",color:"#475569",marginTop:"1px"}}>Rd {slot.round}</div>
+                            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.8vw,8px)",color:"var(--dg-text-faint)",marginTop:"1px"}}>Rd {slot.round}</div>
                           )}
                         </div>
                       );
@@ -2441,7 +2443,7 @@ function MockDraftPage() {
                 <div style={{marginTop:"clamp(8px,1.2vw,12px)"}}>
                   <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#f97316",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>Trades Made</div>
                   {tradeHistory.map((t, i) => (
-                    <div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"#94a3b8",lineHeight:1.6}}>
+                    <div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"var(--dg-text-muted)",lineHeight:1.6}}>
                       <span style={{color:"#f97316"}}>⇄</span> {getPickTeamName(t.team1)} sent {t.team1Gives.map(p=>`#${p}`).join(", ")} to {getPickTeamName(t.team2)} for {t.team2Gives.map(p=>`#${p}`).join(", ")}
                     </div>
                   ))}
@@ -2449,10 +2451,10 @@ function MockDraftPage() {
               )}
 
               {/* Footer */}
-              <div style={{marginTop:"clamp(8px,1.2vw,14px)",paddingTop:"clamp(6px,1vw,10px)",borderTop:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{marginTop:"clamp(8px,1.2vw,14px)",paddingTop:"clamp(6px,1vw,10px)",borderTop:"1px solid var(--dg-card-border)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(9px,1.1vw,11px)",color:"#94a3b8",fontWeight:500}}>draft-guide.com</span>
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"#475569"}}>· Create your own mock draft</span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(9px,1.1vw,11px)",color:"var(--dg-text-muted)",fontWeight:500}}>draft-guide.com</span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"var(--dg-text-faint)"}}>· Create your own mock draft</span>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
                   <svg width="clamp(11px,1.5vw,14px)" height="clamp(11px,1.5vw,14px)" viewBox="0 0 24 24" fill="#475569"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -2463,9 +2465,9 @@ function MockDraftPage() {
           </div>
 
           {/* Action buttons */}
-          <div style={{borderTop:"1px solid rgba(255,255,255,0.06)",padding:"12px 20px",display:"flex",gap:"10px",justifyContent:"center",background:"#0c1222",flexShrink:0}}>
-            <button onClick={()=>setShowResults(false)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>← Back to Draft</button>
-            <button onClick={resetDraft} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>New Draft</button>
+          <div style={{borderTop:"1px solid var(--dg-card-border)",padding:"12px 20px",display:"flex",gap:"10px",justifyContent:"center",background:"var(--dg-bg)",flexShrink:0}}>
+            <button onClick={()=>setShowResults(false)} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>← Back to Draft</button>
+            <button onClick={resetDraft} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>New Draft</button>
           </div>
         </div>
       )}
@@ -2473,10 +2475,10 @@ function MockDraftPage() {
       {/* Split screen */}
       <div className="draft-split" style={{display:"grid",gridTemplateColumns:"360px 1fr",minHeight:"calc(100vh - 160px)"}}>
         {/* Left - Draft Board */}
-        <div style={{borderRight:"1px solid rgba(255,255,255,0.06)",overflowY:"auto",maxHeight:"calc(100vh - 160px)"}}>
-          <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)",fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9",letterSpacing:"0.8px",textTransform:"uppercase",position:"sticky",top:0,background:"#0c1222",zIndex:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{borderRight:"1px solid var(--dg-card-border)",overflowY:"auto",maxHeight:"calc(100vh - 160px)"}}>
+          <div style={{padding:"12px 16px",borderBottom:"1px solid var(--dg-card-border)",fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"var(--dg-text)",letterSpacing:"0.8px",textTransform:"uppercase",position:"sticky",top:0,background:"var(--dg-bg)",zIndex:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <span>Round {activeRound}</span>
-            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",fontWeight:400}}>{currentRoundPicks.filter(s=>picks[s.pick]).length}/{currentRoundPicks.length}</span>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",fontWeight:400}}>{currentRoundPicks.filter(s=>picks[s.pick]).length}/{currentRoundPicks.length}</span>
           </div>
 
           {currentRoundPicks.map((slot) => {
@@ -2493,7 +2495,7 @@ function MockDraftPage() {
                   padding: isCurrent ? "12px 16px" : "8px 16px",
                   background: isCurrent ? "rgba(45,212,191,0.08)" : isUserTeamRow && picked ? "rgba(45,212,191,0.03)" : "transparent",
                   borderLeft: isCurrent ? "3px solid #2dd4bf" : isUserTeamRow ? "3px solid rgba(45,212,191,0.25)" : "3px solid transparent",
-                  borderBottom:"1px solid rgba(255,255,255,0.03)",
+                  borderBottom:"1px solid var(--dg-divider)",
                   cursor: draftMode === "full" ? "pointer" : "default",transition:"all 0.15s",
                 }}
               >
@@ -2506,11 +2508,11 @@ function MockDraftPage() {
                   <div style={{flex:1,display:"flex",alignItems:"center",gap:"8px",minWidth:0}}>
                     <PosBadge pos={picked.p}/>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{picked.n}</div>
-                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b"}}>{picked.s}</div>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"var(--dg-text)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{picked.n}</div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-dim)"}}>{picked.s}</div>
                     </div>
                     {((draftMode === "full") || (draftMode === "team" && isUserTeamRow)) && (
-                      <button onClick={(e)=>{e.stopPropagation();undoPick(slot.pick);}} style={{background:"none",border:"none",color:"#475569",cursor:"pointer",fontSize:"14px",padding:"2px 4px",flexShrink:0}} title="Undo pick">×</button>
+                      <button onClick={(e)=>{e.stopPropagation();undoPick(slot.pick);}} style={{background:"none",border:"none",color:"var(--dg-text-faint)",cursor:"pointer",fontSize:"14px",padding:"2px 4px",flexShrink:0}} title="Undo pick">×</button>
                     )}
                   </div>
                 ) : (
@@ -2528,12 +2530,12 @@ function MockDraftPage() {
         {/* Right - Available Players */}
         <div style={{overflowY:"auto",maxHeight:"calc(100vh - 160px)"}}>
           {!draftComplete && currentSlot && (
-            <div style={{padding:"14px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)",background:isUserPick?"#0c1222":"rgba(255,255,255,0.02)",position:"sticky",top:0,zIndex:10}}>
+            <div style={{padding:"14px 20px",borderBottom:"1px solid var(--dg-card-border)",background:isUserPick?"var(--dg-bg)":"var(--dg-card)",position:"sticky",top:0,zIndex:10}}>
               <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
                 <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"#2dd4bf"}}>#{currentPick}</span>
                 <span style={{width:"40px",height:"26px",borderRadius:"5px",background:TEAM_COLORS[getPickOwner(currentPick)]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:700,color:"#fff"}}>{getPickOwner(currentPick)}</span>
                 <div>
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:600,color:"#f1f5f9"}}>{getPickTeamName(getPickOwner(currentPick))}</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:600,color:"var(--dg-text)"}}>{getPickTeamName(getPickOwner(currentPick))}</div>
                   <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:isUserPick?"#2dd4bf":"#64748b"}}>
                     {isUserPick ? `Round ${currentSlot.round} · Your pick — select a player` : autoPickAnimating ? "Simulating pick..." : `Round ${currentSlot.round}`}
                   </div>
@@ -2550,9 +2552,9 @@ function MockDraftPage() {
               </div>
               {TEAM_NEEDS[currentSlot.abbr] && (
                 <div style={{marginTop:"10px",display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}}>
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>NEEDS</span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>NEEDS</span>
                   {TEAM_NEEDS[currentSlot.abbr].map(need=>(
-                    <span key={need} style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"4px",padding:"2px 8px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:600,color:"#f59e0b",letterSpacing:"0.3px"}}>{need}</span>
+                    <span key={need} style={{background:"rgba(255,255,255,0.06)",border:"1px solid var(--dg-card-border2)",borderRadius:"4px",padding:"2px 8px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:600,color:"#f59e0b",letterSpacing:"0.3px"}}>{need}</span>
                   ))}
                 </div>
               )}
@@ -2566,10 +2568,10 @@ function MockDraftPage() {
                 return (
                   <div style={{marginTop:"10px",paddingTop:"10px",borderTop:"1px solid rgba(255,255,255,0.04)"}}>
                     <div style={{display:"flex",alignItems:"center",gap:"6px",marginBottom:"6px"}}>
-                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>
+                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>
                         {draftMode === "team" ? "Your Roster" : `${currentSlot.abbr} Picks`}
                       </span>
-                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#334155"}}>({alreadyDrafted.length})</span>
+                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-ghost)"}}>({alreadyDrafted.length})</span>
                     </div>
                     <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
                       {alreadyDrafted.map(d => {
@@ -2577,7 +2579,7 @@ function MockDraftPage() {
                         return (
                           <div key={d.pick} style={{
                             display:"flex",alignItems:"center",gap:"5px",
-                            background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",
+                            background:"rgba(255,255,255,0.03)",border:"1px solid var(--dg-card-border)",
                             borderRadius:"6px",padding:"4px 8px",
                           }}>
                             <span style={{
@@ -2589,7 +2591,7 @@ function MockDraftPage() {
                               fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:500,color:"#e2e8f0",
                             }}>{d.player.n.split(" ").pop()}</span>
                             <span style={{
-                              fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",
+                              fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",
                             }}>R{d.round}</span>
                           </div>
                         );
@@ -2601,17 +2603,17 @@ function MockDraftPage() {
             </div>
           )}
 
-          <div style={{padding:"12px 20px",borderBottom:"1px solid rgba(255,255,255,0.04)",display:"flex",gap:"8px",flexWrap:"wrap",alignItems:"center",position:"sticky",top:draftComplete?0:"90px",zIndex:9,background:"#0c1222"}}>
-            <div style={{display:"flex",alignItems:"center",gap:"6px",flex:1,minWidth:"160px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"6px 10px"}}>
+          <div style={{padding:"12px 20px",borderBottom:"1px solid var(--dg-divider)",display:"flex",gap:"8px",flexWrap:"wrap",alignItems:"center",position:"sticky",top:draftComplete?0:"90px",zIndex:9,background:"var(--dg-bg)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"6px",flex:1,minWidth:"160px",background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 10px"}}>
               <SearchIcon/>
-              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search players..." style={{background:"transparent",border:"none",outline:"none",color:"#f1f5f9",fontSize:"12px",fontFamily:"'JetBrains Mono',monospace",width:"100%"}}/>
-              {search && <button onClick={()=>setSearch("")} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"14px",padding:"0"}}>×</button>}
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search players..." style={{background:"transparent",border:"none",outline:"none",color:"var(--dg-text)",fontSize:"12px",fontFamily:"'JetBrains Mono',monospace",width:"100%"}}/>
+              {search && <button onClick={()=>setSearch("")} style={{background:"none",border:"none",color:"var(--dg-text-dim)",cursor:"pointer",fontSize:"14px",padding:"0"}}>×</button>}
             </div>
-            <select value={posFilter} onChange={e=>setPosFilter(e.target.value)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"6px 10px",color:"#f1f5f9",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",cursor:"pointer",outline:"none"}}>
+            <select value={posFilter} onChange={e=>setPosFilter(e.target.value)} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 10px",color:"var(--dg-text)",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",cursor:"pointer",outline:"none"}}>
               <option value="ALL" style={{background:"#1a2332"}}>All Positions</option>
               {[...OFF_POSITIONS,...DEF_POSITIONS].map(pos=>(<option key={pos} value={pos} style={{background:"#1a2332"}}>{pos}</option>))}
             </select>
-            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569"}}>{available.length} available</span>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)"}}>{available.length} available</span>
           </div>
 
           <div>
@@ -2621,7 +2623,7 @@ function MockDraftPage() {
               return (
               <div key={player.r}>
               <div onClick={()=>{ if(canPick) handlePick(player); }}
-                style={{display:"grid",gridTemplateColumns:"40px 44px 1fr auto",alignItems:"center",gap:"10px",padding:"10px 20px",background:i%2===0?"transparent":"rgba(255,255,255,0.015)",borderBottom:"1px solid rgba(255,255,255,0.03)",cursor:canPick?"pointer":"default",opacity:canPick?1:0.6,transition:"background 0.1s"}}
+                style={{display:"grid",gridTemplateColumns:"40px 44px 1fr auto",alignItems:"center",gap:"10px",padding:"10px 20px",background:i%2===0?"transparent":"rgba(255,255,255,0.015)",borderBottom:"1px solid var(--dg-divider)",cursor:canPick?"pointer":"default",opacity:canPick?1:0.6,transition:"background 0.1s"}}
                 onMouseEnter={e=>{if(canPick) e.currentTarget.style.background="rgba(45,212,191,0.06)";}}
                 onMouseLeave={e=>{e.currentTarget.style.background=i%2===0?"transparent":"rgba(255,255,255,0.015)";}}
               >
@@ -2629,17 +2631,17 @@ function MockDraftPage() {
                 <PosBadge pos={player.p}/>
                 <div>
                   <div style={{display:"flex",alignItems:"baseline",gap:"8px"}}>
-                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,color:"#f1f5f9"}}>{player.n}</span>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,color:"var(--dg-text)"}}>{player.n}</span>
                     {profile && (
-                      <button onClick={e=>{e.stopPropagation();setExpandedMockPlayer(prev=>prev===player.n?null:player.n);}} style={{background:"none",border:"none",padding:0,cursor:"pointer",color:"#475569",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",display:"flex",alignItems:"center",gap:"2px"}} title="View profile">
+                      <button onClick={e=>{e.stopPropagation();setExpandedMockPlayer(prev=>prev===player.n?null:player.n);}} style={{background:"none",border:"none",padding:0,cursor:"pointer",color:"var(--dg-text-faint)",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",display:"flex",alignItems:"center",gap:"2px"}} title="View profile">
                         <span style={{fontSize:"10px"}}>{expandedMockPlayer===player.n?"▼":"▶"}</span>
                       </button>
                     )}
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
-                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b"}}>{player.s}</span>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)"}}>{player.s}</span>
                     {profile && (
-                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>
+                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)"}}>
                         {profile.height} · {profile.weight} lbs{profile.class ? ` · ${profile.class}` : ""}
                       </span>
                     )}
@@ -2652,12 +2654,12 @@ function MockDraftPage() {
               {/* Expandable Profile */}
               {expandedMockPlayer === player.n && profile && (
                 <div style={{background:"linear-gradient(180deg, rgba(45,212,191,0.04) 0%, rgba(27,42,74,0.2) 100%)",borderBottom:"1px solid rgba(45,212,191,0.08)",padding:"14px 20px"}}>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:"14px",alignItems:"center",marginBottom:"12px",paddingBottom:"10px",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:"14px",alignItems:"center",marginBottom:"12px",paddingBottom:"10px",borderBottom:"1px solid var(--dg-divider)"}}>
                     <div style={{display:"flex",gap:"12px",flexWrap:"wrap"}}>
                       {[{label:"AGE",value:profile.age},{label:"HT",value:profile.height},{label:"WT",value:`${profile.weight} lbs`},{label:"CLASS",value:profile.class}].filter(s=>s.value).map(stat=>(
                         <div key={stat.label} style={{textAlign:"center"}}>
-                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>{stat.label}</div>
-                          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9",marginTop:"1px"}}>{stat.value}</div>
+                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>{stat.label}</div>
+                          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"var(--dg-text)",marginTop:"1px"}}>{stat.value}</div>
                         </div>
                       ))}
                     </div>
@@ -2665,24 +2667,24 @@ function MockDraftPage() {
                       {profile.projected && <span style={{background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"5px",padding:"3px 10px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",fontWeight:600}}>{profile.projected}</span>}
                       {profile.comp && (
                         <div style={{textAlign:"right"}}>
-                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",color:"#475569",letterSpacing:"1px"}}>NFL COMP</div>
+                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",color:"var(--dg-text-faint)",letterSpacing:"1px"}}>NFL COMP</div>
                           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f59e0b"}}>{profile.comp}</div>
                         </div>
                       )}
                     </div>
                   </div>
-                  {profile.summary && <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",lineHeight:1.6,margin:"0 0 10px"}}>{profile.summary}</p>}
+                  {profile.summary && <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",lineHeight:1.6,margin:"0 0 10px"}}>{profile.summary}</p>}
                   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
                     {profile.pros && (
                       <div>
                         <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#22c55e",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>Strengths</div>
-                        {profile.pros.slice(0,3).map((pro,i)=><div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",lineHeight:1.5}}>+ {pro}</div>)}
+                        {profile.pros.slice(0,3).map((pro,i)=><div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",lineHeight:1.5}}>+ {pro}</div>)}
                       </div>
                     )}
                     {profile.cons && (
                       <div>
                         <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#ef4444",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>Weaknesses</div>
-                        {profile.cons.slice(0,3).map((con,i)=><div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",lineHeight:1.5}}>− {con}</div>)}
+                        {profile.cons.slice(0,3).map((con,i)=><div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",lineHeight:1.5}}>− {con}</div>)}
                       </div>
                     )}
                   </div>
@@ -2695,6 +2697,20 @@ function MockDraftPage() {
         </div>
       </div>
     </div>
+
+    {/* Team Profile Overlay */}
+    {teamProfileOverlay && (
+      <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"var(--dg-bg)",zIndex:500,overflowY:"auto"}}>
+        <div style={{position:"sticky",top:0,zIndex:10,background:"var(--dg-bg)",borderBottom:"1px solid var(--dg-card-border)",padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>
+            {TEAM_INFO[teamProfileOverlay]?.name || teamProfileOverlay} — Draft Profile
+          </div>
+          <button onClick={()=>setTeamProfileOverlay(null)} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>← Back to Draft</button>
+        </div>
+        <TeamPage abbr={teamProfileOverlay} setActivePage={()=>{}} navigateToTeam={(ab)=>setTeamProfileOverlay(ab)}/>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -2719,31 +2735,31 @@ function CompareOverlay({ players, onClose, onUpdate }) {
   };
 
   return (
-    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(12,18,34,0.95)",zIndex:400,overflowY:"auto"}}>
+    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"var(--dg-bg)",zIndex:400,overflowY:"auto"}}>
       <div style={{maxWidth:"960px",margin:"0 auto",padding:"20px 24px 60px"}}>
         {/* Header */}
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"20px",flexWrap:"wrap",gap:"10px"}}>
           <div>
-            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Prospect Comparison</div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginTop:"2px"}}>{count} prospects · Side-by-side analysis</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Prospect Comparison</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",marginTop:"2px"}}>{count} prospects · Side-by-side analysis</div>
           </div>
           <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
             {players.length < 3 && (
               <div style={{position:"relative"}}>
-                <input value={addSearch} onChange={e=>setAddSearch(e.target.value)} placeholder="Add player..." style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"6px 10px",color:"#f1f5f9",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",width:"160px",outline:"none"}}/>
+                <input value={addSearch} onChange={e=>setAddSearch(e.target.value)} placeholder="Add player..." style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 10px",color:"var(--dg-text)",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",width:"160px",outline:"none"}}/>
                 {searchResults.length > 0 && (
                   <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#1a2332",border:"1px solid rgba(255,255,255,0.1)",borderRadius:"6px",marginTop:"4px",zIndex:10,maxHeight:"200px",overflowY:"auto"}}>
                     {searchResults.map(p => {
                       const pc = POS_COLORS[p.p]||{bg:"#555",text:"#fff"};
                       return (
-                        <div key={p.r} onClick={()=>addPlayer(p)} style={{display:"flex",alignItems:"center",gap:"6px",padding:"6px 10px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.04)"}}
+                        <div key={p.r} onClick={()=>addPlayer(p)} style={{display:"flex",alignItems:"center",gap:"6px",padding:"6px 10px",cursor:"pointer",borderBottom:"1px solid var(--dg-divider)"}}
                           onMouseEnter={e=>{e.currentTarget.style.background="rgba(45,212,191,0.08)";}}
                           onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}
                         >
                           <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:700,color:"#2dd4bf"}}>#{p.r}</span>
                           <span style={{background:pc.bg,color:pc.text,padding:"1px 4px",borderRadius:"2px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{p.p}</span>
-                          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#f1f5f9"}}>{p.n}</span>
-                          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b",marginLeft:"auto"}}>{p.s}</span>
+                          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text)"}}>{p.n}</span>
+                          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-dim)",marginLeft:"auto"}}>{p.s}</span>
                         </div>
                       );
                     })}
@@ -2751,7 +2767,7 @@ function CompareOverlay({ players, onClose, onUpdate }) {
                 )}
               </div>
             )}
-            <button onClick={onClose} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Close</button>
+            <button onClick={onClose} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Close</button>
           </div>
         </div>
 
@@ -2769,15 +2785,15 @@ function CompareOverlay({ players, onClose, onUpdate }) {
                 padding:"20px 16px",textAlign:"center",
               }}>
                 {players.length > 2 && (
-                  <button onClick={()=>removePlayer(idx)} style={{position:"relative",float:"right",background:"none",border:"none",color:"#475569",cursor:"pointer",fontSize:"14px"}}>×</button>
+                  <button onClick={()=>removePlayer(idx)} style={{position:"relative",float:"right",background:"none",border:"none",color:"var(--dg-text-faint)",cursor:"pointer",fontSize:"14px"}}>×</button>
                 )}
                 <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#2dd4bf",letterSpacing:"1px",marginBottom:"4px"}}>#{p.r} OVERALL</div>
-                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",lineHeight:1.2,marginBottom:"4px"}}>{p.n}</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",lineHeight:1.2,marginBottom:"4px"}}>{p.n}</div>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"6px",marginBottom:"4px"}}>
                   <span style={{background:pc.bg,color:pc.text,padding:"2px 8px",borderRadius:"3px",fontSize:"10px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{p.p}</span>
                 </div>
-                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8"}}>{p.s}</div>
-                {profile && <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",marginTop:"4px"}}>{profile.projected}</div>}
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)"}}>{p.s}</div>
+                {profile && <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",marginTop:"4px"}}>{profile.projected}</div>}
               </div>
             );
           })}
@@ -2798,57 +2814,57 @@ function CompareOverlay({ players, onClose, onUpdate }) {
           ];
 
           return (
-            <div style={{border:"1px solid rgba(255,255,255,0.06)",borderRadius:"0 0 12px 12px",overflow:"hidden"}}>
+            <div style={{border:"1px solid var(--dg-card-border)",borderRadius:"0 0 12px 12px",overflow:"hidden"}}>
               {/* Bio stats */}
               {rows.map((row, ri) => (
                 <div key={row.label} style={{
                   display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,
                   background: ri % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent",
-                  borderBottom:"1px solid rgba(255,255,255,0.04)",
+                  borderBottom:"1px solid var(--dg-divider)",
                 }}>
-                  <div style={{padding:"10px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"0.5px",textTransform:"uppercase",display:"flex",alignItems:"center"}}>{row.label}</div>
+                  <div style={{padding:"10px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",letterSpacing:"0.5px",textTransform:"uppercase",display:"flex",alignItems:"center"}}>{row.label}</div>
                   {row.values.map((val, vi) => (
-                    <div key={vi} style={{padding:"10px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)",fontFamily:row.highlight?"'Oswald',sans-serif":"'JetBrains Mono',monospace",fontSize:row.highlight?"14px":"12px",color:row.highlight?"#f59e0b":"#f1f5f9",fontWeight:row.highlight?600:400,display:"flex",alignItems:"center"}}>{val}</div>
+                    <div key={vi} style={{padding:"10px 16px",borderLeft:"1px solid var(--dg-card-border)",fontFamily:row.highlight?"'Oswald',sans-serif":"'JetBrains Mono',monospace",fontSize:row.highlight?"14px":"12px",color:row.highlight?"#f59e0b":"#f1f5f9",fontWeight:row.highlight?600:400,display:"flex",alignItems:"center"}}>{val}</div>
                   ))}
                 </div>
               ))}
 
               {/* Scouting Summary */}
-              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid rgba(255,255,255,0.04)",background:"rgba(255,255,255,0.015)"}}>
-                <div style={{padding:"12px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"0.5px",textTransform:"uppercase"}}>Scouting Report</div>
+              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid var(--dg-divider)",background:"var(--dg-row-alt)"}}>
+                <div style={{padding:"12px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Scouting Report</div>
                 {profiles.map((prof, vi) => (
-                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)",fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",lineHeight:1.5}}>{prof?.summary || "No scouting report available"}</div>
+                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid var(--dg-card-border)",fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",lineHeight:1.5}}>{prof?.summary || "No scouting report available"}</div>
                 ))}
               </div>
 
               {/* Strengths */}
-              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid var(--dg-divider)"}}>
                 <div style={{padding:"12px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#22c55e",letterSpacing:"0.5px",textTransform:"uppercase"}}>Strengths</div>
                 {profiles.map((prof, vi) => (
-                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)"}}>
+                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid var(--dg-card-border)"}}>
                     {(prof?.pros || []).map((pro, pi) => (
                       <div key={pi} style={{display:"flex",alignItems:"flex-start",gap:"6px",marginBottom:"6px"}}>
                         <span style={{color:"#22c55e",fontSize:"10px",marginTop:"2px",flexShrink:0}}>+</span>
-                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",lineHeight:1.4}}>{pro}</span>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",lineHeight:1.4}}>{pro}</span>
                       </div>
                     ))}
-                    {!prof && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#334155"}}>No data</span>}
+                    {!prof && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-ghost)"}}>No data</span>}
                   </div>
                 ))}
               </div>
 
               {/* Weaknesses */}
-              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid rgba(255,255,255,0.04)",background:"rgba(255,255,255,0.015)"}}>
+              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid var(--dg-divider)",background:"var(--dg-row-alt)"}}>
                 <div style={{padding:"12px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#ef4444",letterSpacing:"0.5px",textTransform:"uppercase"}}>Weaknesses</div>
                 {profiles.map((prof, vi) => (
-                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)"}}>
+                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid var(--dg-card-border)"}}>
                     {(prof?.cons || []).map((con, ci) => (
                       <div key={ci} style={{display:"flex",alignItems:"flex-start",gap:"6px",marginBottom:"6px"}}>
                         <span style={{color:"#ef4444",fontSize:"10px",marginTop:"2px",flexShrink:0}}>−</span>
-                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",lineHeight:1.4}}>{con}</span>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",lineHeight:1.4}}>{con}</span>
                       </div>
                     ))}
-                    {!prof && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#334155"}}>No data</span>}
+                    {!prof && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-ghost)"}}>No data</span>}
                   </div>
                 ))}
               </div>
@@ -2859,7 +2875,7 @@ function CompareOverlay({ players, onClose, onUpdate }) {
                 {players.map((p, vi) => {
                   const maxRank = Math.max(...players.map(pl=>pl.r));
                   return (
-                    <div key={vi} style={{padding:"14px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)"}}>
+                    <div key={vi} style={{padding:"14px 16px",borderLeft:"1px solid var(--dg-card-border)"}}>
                       <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
                         <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:"#2dd4bf"}}>#{p.r}</span>
                       </div>
@@ -2876,7 +2892,7 @@ function CompareOverlay({ players, onClose, onUpdate }) {
 
         {/* Footer */}
         <div style={{marginTop:"16px",textAlign:"center"}}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#334155"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-ghost)"}}>
             DRAFT GUIDE © 2026 · draft-guide.com · @DraftGuide_
           </div>
         </div>
@@ -2902,6 +2918,7 @@ export default function App() {
   // Persist theme
   useEffect(() => {
     try { localStorage.setItem("dg-theme", theme); } catch {}
+    document.documentElement.setAttribute("data-theme", theme);
     document.body.style.background = isDark ? "#0c1222" : "#f8fafc";
     document.body.style.color = isDark ? "#f1f5f9" : "#1e293b";
   }, [theme, isDark]);
@@ -2958,7 +2975,7 @@ export default function App() {
   // Theme colors
   const t = isDark ? {
     bg: "#0c1222", headerBg: "#0c1222", headerBorder: "rgba(255,255,255,0.06)",
-    headerShadow: "none", text: "#f1f5f9", textMuted: "#94a3b8", textDim: "#64748b",
+    headerShadow: "none", text: "#f1f5f9", textMuted: "var(--dg-text-muted)", textDim: "#64748b",
     textFaint: "#475569", textGhost: "#334155", navActive: "#f1f5f9", navInactive: "#64748b",
     navActiveBg: "rgba(45,212,191,0.08)", cardBg: "rgba(255,255,255,0.02)",
     cardBorder: "rgba(255,255,255,0.06)", rowAlt: "rgba(255,255,255,0.015)",
@@ -2966,8 +2983,8 @@ export default function App() {
   } : {
     bg: "#f8fafc", headerBg: "#ffffff", headerBorder: "#e5e7eb",
     headerShadow: "0 1px 3px rgba(0,0,0,0.08)", text: "#1e293b", textMuted: "#475569",
-    textDim: "#64748b", textFaint: "#94a3b8", textGhost: "#cbd5e1", navActive: "#1B2A4A",
-    navInactive: "#94a3b8", navActiveBg: "rgba(27,42,74,0.08)", cardBg: "rgba(0,0,0,0.02)",
+    textDim: "#64748b", textFaint: "var(--dg-text-muted)", textGhost: "#cbd5e1", navActive: "#1B2A4A",
+    navInactive: "var(--dg-text-muted)", navActiveBg: "rgba(27,42,74,0.08)", cardBg: "rgba(0,0,0,0.02)",
     cardBorder: "rgba(0,0,0,0.08)", rowAlt: "rgba(0,0,0,0.02)",
     logo: "/logo.png",
   };
@@ -3052,7 +3069,7 @@ export default function App() {
             display:"inline-flex",alignItems:"center",gap:"6px",
             background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.15)",
             borderRadius:"6px",padding:"5px 12px",
-            fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",
+            fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",
           }}>
             <span style={{width:"6px",height:"6px",borderRadius:"50%",background:"#2dd4bf",display:"inline-block"}}/>
             NFL Mock Draft Database · 92 Sources · {PLAYERS.length} Prospects

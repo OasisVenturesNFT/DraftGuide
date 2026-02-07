@@ -38,6 +38,61 @@ input::placeholder {
   color: #475569;
 }
 
+/* ── Theme CSS Variables ── */
+:root, [data-theme="dark"] {
+  --dg-bg: #0c1222;
+  --dg-bg2: #111a2e;
+  --dg-text: #f1f5f9;
+  --dg-text-muted: #94a3b8;
+  --dg-text-dim: #64748b;
+  --dg-text-faint: #475569;
+  --dg-text-ghost: #334155;
+  --dg-card: rgba(255,255,255,0.02);
+  --dg-card-border: rgba(255,255,255,0.06);
+  --dg-card-border2: rgba(255,255,255,0.08);
+  --dg-row-alt: rgba(255,255,255,0.015);
+  --dg-row-hover: rgba(45,212,191,0.06);
+  --dg-input: rgba(255,255,255,0.04);
+  --dg-divider: rgba(255,255,255,0.04);
+  --dg-gradient-hero: linear-gradient(135deg, rgba(45,212,191,0.06) 0%, rgba(27,42,74,0.5) 50%, rgba(45,212,191,0.03) 100%);
+}
+
+[data-theme="light"] {
+  --dg-bg: #f8fafc;
+  --dg-bg2: #ffffff;
+  --dg-text: #1e293b;
+  --dg-text-muted: #475569;
+  --dg-text-dim: #64748b;
+  --dg-text-faint: #94a3b8;
+  --dg-text-ghost: #cbd5e1;
+  --dg-card: #ffffff;
+  --dg-card-border: rgba(0,0,0,0.08);
+  --dg-card-border2: rgba(0,0,0,0.12);
+  --dg-row-alt: rgba(0,0,0,0.02);
+  --dg-row-hover: rgba(45,212,191,0.08);
+  --dg-input: rgba(0,0,0,0.04);
+  --dg-divider: rgba(0,0,0,0.06);
+  --dg-gradient-hero: linear-gradient(135deg, rgba(45,212,191,0.04) 0%, rgba(200,215,240,0.5) 50%, rgba(45,212,191,0.03) 100%);
+}
+
+/* Light mode scrollbar */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(45, 212, 191, 0.15);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(45, 212, 191, 0.3);
+}
+[data-theme="light"] input::placeholder {
+  color: #94a3b8;
+}
+[data-theme="light"] select {
+  color: #1e293b;
+}
+[data-theme="light"] option {
+  background: #ffffff;
+  color: #1e293b;
+}
+
 /* ── Mobile Responsive ── */
 @media (max-width: 768px) {
   /* Hide "Draft Guide / 2026 NFL Draft" text next to logo on mobile */
