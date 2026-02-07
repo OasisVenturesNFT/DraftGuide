@@ -28,7 +28,7 @@ function PosBadge({ pos }) {
   );
 }
 
-function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle, navigateToTeam }) {
+function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle, navigateToTeam, compareMode, compareSelected, onCompareToggle }) {
   const [hovered, setHovered] = useState(false);
   const profile = PROFILES[player.n];
   const hasProfile = !!profile;
@@ -39,17 +39,29 @@ function PlayerRow({ player, posRank, index, isPositionView, expanded, onToggle,
       <div
         className="player-row"
         onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)}
-        onClick={()=>{ if(hasProfile && onToggle) onToggle(player.r); }}
+        onClick={()=>{
+          if (compareMode && onCompareToggle) { onCompareToggle(player); return; }
+          if(hasProfile && onToggle) onToggle(player.r);
+        }}
         style={{
           display:"grid",
-          gridTemplateColumns:"70px 52px 1fr 1fr",
+          gridTemplateColumns: compareMode ? "28px 70px 52px 1fr 1fr" : "70px 52px 1fr 1fr",
           alignItems:"center",gap:"12px",padding:"12px 20px",
-          background: expanded ? "rgba(45,212,191,0.08)" : hovered ? "rgba(45,212,191,0.06)" : index%2===0 ? "transparent" : "rgba(255,255,255,0.015)",
+          background: compareSelected ? "rgba(245,158,11,0.08)" : expanded ? "rgba(45,212,191,0.08)" : hovered ? "rgba(45,212,191,0.06)" : index%2===0 ? "transparent" : "rgba(255,255,255,0.015)",
           borderBottom: expanded ? "none" : "1px solid rgba(255,255,255,0.04)",
+          borderLeft: compareSelected ? "2px solid #f59e0b" : "2px solid transparent",
           transition:"background 0.15s ease",
-          cursor: hasProfile ? "pointer" : "default",
+          cursor: compareMode ? "pointer" : hasProfile ? "pointer" : "default",
         }}
       >
+        {/* Compare checkbox */}
+        {compareMode && (
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <div style={{width:"18px",height:"18px",borderRadius:"4px",border:compareSelected?"2px solid #f59e0b":"2px solid rgba(255,255,255,0.15)",background:compareSelected?"rgba(245,158,11,0.2)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+              {compareSelected && <span style={{color:"#f59e0b",fontSize:"12px",fontWeight:700}}>✓</span>}
+            </div>
+          </div>
+        )}
         {/* Rank */}
         <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
           <span className="rank-number" style={{
@@ -574,7 +586,7 @@ function HomePage({ setPage, navigateToTeam }) {
 }
 
 /* ───── Big Board Page ───── */
-function BigBoardPage({ navigateToTeam }) {
+function BigBoardPage({ navigateToTeam, openCompare }) {
   const [activePos, setActivePos] = useState("ALL");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -584,6 +596,8 @@ function BigBoardPage({ navigateToTeam }) {
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderPosFilter, setBuilderPosFilter] = useState("ALL");
   const [showBuilderResults, setShowBuilderResults] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareSelections, setCompareSelections] = useState([]); // array of player objects
   const PER_PAGE = 50;
 
   useEffect(()=>{ setPage(0); },[activePos, search]);
@@ -863,7 +877,7 @@ function BigBoardPage({ navigateToTeam }) {
         </div>
       )}
 
-      {/* Search + Builder CTA */}
+      {/* Search + Builder CTA + Compare */}
       <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"12px",flexWrap:"wrap"}}>
         <div className="search-bar" style={{
           display:"flex",alignItems:"center",gap:"8px",flex:"1",minWidth:"200px",
@@ -887,10 +901,49 @@ function BigBoardPage({ navigateToTeam }) {
           fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap",
           transition:"all 0.15s",
         }}>✎ Build Your Board</button>
+        <button onClick={()=>{setCompareMode(!compareMode);if(compareMode)setCompareSelections([]);}} style={{
+          background:compareMode?"rgba(245,158,11,0.12)":"rgba(255,255,255,0.04)",
+          border:compareMode?"1px solid rgba(245,158,11,0.3)":"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"8px 16px",
+          cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:compareMode?"#f59e0b":"#94a3b8",
+          fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap",
+          transition:"all 0.15s",
+        }}>{compareMode ? "Cancel" : "⚖ Compare"}</button>
         <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",whiteSpace:"nowrap"}}>
           {filtered.length} player{filtered.length!==1?"s":""}
         </div>
       </div>
+
+      {/* Compare Selection Bar */}
+      {compareMode && (
+        <div style={{
+          background:"rgba(245,158,11,0.06)",border:"1px solid rgba(245,158,11,0.15)",
+          borderRadius:"10px",padding:"12px 16px",marginBottom:"12px",
+          display:"flex",alignItems:"center",gap:"12px",flexWrap:"wrap",
+        }}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#f59e0b",fontWeight:600}}>
+            Select 2-3 players to compare
+          </div>
+          <div style={{display:"flex",gap:"6px",flex:1,flexWrap:"wrap"}}>
+            {compareSelections.map((p, i) => {
+              const pc = POS_COLORS[p.p]||{bg:"#555",text:"#fff"};
+              return (
+                <div key={p.r} style={{display:"flex",alignItems:"center",gap:"5px",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"4px 8px"}}>
+                  <span style={{background:pc.bg,color:pc.text,padding:"1px 4px",borderRadius:"2px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{p.p}</span>
+                  <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#f1f5f9"}}>{p.n}</span>
+                  <button onClick={()=>setCompareSelections(prev=>prev.filter((_,j)=>j!==i))} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"12px",padding:0}}>×</button>
+                </div>
+              );
+            })}
+          </div>
+          {compareSelections.length >= 2 && openCompare && (
+            <button onClick={()=>{openCompare(compareSelections);setCompareMode(false);setCompareSelections([]);}} style={{
+              background:"#f59e0b",border:"none",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",
+              fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#0c1222",fontWeight:600,
+              letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap",
+            }}>Compare →</button>
+          )}
+        </div>
+      )}
 
       {/* Table Header */}
       <div className="table-header" style={{
@@ -914,6 +967,15 @@ function BigBoardPage({ navigateToTeam }) {
             expanded={expandedPlayer===player.r}
             onToggle={(id)=>setExpandedPlayer(expandedPlayer===id?null:id)}
             navigateToTeam={navigateToTeam}
+            compareMode={compareMode}
+            compareSelected={compareSelections.some(c=>c.r===player.r)}
+            onCompareToggle={(p)=>{
+              setCompareSelections(prev => {
+                if (prev.some(c=>c.r===p.r)) return prev.filter(c=>c.r!==p.r);
+                if (prev.length >= 3) return prev;
+                return [...prev, p];
+              });
+            }}
           />;
         })}
       </div>
@@ -2670,10 +2732,198 @@ function MockDraftPage() {
   );
 }
 
+/* ───── Prospect Comparison Overlay ───── */
+function CompareOverlay({ players, onClose, onUpdate }) {
+  const [addSearch, setAddSearch] = useState("");
+  const count = players.length;
+
+  const searchResults = addSearch.trim().length > 1
+    ? PLAYERS.filter(p => !players.some(s=>s.r===p.r) && (p.n.toLowerCase().includes(addSearch.toLowerCase()) || p.s.toLowerCase().includes(addSearch.toLowerCase()))).slice(0, 6)
+    : [];
+
+  const removePlayer = (idx) => {
+    if (players.length <= 2) return;
+    onUpdate(players.filter((_,i)=>i!==idx));
+  };
+
+  const addPlayer = (p) => {
+    if (players.length >= 3) return;
+    onUpdate([...players, p]);
+    setAddSearch("");
+  };
+
+  return (
+    <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(12,18,34,0.95)",zIndex:400,overflowY:"auto"}}>
+      <div style={{maxWidth:"960px",margin:"0 auto",padding:"20px 24px 60px"}}>
+        {/* Header */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"20px",flexWrap:"wrap",gap:"10px"}}>
+          <div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Prospect Comparison</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginTop:"2px"}}>{count} prospects · Side-by-side analysis</div>
+          </div>
+          <div style={{display:"flex",gap:"8px",alignItems:"center"}}>
+            {players.length < 3 && (
+              <div style={{position:"relative"}}>
+                <input value={addSearch} onChange={e=>setAddSearch(e.target.value)} placeholder="Add player..." style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"6px 10px",color:"#f1f5f9",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",width:"160px",outline:"none"}}/>
+                {searchResults.length > 0 && (
+                  <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#1a2332",border:"1px solid rgba(255,255,255,0.1)",borderRadius:"6px",marginTop:"4px",zIndex:10,maxHeight:"200px",overflowY:"auto"}}>
+                    {searchResults.map(p => {
+                      const pc = POS_COLORS[p.p]||{bg:"#555",text:"#fff"};
+                      return (
+                        <div key={p.r} onClick={()=>addPlayer(p)} style={{display:"flex",alignItems:"center",gap:"6px",padding:"6px 10px",cursor:"pointer",borderBottom:"1px solid rgba(255,255,255,0.04)"}}
+                          onMouseEnter={e=>{e.currentTarget.style.background="rgba(45,212,191,0.08)";}}
+                          onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}
+                        >
+                          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:700,color:"#2dd4bf"}}>#{p.r}</span>
+                          <span style={{background:pc.bg,color:pc.text,padding:"1px 4px",borderRadius:"2px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{p.p}</span>
+                          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#f1f5f9"}}>{p.n}</span>
+                          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b",marginLeft:"auto"}}>{p.s}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+            <button onClick={onClose} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Close</button>
+          </div>
+        </div>
+
+        {/* Player Headers */}
+        <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,gap:"0",marginBottom:"0"}}>
+          <div/>
+          {players.map((p, idx) => {
+            const pc = POS_COLORS[p.p]||{bg:"#555",text:"#fff"};
+            const profile = PROFILES[p.n];
+            return (
+              <div key={p.r} style={{
+                background:`linear-gradient(180deg, ${pc.bg}22 0%, transparent 100%)`,
+                borderTop:`3px solid ${pc.bg}`,
+                borderLeft: idx > 0 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                padding:"20px 16px",textAlign:"center",
+              }}>
+                {players.length > 2 && (
+                  <button onClick={()=>removePlayer(idx)} style={{position:"relative",float:"right",background:"none",border:"none",color:"#475569",cursor:"pointer",fontSize:"14px"}}>×</button>
+                )}
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#2dd4bf",letterSpacing:"1px",marginBottom:"4px"}}>#{p.r} OVERALL</div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",lineHeight:1.2,marginBottom:"4px"}}>{p.n}</div>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"6px",marginBottom:"4px"}}>
+                  <span style={{background:pc.bg,color:pc.text,padding:"2px 8px",borderRadius:"3px",fontSize:"10px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{p.p}</span>
+                </div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8"}}>{p.s}</div>
+                {profile && <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",marginTop:"4px"}}>{profile.projected}</div>}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Comparison Rows */}
+        {(() => {
+          const profiles = players.map(p => PROFILES[p.n]);
+          const hasAnyProfile = profiles.some(p => p);
+
+          const rows = [
+            {label:"Age",values:profiles.map(p=>p?.age||"—")},
+            {label:"Height",values:profiles.map(p=>p?.height||"—")},
+            {label:"Weight",values:profiles.map(p=>p?.weight ? `${p.weight} lbs` : "—")},
+            {label:"Class",values:profiles.map(p=>p?.class||"—")},
+            {label:"Draft Range",values:profiles.map(p=>p?.projected||"—")},
+            {label:"NFL Comparison",values:profiles.map(p=>p?.comp||"—"),highlight:true},
+          ];
+
+          return (
+            <div style={{border:"1px solid rgba(255,255,255,0.06)",borderRadius:"0 0 12px 12px",overflow:"hidden"}}>
+              {/* Bio stats */}
+              {rows.map((row, ri) => (
+                <div key={row.label} style={{
+                  display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,
+                  background: ri % 2 === 0 ? "rgba(255,255,255,0.015)" : "transparent",
+                  borderBottom:"1px solid rgba(255,255,255,0.04)",
+                }}>
+                  <div style={{padding:"10px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"0.5px",textTransform:"uppercase",display:"flex",alignItems:"center"}}>{row.label}</div>
+                  {row.values.map((val, vi) => (
+                    <div key={vi} style={{padding:"10px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)",fontFamily:row.highlight?"'Oswald',sans-serif":"'JetBrains Mono',monospace",fontSize:row.highlight?"14px":"12px",color:row.highlight?"#f59e0b":"#f1f5f9",fontWeight:row.highlight?600:400,display:"flex",alignItems:"center"}}>{val}</div>
+                  ))}
+                </div>
+              ))}
+
+              {/* Scouting Summary */}
+              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid rgba(255,255,255,0.04)",background:"rgba(255,255,255,0.015)"}}>
+                <div style={{padding:"12px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"0.5px",textTransform:"uppercase"}}>Scouting Report</div>
+                {profiles.map((prof, vi) => (
+                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)",fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",lineHeight:1.5}}>{prof?.summary || "No scouting report available"}</div>
+                ))}
+              </div>
+
+              {/* Strengths */}
+              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                <div style={{padding:"12px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#22c55e",letterSpacing:"0.5px",textTransform:"uppercase"}}>Strengths</div>
+                {profiles.map((prof, vi) => (
+                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)"}}>
+                    {(prof?.pros || []).map((pro, pi) => (
+                      <div key={pi} style={{display:"flex",alignItems:"flex-start",gap:"6px",marginBottom:"6px"}}>
+                        <span style={{color:"#22c55e",fontSize:"10px",marginTop:"2px",flexShrink:0}}>+</span>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",lineHeight:1.4}}>{pro}</span>
+                      </div>
+                    ))}
+                    {!prof && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#334155"}}>No data</span>}
+                  </div>
+                ))}
+              </div>
+
+              {/* Weaknesses */}
+              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,borderBottom:"1px solid rgba(255,255,255,0.04)",background:"rgba(255,255,255,0.015)"}}>
+                <div style={{padding:"12px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#ef4444",letterSpacing:"0.5px",textTransform:"uppercase"}}>Weaknesses</div>
+                {profiles.map((prof, vi) => (
+                  <div key={vi} style={{padding:"12px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)"}}>
+                    {(prof?.cons || []).map((con, ci) => (
+                      <div key={ci} style={{display:"flex",alignItems:"flex-start",gap:"6px",marginBottom:"6px"}}>
+                        <span style={{color:"#ef4444",fontSize:"10px",marginTop:"2px",flexShrink:0}}>−</span>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",lineHeight:1.4}}>{con}</span>
+                      </div>
+                    ))}
+                    {!prof && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#334155"}}>No data</span>}
+                  </div>
+                ))}
+              </div>
+
+              {/* Consensus rank comparison bar */}
+              <div style={{display:"grid",gridTemplateColumns:`200px repeat(${count}, 1fr)`,background:"rgba(45,212,191,0.04)"}}>
+                <div style={{padding:"14px 16px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",letterSpacing:"0.5px",textTransform:"uppercase"}}>Consensus Rank</div>
+                {players.map((p, vi) => {
+                  const maxRank = Math.max(...players.map(pl=>pl.r));
+                  return (
+                    <div key={vi} style={{padding:"14px 16px",borderLeft:"1px solid rgba(255,255,255,0.06)"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                        <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:"#2dd4bf"}}>#{p.r}</span>
+                      </div>
+                      <div style={{height:"4px",background:"rgba(255,255,255,0.06)",borderRadius:"2px",marginTop:"6px",overflow:"hidden"}}>
+                        <div style={{width:`${Math.max(5,100 - ((p.r/Math.max(maxRank,100))*100))}%`,height:"100%",background:"#2dd4bf",borderRadius:"2px"}}/>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Footer */}
+        <div style={{marginTop:"16px",textAlign:"center"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#334155"}}>
+            DRAFT GUIDE © 2026 · draft-guide.com · @DraftGuide_
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ───── Main App ───── */
 export default function App() {
   const [activePage, setActivePage] = useState("HOME");
   const [teamPageAbbr, setTeamPageAbbr] = useState(null);
+  const [comparePlayers, setComparePlayers] = useState(null); // array of player objects for comparison
 
   // Hash-based routing for team pages
   useEffect(() => {
@@ -2787,9 +3037,12 @@ export default function App() {
 
       {/* ── Page Content ── */}
       {activePage==="HOME" && <HomePage setPage={handleSetPage} navigateToTeam={navigateToTeam}/>}
-      {activePage==="BIG BOARD" && <BigBoardPage navigateToTeam={navigateToTeam}/>}
+      {activePage==="BIG BOARD" && <BigBoardPage navigateToTeam={navigateToTeam} openCompare={setComparePlayers}/>}
       {activePage==="MOCK DRAFT" && <MockDraftPage/>}
       {activePage==="TEAM" && teamPageAbbr && <TeamPage abbr={teamPageAbbr} setActivePage={handleSetPage} navigateToTeam={navigateToTeam}/>}
+
+      {/* ── Compare Overlay ── */}
+      {comparePlayers && <CompareOverlay players={comparePlayers} onClose={()=>setComparePlayers(null)} onUpdate={setComparePlayers}/>}
 
       {/* ── Footer ── */}
       <div style={{maxWidth:"960px",margin:"0 auto",padding:"0 24px 40px"}}>

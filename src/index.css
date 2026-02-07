@@ -101,6 +101,9 @@ input::placeholder {
   /* Search bar */
   .search-bar { padding: 7px 10px !important; }
 
+  /* Compare buttons - stack */
+  .compare-actions { flex-direction: column !important; }
+
   /* Mock draft team selector - 2 divisions per row */
   .mock-team-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
 
