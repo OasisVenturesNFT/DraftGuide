@@ -1035,16 +1035,61 @@ function MockDraftPage() {
     setUserTradeOffers(new Set());
     setPartnerTradeOffers(new Set());
 
-    // If we acquired the current pick, stay on it. If we traded it away, the new owner picks.
-    // In team mode, if we now own an earlier pick, move to it
+    // After trade: resolve who owns the current pick and continue the draft
+    // Use newOwnership directly since React state hasn't flushed yet
+    const resolveOwner = (pn) => newOwnership[pn] || DRAFT_ORDER.find(s=>s.pick===pn)?.abbr;
+
     if (draftMode === "team") {
-      // Check if user now owns the current pick
-      const currentOwner = newOwnership[currentPick] || DRAFT_ORDER.find(s=>s.pick===currentPick)?.abbr;
-      if (currentOwner !== myTeam) {
-        // We traded away our current pick - need to auto-pick for the new owner and continue
-        // Trigger re-evaluation by just re-rendering; the isUserPick check will handle it
+      const currentOwner = resolveOwner(currentPick);
+      if (currentOwner === myTeam) {
+        // We still own the current pick (traded away future picks only). Stay here.
+        return;
+      }
+      // We traded away our current pick. Auto-pick from currentPick forward until our next pick.
+      let p = currentPick;
+      let tmpPicks = {...picks};
+      const autopickQueue = [];
+      while (p <= TOTAL_PICKS) {
+        if (tmpPicks[p]) { p++; continue; }
+        const own = resolveOwner(p);
+        if (own === myTeam) break;
+        const ap = getAutoPick(own, tmpPicks);
+        if (ap) { autopickQueue.push({pick:p, player:ap}); tmpPicks[p] = ap; }
+        p++;
+      }
+      const nextUserPick = (p <= TOTAL_PICKS) ? p : null;
+
+      if (autopickQueue.length > 0) {
+        // Small delay before starting animation so trade banner renders first
+        setTimeout(() => {
+          setAutoPickAnimating(true);
+          const delay = autopickQueue.length > 20 ? 80 : autopickQueue.length > 10 ? 150 : 350;
+          autopickQueue.forEach((ap, idx) => {
+            setTimeout(() => {
+              setPicks(prev => ({...prev, [ap.pick]: ap.player}));
+              setCurrentPick(ap.pick);
+              const apRound = DRAFT_ORDER.find(s=>s.pick===ap.pick)?.round || 1;
+              setActiveRound(apRound);
+              if (idx === autopickQueue.length - 1) {
+                setTimeout(() => {
+                  setAutoPickAnimating(false);
+                  if (nextUserPick) {
+                    setCurrentPick(nextUserPick);
+                    const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
+                    setActiveRound(nr);
+                  }
+                }, 200);
+              }
+            }, delay * (idx + 1));
+          });
+        }, 300);
+      } else if (nextUserPick) {
+        setCurrentPick(nextUserPick);
+        const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
+        setActiveRound(nr);
       }
     }
+    // In full draft mode, stay on current pick — user picks for whoever now owns it
   };
 
   const needsMapping = {"QB":"QB","RB":"RB","WR":"WR","TE":"TE","T":"OT","G":"IOL","C":"IOL","OL":"IOL","DL":"DL","DI":"DL","ED":"EDGE","EDGE":"EDGE","LB":"LB","CB":"CB","S":"S","DB":"S"};
@@ -1056,6 +1101,60 @@ function MockDraftPage() {
     const mappedNeeds = needs.map(n => needsMapping[n] || n);
     const needMatch = avail.find(p => mappedNeeds.includes(p.p));
     return needMatch || avail[0];
+  };
+
+  // Shared auto-pick runner (can use a custom ownership map for post-trade scenarios)
+  const runAutoPicks = (startPick, existingPicks, ownershipOverride) => {
+    const resolveOwner = (pn) => (ownershipOverride || pickOwnership)[pn] || DRAFT_ORDER.find(s=>s.pick===pn)?.abbr;
+    let p = startPick;
+    let tmpPicks = {...existingPicks};
+    const autopickQueue = [];
+    while (p <= TOTAL_PICKS) {
+      const slot = DRAFT_ORDER.find(s=>s.pick===p);
+      if (!slot) { p++; continue; }
+      if (tmpPicks[p]) { p++; continue; }
+      const owner = resolveOwner(p);
+      if (owner === userTeam) break;
+      const autoPick = getAutoPick(owner, tmpPicks);
+      if (autoPick) {
+        autopickQueue.push({pick: p, player: autoPick});
+        tmpPicks[p] = autoPick;
+      }
+      p++;
+    }
+    return { autopickQueue, nextUserPick: p <= TOTAL_PICKS ? p : null, finalPicks: tmpPicks };
+  };
+
+  // Animate and apply an auto-pick queue, then land on nextUserPick
+  const animateAutoPicks = (autopickQueue, nextUserPick) => {
+    if (autopickQueue.length === 0) {
+      if (nextUserPick) {
+        setCurrentPick(nextUserPick);
+        const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
+        setActiveRound(nr);
+      }
+      return;
+    }
+    setAutoPickAnimating(true);
+    const delay = autopickQueue.length > 20 ? 80 : autopickQueue.length > 10 ? 150 : 350;
+    autopickQueue.forEach((ap, idx) => {
+      setTimeout(() => {
+        setPicks(prev => ({...prev, [ap.pick]: ap.player}));
+        setCurrentPick(ap.pick);
+        const apRound = DRAFT_ORDER.find(s=>s.pick===ap.pick)?.round || 1;
+        setActiveRound(apRound);
+        if (idx === autopickQueue.length - 1) {
+          setTimeout(() => {
+            setAutoPickAnimating(false);
+            if (nextUserPick) {
+              setCurrentPick(nextUserPick);
+              const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
+              setActiveRound(nr);
+            }
+          }, 200);
+        }
+      }, delay * (idx + 1));
+    });
   };
 
   const handlePick = (player) => { setConfirmPlayer(player); };
@@ -1071,64 +1170,8 @@ function MockDraftPage() {
     if (Object.keys(newPicks).length === TOTAL_PICKS) return;
 
     if (draftMode === "team") {
-      let nextPick = currentPick + 1;
-      let tempPicks = {...newPicks};
-
-      const runAutoPicks = (startPick, existingPicks) => {
-        let p = startPick;
-        let tmpPicks = {...existingPicks};
-        const autopickQueue = [];
-        while (p <= TOTAL_PICKS) {
-          const slot = DRAFT_ORDER.find(s=>s.pick===p);
-          if (!slot) { p++; continue; }
-          if (tmpPicks[p]) { p++; continue; }
-          const owner = getPickOwner(p);
-          if (owner === userTeam) break;
-          const autoPick = getAutoPick(owner, tmpPicks);
-          if (autoPick) {
-            autopickQueue.push({pick: p, player: autoPick});
-            tmpPicks[p] = autoPick;
-          }
-          p++;
-        }
-        return { autopickQueue, nextUserPick: p <= TOTAL_PICKS ? p : null, finalPicks: tmpPicks };
-      };
-
-      const { autopickQueue, nextUserPick, finalPicks } = runAutoPicks(nextPick, tempPicks);
-
-      if (autopickQueue.length > 0) {
-        setAutoPickAnimating(true);
-        // Speed up auto-picks for later rounds
-        const delay = autopickQueue.length > 20 ? 80 : autopickQueue.length > 10 ? 150 : 350;
-        autopickQueue.forEach((ap, idx) => {
-          setTimeout(() => {
-            setPicks(prev => ({...prev, [ap.pick]: ap.player}));
-            setCurrentPick(ap.pick);
-            const apRound = DRAFT_ORDER.find(s=>s.pick===ap.pick)?.round || 1;
-            setActiveRound(apRound);
-            if (idx === autopickQueue.length - 1) {
-              setTimeout(() => {
-                setAutoPickAnimating(false);
-                if (nextUserPick && !finalPicks[nextUserPick]) {
-                  setCurrentPick(nextUserPick);
-                  const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
-                  setActiveRound(nr);
-                } else {
-                  for (let i = 1; i <= TOTAL_PICKS; i++) {
-                    if (!finalPicks[i]) { setCurrentPick(i); return; }
-                  }
-                }
-              }, 200);
-            }
-          }, delay * (idx + 1));
-        });
-      } else {
-        if (nextUserPick) {
-          setCurrentPick(nextUserPick);
-          const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
-          setActiveRound(nr);
-        }
-      }
+      const { autopickQueue, nextUserPick } = runAutoPicks(currentPick + 1, newPicks);
+      animateAutoPicks(autopickQueue, nextUserPick);
     } else {
       for (let i = currentPick + 1; i <= TOTAL_PICKS; i++) {
         const slot = DRAFT_ORDER.find(s=>s.pick===i);
