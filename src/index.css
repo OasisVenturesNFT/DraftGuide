@@ -61,19 +61,24 @@ input::placeholder {
   .stats-grid > div { padding: 14px 8px !important; }
   .stats-grid .stat-value { font-size: 24px !important; }
 
-  /* Player rows - show school, hide team fit badges */
+  /* Player rows - keep school visible, hide team fit badges */
   .player-row { 
-    grid-template-columns: 60px 44px 1fr auto !important; 
+    grid-template-columns: 54px 44px 1fr 80px !important; 
     padding: 10px 12px !important; 
-    gap: 8px !important; 
+    gap: 6px !important; 
   }
-  .player-school { font-size: 10px !important; }
+  .player-school { 
+    font-size: 10px !important; 
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
   .team-fits { display: none !important; }
   .player-name { font-size: 13px !important; }
 
   /* Table header */
   .table-header { 
-    grid-template-columns: 60px 44px 1fr auto !important; 
+    grid-template-columns: 54px 44px 1fr 80px !important; 
     padding: 8px 12px !important; 
   }
 
@@ -96,9 +101,11 @@ input::placeholder {
   /* Search bar */
   .search-bar { padding: 7px 10px !important; }
 
-  /* Mock draft team selector - 2 columns per division */
-  .mock-team-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; }
-  .mock-div-teams { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 4px !important; }
+  /* Mock draft team selector - 2 divisions per row */
+  .mock-team-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+
+  /* Homepage team grid - 2 columns on mobile */
+  .home-team-grid { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 @media (max-width: 480px) {
@@ -116,8 +123,9 @@ input::placeholder {
   .draft-split > div:first-child { max-height: 35vh !important; border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.06); }
   .draft-split > div:last-child { max-height: 55vh !important; }
 
-  /* Mock draft team selector - 2 columns on small mobile */
-  .mock-team-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  /* Mock draft team selector - single column on very small */
+  .mock-team-grid { grid-template-columns: 1fr !important; }
+  .home-team-grid { grid-template-columns: 1fr !important; }
 
   /* Profile card */
   .profile-pros-cons { grid-template-columns: 1fr !important; }

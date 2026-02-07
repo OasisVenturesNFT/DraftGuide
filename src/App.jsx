@@ -544,7 +544,7 @@ function HomePage({ setPage, navigateToTeam }) {
             </div>
           </div>
           <div style={{padding:"16px 20px"}}>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"6px"}}>
+            <div className="home-team-grid" style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"6px"}}>
               {Object.entries(TEAM_INFO).sort((a,b) => a[1].name.localeCompare(b[1].name)).map(([abbr, info]) => {
                 const picks = DRAFT_ORDER.filter(s => s.abbr === abbr);
                 const firstPick = picks[0]?.pick;
