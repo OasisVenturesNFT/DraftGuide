@@ -702,6 +702,8 @@ const TEAM_NEEDS = {
 };
 
 function MockDraftPage() {
+  const [draftMode, setDraftMode] = useState(null); // null = show modal, "full" or "team"
+  const [userTeam, setUserTeam] = useState(null); // abbr of team in team mode
   const [drafting, setDrafting] = useState(false);
   const [picks, setPicks] = useState({});
   const [currentPick, setCurrentPick] = useState(1);
@@ -709,6 +711,8 @@ function MockDraftPage() {
   const [posFilter, setPosFilter] = useState("ALL");
   const [confirmPlayer, setConfirmPlayer] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const [fullDraftToggle, setFullDraftToggle] = useState(false);
+  const [autoPickAnimating, setAutoPickAnimating] = useState(false);
 
   const pickedPlayerIds = useMemo(()=> new Set(Object.values(picks).map(p=>p.r)), [picks]);
 
@@ -724,6 +728,21 @@ function MockDraftPage() {
 
   const draftComplete = Object.keys(picks).length === 32;
 
+  // Map TEAM_NEEDS positions to our position categories
+  const needsMapping = {"QB":"QB","RB":"RB","WR":"WR","TE":"TE","T":"OT","G":"IOL","C":"IOL","OL":"IOL","DL":"DL","DI":"DL","ED":"EDGE","EDGE":"EDGE","LB":"LB","CB":"CB","S":"S","DB":"S"};
+
+  // Auto-pick: best available player matching team needs
+  const getAutoPick = (slotAbbr, currentPicks) => {
+    const picked = new Set(Object.values(currentPicks).map(p=>p.r));
+    const avail = PLAYERS.filter(p => !picked.has(p.r));
+    const needs = TEAM_NEEDS[slotAbbr] || [];
+    const mappedNeeds = needs.map(n => needsMapping[n] || n);
+    // First try: best available at a need position
+    const needMatch = avail.find(p => mappedNeeds.includes(p.p));
+    // Fallback: best player available overall
+    return needMatch || avail[0];
+  };
+
   const handlePick = (player) => {
     setConfirmPlayer(player);
   };
@@ -734,20 +753,95 @@ function MockDraftPage() {
     setPicks(newPicks);
     setConfirmPlayer(null);
     setSearch("");
-    // Auto advance to next unpicked slot
-    for (let i = currentPick + 1; i <= 32; i++) {
-      if (!newPicks[i]) { setCurrentPick(i); return; }
+    setPosFilter("ALL");
+
+    if (Object.keys(newPicks).length === 32) {
+      setCurrentPick(currentPick);
+      return;
     }
-    for (let i = 1; i < currentPick; i++) {
-      if (!newPicks[i]) { setCurrentPick(i); return; }
+
+    // In team mode, auto-advance and auto-pick non-user picks
+    if (draftMode === "team") {
+      let nextPick = currentPick + 1;
+      let tempPicks = {...newPicks};
+      
+      // Auto-pick until we hit another user pick or end
+      const runAutoPicks = (startPick, existingPicks) => {
+        let p = startPick;
+        let tmpPicks = {...existingPicks};
+        const autopickQueue = [];
+
+        while (p <= 32) {
+          if (tmpPicks[p]) { p++; continue; }
+          const slot = DRAFT_ORDER.find(s=>s.pick===p);
+          if (slot.abbr === userTeam) break; // user's turn
+          const autoPick = getAutoPick(slot.abbr, tmpPicks);
+          if (autoPick) {
+            autopickQueue.push({pick: p, player: autoPick});
+            tmpPicks[p] = autoPick;
+          }
+          p++;
+        }
+        return { autopickQueue, nextUserPick: p <= 32 ? p : null, finalPicks: tmpPicks };
+      };
+
+      const { autopickQueue, nextUserPick, finalPicks } = runAutoPicks(nextPick, tempPicks);
+
+      if (autopickQueue.length > 0) {
+        setAutoPickAnimating(true);
+        let delay = 0;
+        autopickQueue.forEach((ap, idx) => {
+          delay += 350;
+          setTimeout(() => {
+            setPicks(prev => ({...prev, [ap.pick]: ap.player}));
+            setCurrentPick(ap.pick);
+            if (idx === autopickQueue.length - 1) {
+              setTimeout(() => {
+                setAutoPickAnimating(false);
+                if (nextUserPick && !finalPicks[nextUserPick]) {
+                  setCurrentPick(nextUserPick);
+                } else {
+                  // Find any remaining user picks
+                  for (let i = 1; i <= 32; i++) {
+                    if (!finalPicks[i]) {
+                      setCurrentPick(i);
+                      return;
+                    }
+                  }
+                }
+              }, 300);
+            }
+          }, delay);
+        });
+      } else {
+        if (nextUserPick) setCurrentPick(nextUserPick);
+      }
+    } else {
+      // Full draft mode - advance to next open slot
+      for (let i = currentPick + 1; i <= 32; i++) {
+        if (!newPicks[i]) { setCurrentPick(i); return; }
+      }
+      for (let i = 1; i < currentPick; i++) {
+        if (!newPicks[i]) { setCurrentPick(i); return; }
+      }
     }
   };
 
   const undoPick = (pickNum) => {
-    const newPicks = {...picks};
-    delete newPicks[pickNum];
-    setPicks(newPicks);
-    setCurrentPick(pickNum);
+    if (draftMode === "team") {
+      // In team mode, undo back to this pick and clear all subsequent
+      const newPicks = {};
+      for (let i = 1; i < pickNum; i++) {
+        if (picks[i]) newPicks[i] = picks[i];
+      }
+      setPicks(newPicks);
+      setCurrentPick(pickNum);
+    } else {
+      const newPicks = {...picks};
+      delete newPicks[pickNum];
+      setPicks(newPicks);
+      setCurrentPick(pickNum);
+    }
   };
 
   const resetDraft = () => {
@@ -757,13 +851,83 @@ function MockDraftPage() {
     setPosFilter("ALL");
     setConfirmPlayer(null);
     setShowResults(false);
+    setAutoPickAnimating(false);
   };
 
-  // Pre-draft overview
-  if (!drafting) {
+  const exitToModal = () => {
+    resetDraft();
+    setDrafting(false);
+    setDraftMode(null);
+    setUserTeam(null);
+    setFullDraftToggle(false);
+  };
+
+  // Start draft (from modal)
+  const startDraft = (mode, team) => {
+    setDraftMode(mode);
+    setUserTeam(team);
+    setDrafting(true);
+
+    if (mode === "team") {
+      // Auto-pick from pick 1 until user's team is up
+      const slot1 = DRAFT_ORDER[0];
+      if (slot1.abbr === team) {
+        setCurrentPick(1);
+        return;
+      }
+      // Auto-pick from the start
+      let tmpPicks = {};
+      const autopickQueue = [];
+      for (let i = 0; i < DRAFT_ORDER.length; i++) {
+        const slot = DRAFT_ORDER[i];
+        if (slot.abbr === team) break;
+        const autoPick = getAutoPick(slot.abbr, tmpPicks);
+        if (autoPick) {
+          autopickQueue.push({pick: slot.pick, player: autoPick});
+          tmpPicks[slot.pick] = autoPick;
+        }
+      }
+
+      if (autopickQueue.length > 0) {
+        setAutoPickAnimating(true);
+        let delay = 0;
+        autopickQueue.forEach((ap, idx) => {
+          delay += 350;
+          setTimeout(() => {
+            setPicks(prev => ({...prev, [ap.pick]: ap.player}));
+            setCurrentPick(ap.pick);
+            if (idx === autopickQueue.length - 1) {
+              setTimeout(() => {
+                setAutoPickAnimating(false);
+                const userSlot = DRAFT_ORDER.find(s => s.abbr === team);
+                if (userSlot) setCurrentPick(userSlot.pick);
+              }, 300);
+            }
+          }, delay);
+        });
+      }
+    } else {
+      setCurrentPick(1);
+    }
+  };
+
+  // ── TEAM SELECTION MODAL ──
+  if (!draftMode) {
+    // Organize teams by division for display
+    const divisions = {
+      "AFC East": ["BUF","MIA","NE","NYJ"],
+      "AFC North": ["BAL","CIN","CLE","PIT"],
+      "AFC South": ["HOU","IND","JAX","TEN"],
+      "AFC West": ["DEN","KC","LAC","LV"],
+      "NFC East": ["DAL","NYG","PHI","WAS"],
+      "NFC North": ["CHI","DET","GB","MIN"],
+      "NFC South": ["ATL","CAR","NO","TB"],
+      "NFC West": ["ARI","LAR","SF","SEA"],
+    };
+
     return (
       <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"24px 24px 60px"}}>
-        {/* Hero */}
+        {/* Hero stays visible behind modal */}
         <div style={{
           background:"linear-gradient(135deg, rgba(45,212,191,0.06) 0%, rgba(27,42,74,0.5) 50%, rgba(45,212,191,0.03) 100%)",
           border:"1px solid rgba(45,212,191,0.12)",borderRadius:"16px",
@@ -779,22 +943,140 @@ function MockDraftPage() {
           }}>Mock Draft Simulator</h2>
           <p style={{
             fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",color:"#64748b",
-            maxWidth:"500px",margin:"0 auto 24px",lineHeight:1.6,
+            maxWidth:"500px",margin:"0 auto",lineHeight:1.6,
           }}>
             Build your own first-round mock draft. Select from {PLAYERS.length} consensus-ranked prospects.
           </p>
-          <button onClick={()=>setDrafting(true)} style={{
-            background:"#2dd4bf",color:"#0c1222",border:"none",borderRadius:"8px",
-            padding:"14px 36px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",
-            fontSize:"16px",fontWeight:600,letterSpacing:"1px",textTransform:"uppercase",
-            transition:"all 0.2s ease",
-          }}>Start Draft →</button>
+        </div>
+
+        {/* Mode selection card */}
+        <div style={{
+          background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+          borderRadius:"16px",overflow:"hidden",
+        }}>
+          {/* Header with toggle */}
+          <div style={{
+            padding:"20px 24px",borderBottom:"1px solid rgba(255,255,255,0.06)",
+            display:"flex",alignItems:"center",justifyContent:"space-between",
+          }}>
+            <div>
+              <h3 style={{
+                fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
+                color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase",margin:"0 0 4px",
+              }}>{fullDraftToggle ? "Full Draft Mode" : "Choose Your Team"}</h3>
+              <p style={{
+                fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",margin:0,
+              }}>{fullDraftToggle ? "You make every pick for all 32 teams" : "Draft for your team — AI handles the rest"}</p>
+            </div>
+            {/* Toggle */}
+            <div style={{display:"flex",alignItems:"center",gap:"10px",flexShrink:0}}>
+              <span style={{
+                fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",
+                letterSpacing:"0.5px",textTransform:"uppercase",
+              }}>Full Draft</span>
+              <div
+                onClick={()=>setFullDraftToggle(!fullDraftToggle)}
+                style={{
+                  width:"44px",height:"24px",borderRadius:"12px",
+                  background: fullDraftToggle ? "#2dd4bf" : "rgba(255,255,255,0.1)",
+                  cursor:"pointer",position:"relative",transition:"background 0.2s",
+                  border: fullDraftToggle ? "none" : "1px solid rgba(255,255,255,0.15)",
+                }}
+              >
+                <div style={{
+                  width:"18px",height:"18px",borderRadius:"50%",
+                  background: fullDraftToggle ? "#0c1222" : "#64748b",
+                  position:"absolute",top:"3px",
+                  left: fullDraftToggle ? "23px" : "3px",
+                  transition:"all 0.2s",
+                }}/>
+              </div>
+            </div>
+          </div>
+
+          {/* Content area */}
+          {fullDraftToggle ? (
+            <div style={{padding:"40px 24px",textAlign:"center"}}>
+              <div style={{
+                width:"80px",height:"80px",borderRadius:"50%",margin:"0 auto 20px",
+                background:"linear-gradient(135deg, rgba(45,212,191,0.15), rgba(45,212,191,0.05))",
+                border:"2px solid rgba(45,212,191,0.3)",
+                display:"flex",alignItems:"center",justifyContent:"center",
+              }}>
+                <span style={{fontSize:"32px"}}>🏈</span>
+              </div>
+              <p style={{
+                fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8",
+                maxWidth:"400px",margin:"0 auto 24px",lineHeight:1.6,
+              }}>
+                Take full control. You'll make all 32 first-round selections — pick the best player for each team based on needs, value, and your own draft strategy.
+              </p>
+              <button onClick={()=>startDraft("full", null)} style={{
+                background:"#2dd4bf",color:"#0c1222",border:"none",borderRadius:"8px",
+                padding:"14px 36px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",
+                fontSize:"16px",fontWeight:600,letterSpacing:"1px",textTransform:"uppercase",
+              }}>Start Full Draft →</button>
+            </div>
+          ) : (
+            <div style={{padding:"16px 20px 24px"}}>
+              {/* Team grid by division */}
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"12px"}}>
+                {Object.entries(divisions).map(([divName, teams]) => (
+                  <div key={divName}>
+                    <div style={{
+                      fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",
+                      letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px",
+                      paddingBottom:"6px",borderBottom:"1px solid rgba(255,255,255,0.04)",
+                    }}>{divName}</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+                      {teams.map(abbr => {
+                        const slot = DRAFT_ORDER.find(s=>s.abbr===abbr);
+                        const teamName = slot ? slot.team.replace(/^(New York|Los Angeles|San Francisco|Green Bay|Kansas City|Las Vegas|New Orleans|Tampa Bay|New England) ?/,"") : abbr;
+                        const shortName = slot ? slot.team.split(" ").pop() : abbr;
+                        return (
+                          <div key={abbr}
+                            onClick={()=>startDraft("team", abbr)}
+                            style={{
+                              display:"flex",alignItems:"center",gap:"8px",
+                              padding:"8px 10px",borderRadius:"8px",
+                              background:"rgba(255,255,255,0.02)",
+                              border:"1px solid rgba(255,255,255,0.04)",
+                              cursor:"pointer",transition:"all 0.15s",
+                            }}
+                            onMouseEnter={e=>{e.currentTarget.style.background="rgba(45,212,191,0.08)";e.currentTarget.style.borderColor="rgba(45,212,191,0.2)";}}
+                            onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.02)";e.currentTarget.style.borderColor="rgba(255,255,255,0.04)";}}
+                          >
+                            <span style={{
+                              width:"32px",height:"20px",borderRadius:"4px",
+                              background:TEAM_COLORS[abbr]||"#333",
+                              display:"flex",alignItems:"center",justifyContent:"center",
+                              fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,
+                              color:"#fff",letterSpacing:"0.3px",flexShrink:0,
+                            }}>{abbr}</span>
+                            <span style={{
+                              fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:500,
+                              color:"#f1f5f9",flex:1,
+                            }}>{shortName}</span>
+                            {slot && (
+                              <span style={{
+                                fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",
+                              }}>#{slot.pick}</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Draft Order Preview */}
         <div style={{
           background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
-          borderRadius:"12px",padding:"20px",
+          borderRadius:"12px",padding:"20px",marginTop:"24px",
         }}>
           <h3 style={{
             fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:600,
@@ -830,8 +1112,13 @@ function MockDraftPage() {
     );
   }
 
+  // Not yet in drafting mode (shouldn't happen but safety)
+  if (!drafting) return null;
+
   // Draft mode - split screen
   const currentSlot = DRAFT_ORDER.find(s=>s.pick===currentPick);
+  const isUserPick = draftMode === "full" || (draftMode === "team" && currentSlot && currentSlot.abbr === userTeam);
+  const userTeamSlot = userTeam ? DRAFT_ORDER.find(s=>s.abbr===userTeam) : null;
 
   return (
     <div style={{maxWidth:"1200px",margin:"0 auto",padding:"0"}}>
@@ -845,6 +1132,23 @@ function MockDraftPage() {
           <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"#f1f5f9",textTransform:"uppercase",letterSpacing:"0.5px"}}>
             Round 1
           </span>
+          {draftMode === "team" && userTeamSlot && (
+            <span style={{
+              display:"inline-flex",alignItems:"center",gap:"6px",
+              background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
+              borderRadius:"6px",padding:"3px 10px",
+            }}>
+              <span style={{
+                width:"22px",height:"14px",borderRadius:"3px",
+                background:TEAM_COLORS[userTeam]||"#333",
+                display:"inline-flex",alignItems:"center",justifyContent:"center",
+                fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff",
+              }}>{userTeam}</span>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>
+                {userTeamSlot.team}
+              </span>
+            </span>
+          )}
           <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b"}}>
             {Object.keys(picks).length}/32 picks made
           </span>
@@ -860,7 +1164,7 @@ function MockDraftPage() {
             fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#94a3b8",
             letterSpacing:"0.5px",textTransform:"uppercase",
           }}>Reset</button>
-          <button onClick={()=>{setDrafting(false);resetDraft();}} style={{
+          <button onClick={exitToModal} style={{
             background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
             borderRadius:"6px",padding:"6px 14px",cursor:"pointer",
             fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#94a3b8",
@@ -868,6 +1172,23 @@ function MockDraftPage() {
           }}>Exit</button>
         </div>
       </div>
+
+      {/* Auto-pick indicator */}
+      {autoPickAnimating && (
+        <div style={{
+          background:"rgba(45,212,191,0.06)",borderBottom:"1px solid rgba(45,212,191,0.12)",
+          padding:"8px 20px",display:"flex",alignItems:"center",gap:"10px",
+        }}>
+          <div style={{
+            width:"8px",height:"8px",borderRadius:"50%",background:"#2dd4bf",
+            animation:"pulse 1s infinite",
+          }}/>
+          <span style={{
+            fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#2dd4bf",
+          }}>Simulating picks...</span>
+          <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}`}</style>
+        </div>
+      )}
 
       {/* Confirmation modal */}
       {confirmPlayer && currentSlot && (
@@ -1090,16 +1411,22 @@ function MockDraftPage() {
           {DRAFT_ORDER.map((slot) => {
             const picked = picks[slot.pick];
             const isCurrent = slot.pick === currentPick && !draftComplete;
+            const isUserTeamRow = draftMode === "team" && slot.abbr === userTeam;
             return (
               <div key={slot.pick}
-                onClick={()=>{ if(!draftComplete) setCurrentPick(slot.pick); }}
+                onClick={()=>{ if(!draftComplete && draftMode === "full") setCurrentPick(slot.pick); }}
                 style={{
                   display:"flex",alignItems:"center",gap:"10px",
                   padding: isCurrent ? "12px 16px" : "8px 16px",
-                  background: isCurrent ? "rgba(45,212,191,0.08)" : "transparent",
-                  borderLeft: isCurrent ? "3px solid #2dd4bf" : "3px solid transparent",
+                  background: isCurrent ? "rgba(45,212,191,0.08)"
+                    : isUserTeamRow && picked ? "rgba(45,212,191,0.03)"
+                    : "transparent",
+                  borderLeft: isCurrent ? "3px solid #2dd4bf"
+                    : isUserTeamRow ? "3px solid rgba(45,212,191,0.25)"
+                    : "3px solid transparent",
                   borderBottom:"1px solid rgba(255,255,255,0.03)",
-                  cursor:"pointer",transition:"all 0.15s",
+                  cursor: draftMode === "full" ? "pointer" : "default",
+                  transition:"all 0.15s",
                 }}
               >
                 {/* Pick number */}
@@ -1116,6 +1443,7 @@ function MockDraftPage() {
                   display:"flex",alignItems:"center",justifyContent:"center",
                   fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,
                   color:"#fff",letterSpacing:"0.3px",flexShrink:0,
+                  boxShadow: isUserTeamRow ? "0 0 0 1.5px rgba(45,212,191,0.5)" : "none",
                 }}>{slot.abbr}</span>
 
                 {/* Pick content */}
@@ -1126,17 +1454,19 @@ function MockDraftPage() {
                       <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{picked.n}</div>
                       <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b"}}>{picked.s}</div>
                     </div>
-                    <button onClick={(e)=>{e.stopPropagation();undoPick(slot.pick);}} style={{
-                      background:"none",border:"none",color:"#475569",cursor:"pointer",
-                      fontSize:"14px",padding:"2px 4px",flexShrink:0,
-                    }} title="Undo pick">×</button>
+                    {((draftMode === "full") || (draftMode === "team" && isUserTeamRow)) && (
+                      <button onClick={(e)=>{e.stopPropagation();undoPick(slot.pick);}} style={{
+                        background:"none",border:"none",color:"#475569",cursor:"pointer",
+                        fontSize:"14px",padding:"2px 4px",flexShrink:0,
+                      }} title="Undo pick">×</button>
+                    )}
                   </div>
                 ) : (
                   <div style={{flex:1}}>
                     <div style={{
                       fontFamily:"'Oswald',sans-serif",fontSize:"12px",
                       color: isCurrent ? "#94a3b8" : "#334155",
-                    }}>{isCurrent ? "On the clock..." : slot.team}</div>
+                    }}>{isCurrent ? (isUserPick ? "Your pick..." : "Simulating...") : slot.team}</div>
                   </div>
                 )}
               </div>
@@ -1152,7 +1482,7 @@ function MockDraftPage() {
           {!draftComplete && currentSlot && (
             <div style={{
               padding:"14px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)",
-              background:"#0c1222",
+              background: isUserPick ? "#0c1222" : "rgba(255,255,255,0.02)",
               position:"sticky",top:0,zIndex:10,
             }}>
               <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
@@ -1165,8 +1495,19 @@ function MockDraftPage() {
                 }}>{currentSlot.abbr}</span>
                 <div>
                   <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:600,color:"#f1f5f9"}}>{currentSlot.team}</div>
-                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b"}}>On the clock · Select a player below</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color: isUserPick ? "#2dd4bf" : "#64748b"}}>
+                    {isUserPick ? "Your pick — select a player below" : autoPickAnimating ? "Simulating pick..." : "On the clock"}
+                  </div>
                 </div>
+                {draftMode === "team" && isUserPick && (
+                  <span style={{
+                    marginLeft:"auto",
+                    background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.25)",
+                    borderRadius:"6px",padding:"4px 12px",
+                    fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",fontWeight:600,
+                    letterSpacing:"0.5px",textTransform:"uppercase",
+                  }}>Your Pick</span>
+                )}
               </div>
               {/* Team Needs */}
               {TEAM_NEEDS[currentSlot.abbr] && (
@@ -1225,18 +1566,21 @@ function MockDraftPage() {
 
           {/* Available player list */}
           <div>
-            {available.slice(0, 100).map((player, i) => (
+            {available.slice(0, 100).map((player, i) => {
+              const canPick = isUserPick && !draftComplete && !picks[currentPick] && !autoPickAnimating;
+              return (
               <div key={player.r}
-                onClick={()=>{ if(!draftComplete && !picks[currentPick]) handlePick(player); }}
+                onClick={()=>{ if(canPick) handlePick(player); }}
                 style={{
                   display:"grid",gridTemplateColumns:"40px 44px 1fr auto",
                   alignItems:"center",gap:"10px",padding:"10px 20px",
                   background: i%2===0 ? "transparent" : "rgba(255,255,255,0.015)",
                   borderBottom:"1px solid rgba(255,255,255,0.03)",
-                  cursor: draftComplete || picks[currentPick] ? "default" : "pointer",
+                  cursor: canPick ? "pointer" : "default",
+                  opacity: canPick ? 1 : 0.6,
                   transition:"background 0.1s",
                 }}
-                onMouseEnter={e=>{if(!draftComplete && !picks[currentPick]) e.currentTarget.style.background="rgba(45,212,191,0.06)";}}
+                onMouseEnter={e=>{if(canPick) e.currentTarget.style.background="rgba(45,212,191,0.06)";}}
                 onMouseLeave={e=>{e.currentTarget.style.background=i%2===0?"transparent":"rgba(255,255,255,0.015)";}}
               >
                 <span style={{
@@ -1248,7 +1592,7 @@ function MockDraftPage() {
                   <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,color:"#f1f5f9"}}>{player.n}</div>
                   <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b"}}>{player.s}</div>
                 </div>
-                {!draftComplete && !picks[currentPick] && (
+                {canPick && (
                   <button onClick={(e)=>{e.stopPropagation();handlePick(player);}} style={{
                     background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.2)",
                     borderRadius:"6px",padding:"5px 12px",cursor:"pointer",
@@ -1257,7 +1601,8 @@ function MockDraftPage() {
                   }}>Draft</button>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
