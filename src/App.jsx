@@ -955,6 +955,9 @@ function MockDraftPage() {
   const [tradeHistory, setTradeHistory] = useState([]);
   const [pickOwnership, setPickOwnership] = useState({}); // {pickNum: abbr} overrides
   const [tradeBanner, setTradeBanner] = useState(null);
+  // Draft length
+  const [draftRounds, setDraftRounds] = useState(1);
+  const [roundCompletePrompt, setRoundCompletePrompt] = useState(null); // round number that just ended
 
   const pickedPlayerIds = useMemo(()=> new Set(Object.values(picks).map(p=>p.r)), [picks]);
 
@@ -969,7 +972,8 @@ function MockDraftPage() {
   }, [pickedPlayerIds, posFilter, search]);
 
   const picksCount = Object.keys(picks).length;
-  const draftComplete = picksCount === TOTAL_PICKS;
+  const lastPickInScope = DRAFT_ORDER.filter(s => s.round <= draftRounds).length;
+  const draftComplete = picksCount >= lastPickInScope;
   const currentRound = DRAFT_ORDER.find(s=>s.pick===currentPick)?.round || 1;
 
   // Resolve who owns a pick (accounting for trades)
@@ -1112,6 +1116,7 @@ function MockDraftPage() {
     while (p <= TOTAL_PICKS) {
       const slot = DRAFT_ORDER.find(s=>s.pick===p);
       if (!slot) { p++; continue; }
+      if (slot.round > draftRounds) break; // past selected round scope
       if (tmpPicks[p]) { p++; continue; }
       const owner = resolveOwner(p);
       if (owner === userTeam) break;
@@ -1122,33 +1127,76 @@ function MockDraftPage() {
       }
       p++;
     }
-    return { autopickQueue, nextUserPick: p <= TOTAL_PICKS ? p : null, finalPicks: tmpPicks };
+    return { autopickQueue, nextUserPick: p <= TOTAL_PICKS && (DRAFT_ORDER.find(s=>s.pick===p)?.round || 99) <= draftRounds ? p : null, finalPicks: tmpPicks };
   };
 
   // Animate and apply an auto-pick queue, then land on nextUserPick
-  const animateAutoPicks = (autopickQueue, nextUserPick) => {
+  const animateAutoPicks = (autopickQueue, nextUserPick, fromRound) => {
     if (autopickQueue.length === 0) {
       if (nextUserPick) {
-        setCurrentPick(nextUserPick);
         const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
+        // Check if we crossed into a new round
+        if (fromRound && nr > fromRound) {
+          setRoundCompletePrompt(fromRound);
+        }
+        setCurrentPick(nextUserPick);
         setActiveRound(nr);
       }
       return;
     }
+
+    // Check if the auto-pick queue crosses a round boundary — if so, truncate and pause
+    let truncatedQueue = autopickQueue;
+    let truncatedNext = nextUserPick;
+    if (fromRound) {
+      const crossIdx = autopickQueue.findIndex(ap => {
+        const r = DRAFT_ORDER.find(s=>s.pick===ap.pick)?.round || 1;
+        return r > fromRound;
+      });
+      if (crossIdx >= 0) {
+        // Truncate: only animate picks in the current round, then pause
+        truncatedQueue = autopickQueue.slice(0, crossIdx);
+        // The next pick after truncation is the first pick of the new round
+        truncatedNext = autopickQueue[crossIdx].pick;
+      }
+    }
+
+    if (truncatedQueue.length === 0) {
+      // All auto-picks are in the next round — go straight to round prompt
+      if (fromRound) setRoundCompletePrompt(fromRound);
+      if (truncatedNext) {
+        setCurrentPick(truncatedNext);
+        const nr = DRAFT_ORDER.find(s=>s.pick===truncatedNext)?.round || 1;
+        setActiveRound(nr);
+      }
+      return;
+    }
+
     setAutoPickAnimating(true);
-    const delay = autopickQueue.length > 20 ? 80 : autopickQueue.length > 10 ? 150 : 350;
-    autopickQueue.forEach((ap, idx) => {
+    const delay = truncatedQueue.length > 20 ? 80 : truncatedQueue.length > 10 ? 150 : 350;
+    truncatedQueue.forEach((ap, idx) => {
       setTimeout(() => {
         setPicks(prev => ({...prev, [ap.pick]: ap.player}));
         setCurrentPick(ap.pick);
         const apRound = DRAFT_ORDER.find(s=>s.pick===ap.pick)?.round || 1;
         setActiveRound(apRound);
-        if (idx === autopickQueue.length - 1) {
+        if (idx === truncatedQueue.length - 1) {
           setTimeout(() => {
             setAutoPickAnimating(false);
-            if (nextUserPick) {
-              setCurrentPick(nextUserPick);
-              const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
+            // Did we truncate due to round boundary?
+            if (truncatedQueue.length < autopickQueue.length && fromRound) {
+              setRoundCompletePrompt(fromRound);
+              if (truncatedNext) {
+                setCurrentPick(truncatedNext);
+                const nr = DRAFT_ORDER.find(s=>s.pick===truncatedNext)?.round || 1;
+                setActiveRound(nr);
+              }
+            } else if (truncatedNext) {
+              const nr = DRAFT_ORDER.find(s=>s.pick===truncatedNext)?.round || 1;
+              if (fromRound && nr > fromRound) {
+                setRoundCompletePrompt(fromRound);
+              }
+              setCurrentPick(truncatedNext);
               setActiveRound(nr);
             }
           }, 200);
@@ -1167,15 +1215,29 @@ function MockDraftPage() {
     setSearch("");
     setPosFilter("ALL");
 
-    if (Object.keys(newPicks).length === TOTAL_PICKS) return;
+    const newCount = Object.keys(newPicks).length;
+    if (newCount >= lastPickInScope) return; // draft complete per selected rounds
 
     if (draftMode === "team") {
       const { autopickQueue, nextUserPick } = runAutoPicks(currentPick + 1, newPicks);
-      animateAutoPicks(autopickQueue, nextUserPick);
+      // Check if auto-picks would cross a round boundary where we should pause
+      const currentPickRound = DRAFT_ORDER.find(s=>s.pick===currentPick)?.round || 1;
+      animateAutoPicks(autopickQueue, nextUserPick, currentPickRound);
     } else {
+      // Full draft mode — advance to next unpicked slot within scope
       for (let i = currentPick + 1; i <= TOTAL_PICKS; i++) {
         const slot = DRAFT_ORDER.find(s=>s.pick===i);
         if (slot && !newPicks[i]) {
+          // Check if we crossed a round boundary
+          const prevRound = DRAFT_ORDER.find(s=>s.pick===currentPick)?.round || 1;
+          if (slot.round > prevRound && slot.round > draftRounds) return; // past scope
+          if (slot.round > prevRound && slot.round <= draftRounds) {
+            // Just finished a round - show prompt to continue or view results
+            setRoundCompletePrompt(prevRound);
+            setCurrentPick(i);
+            setActiveRound(slot.round);
+            return;
+          }
           setCurrentPick(i);
           setActiveRound(slot.round);
           return;
@@ -1217,6 +1279,8 @@ function MockDraftPage() {
     setTradeHistory([]);
     setPickOwnership({});
     setTradeBanner(null);
+    setDraftRounds(1);
+    setRoundCompletePrompt(null);
   };
 
   const exitToModal = () => {
@@ -1294,11 +1358,25 @@ function MockDraftPage() {
           border:"1px solid rgba(45,212,191,0.12)",borderRadius:"16px",
           padding:"40px 32px",marginBottom:"32px",textAlign:"center",
         }}>
-          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#2dd4bf",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"12px"}}>2026 NFL Draft · All 7 Rounds</div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#2dd4bf",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"12px"}}>2026 NFL Draft</div>
           <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(28px,5vw,42px)",fontWeight:700,color:"#f1f5f9",margin:"0 0 8px",letterSpacing:"1px",textTransform:"uppercase"}}>Mock Draft Simulator</h2>
-          <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",color:"#64748b",maxWidth:"500px",margin:"0 auto",lineHeight:1.6}}>
-            Build your own {TOTAL_PICKS}-pick mock draft across all 7 rounds. Select from {PLAYERS.length} consensus-ranked prospects.
+          <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",color:"#64748b",maxWidth:"500px",margin:"0 auto 20px",lineHeight:1.6}}>
+            Build your own mock draft. Select from {PLAYERS.length} consensus-ranked prospects.
           </p>
+          {/* Round Selector */}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px"}}>
+            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>Rounds</span>
+            {[{label:"Round 1",val:1,picks:32},{label:"3 Rounds",val:3,picks:DRAFT_ORDER.filter(s=>s.round<=3).length},{label:"Full Draft",val:7,picks:TOTAL_PICKS}].map(opt => (
+              <button key={opt.val} onClick={()=>setDraftRounds(opt.val)} style={{
+                background: draftRounds===opt.val ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.04)",
+                border: draftRounds===opt.val ? "1px solid rgba(45,212,191,0.4)" : "1px solid rgba(255,255,255,0.08)",
+                borderRadius:"8px",padding:"8px 16px",cursor:"pointer",transition:"all 0.15s",
+              }}>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:draftRounds===opt.val?"#2dd4bf":"#94a3b8",letterSpacing:"0.5px"}}>{opt.label}</div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:draftRounds===opt.val?"rgba(45,212,191,0.7)":"#475569",marginTop:"2px"}}>{opt.picks} picks</div>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"16px",overflow:"hidden"}}>
@@ -1321,7 +1399,7 @@ function MockDraftPage() {
                 <span style={{fontSize:"32px"}}>🏈</span>
               </div>
               <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8",maxWidth:"400px",margin:"0 auto 24px",lineHeight:1.6}}>
-                Take full control. You'll make all {TOTAL_PICKS} selections across 7 rounds — pick the best player for each team.
+                Take full control. You'll make all {lastPickInScope} selections across {draftRounds === 1 ? "Round 1" : draftRounds === 7 ? "7 rounds" : `${draftRounds} rounds`} — pick the best player for each team.
               </p>
               <button onClick={()=>startDraft("full", null)} style={{background:"#2dd4bf",color:"#0c1222",border:"none",borderRadius:"8px",padding:"14px 36px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:600,letterSpacing:"1px",textTransform:"uppercase"}}>Start Full Draft →</button>
             </div>
@@ -1373,7 +1451,7 @@ function MockDraftPage() {
         <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
           {/* Round tabs */}
           <div style={{display:"flex",gap:"2px"}}>
-            {ROUNDS.map(r => {
+            {ROUNDS.filter(r => r <= draftRounds).map(r => {
               const roundDone = roundPicks(r).every(s=>picks[s.pick]);
               const isCurrent = r === currentRound;
               return (
@@ -1394,9 +1472,9 @@ function MockDraftPage() {
               <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>{userTeamSlot.team}</span>
             </span>
           )}
-          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b"}}>{picksCount}/{TOTAL_PICKS}</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b"}}>{picksCount}/{lastPickInScope}</span>
           <div style={{width:"80px",height:"4px",background:"rgba(255,255,255,0.06)",borderRadius:"2px",overflow:"hidden"}}>
-            <div style={{width:`${(picksCount/TOTAL_PICKS)*100}%`,height:"100%",background:"#2dd4bf",borderRadius:"2px",transition:"width 0.3s ease"}}/>
+            <div style={{width:`${(picksCount/lastPickInScope)*100}%`,height:"100%",background:"#2dd4bf",borderRadius:"2px",transition:"width 0.3s ease"}}/>
           </div>
         </div>
         <div style={{display:"flex",gap:"8px"}}>
@@ -1404,6 +1482,33 @@ function MockDraftPage() {
           <button onClick={exitToModal} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit</button>
         </div>
       </div>
+
+      {/* Round Complete Prompt */}
+      {roundCompletePrompt && !draftComplete && (
+        <div style={{background:"rgba(45,212,191,0.06)",border:"1px solid rgba(45,212,191,0.15)",margin:"0",padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"10px",borderBottom:"1px solid rgba(45,212,191,0.1)"}}>
+          <div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:700,color:"#2dd4bf",letterSpacing:"0.5px",textTransform:"uppercase"}}>Round {roundCompletePrompt} Complete</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>{roundCompletePrompt < 7 ? `Continue to Round ${roundCompletePrompt + 1} or view your results` : "All rounds complete"}</div>
+          </div>
+          <div style={{display:"flex",gap:"8px"}}>
+            <button onClick={()=>{setShowResults(true);setResultRound(1);}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#f1f5f9",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>View Results</button>
+            {roundCompletePrompt < 7 && (
+              <button onClick={()=>{
+                const nextRd = roundCompletePrompt + 1;
+                setDraftRounds(prev => Math.max(prev, nextRd));
+                setRoundCompletePrompt(null);
+                // If in team mode, continue auto-picking into the next round
+                if (draftMode === "team") {
+                  const { autopickQueue, nextUserPick } = runAutoPicks(currentPick, picks);
+                  if (autopickQueue.length > 0 || nextUserPick) {
+                    animateAutoPicks(autopickQueue, nextUserPick, nextRd);
+                  }
+                }
+              }} style={{background:"#2dd4bf",border:"none",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#0c1222",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>Continue to Round {roundCompletePrompt + 1} →</button>
+            )}
+          </div>
+        </div>
+      )}
 
       {autoPickAnimating && (
         <div style={{background:"rgba(45,212,191,0.06)",borderBottom:"1px solid rgba(45,212,191,0.12)",padding:"8px 20px",display:"flex",alignItems:"center",gap:"10px"}}>
@@ -1622,10 +1727,10 @@ function MockDraftPage() {
                 </div>
               </div>
 
-              {/* Round tabs (full draft mode only) */}
+              {/* Round tabs (full draft mode, or team mode with multi-round) */}
               {draftMode === "full" && (
                 <div style={{display:"flex",justifyContent:"center",gap:"4px",marginBottom:"clamp(8px,1.2vw,12px)"}}>
-                  {ROUNDS.map(r => (
+                  {ROUNDS.filter(r => roundPicks(r).some(s => picks[s.pick])).map(r => (
                     <button key={r} onClick={()=>setResultRound(r)} style={{
                       background: resultRound===r ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.04)",
                       border: resultRound===r ? "1px solid rgba(45,212,191,0.3)" : "1px solid rgba(255,255,255,0.06)",
