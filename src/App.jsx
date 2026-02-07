@@ -957,7 +957,10 @@ function MockDraftPage() {
   const [tradeBanner, setTradeBanner] = useState(null);
   // Draft length
   const [draftRounds, setDraftRounds] = useState(1);
-  const [roundCompletePrompt, setRoundCompletePrompt] = useState(null); // round number that just ended
+  const [roundCompletePrompt, setRoundCompletePrompt] = useState(null);
+  // Mock draft UI
+  const [expandedMockPlayer, setExpandedMockPlayer] = useState(null);
+  const [resultsView, setResultsView] = useState("my"); // "my" = my picks, "full" = full draft round-by-round
 
   const pickedPlayerIds = useMemo(()=> new Set(Object.values(picks).map(p=>p.r)), [picks]);
 
@@ -1281,6 +1284,8 @@ function MockDraftPage() {
     setTradeBanner(null);
     setDraftRounds(1);
     setRoundCompletePrompt(null);
+    setExpandedMockPlayer(null);
+    setResultsView("my");
   };
 
   const exitToModal = () => {
@@ -1723,30 +1728,58 @@ function MockDraftPage() {
                 </div>
                 <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,3vw,24px)",fontWeight:700,color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.2}}>2026 Mock Draft</div>
                 <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1.2vw,10px)",color:"#64748b",letterSpacing:"1px",textTransform:"uppercase",marginTop:"2px"}}>
-                  {draftMode === "team" ? `${userTeamSlot?.team || ""} · ${teamPicksOwned(userTeam).length} Picks` : `Round ${resultRound} · ${roundPicks(resultRound).length} Picks`}
+                  {resultsView === "my" && draftMode === "team"
+                    ? `${userTeamSlot?.team || ""} · ${teamPicksOwned(userTeam).filter(s=>picks[s.pick]).length} Picks`
+                    : `Round ${resultRound} · ${roundPicks(resultRound).length} Picks`
+                  }
                 </div>
               </div>
 
-              {/* Round tabs (full draft mode, or team mode with multi-round) */}
-              {draftMode === "full" && (
-                <div style={{display:"flex",justifyContent:"center",gap:"4px",marginBottom:"clamp(8px,1.2vw,12px)"}}>
-                  {ROUNDS.filter(r => roundPicks(r).some(s => picks[s.pick])).map(r => (
-                    <button key={r} onClick={()=>setResultRound(r)} style={{
-                      background: resultRound===r ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.04)",
-                      border: resultRound===r ? "1px solid rgba(45,212,191,0.3)" : "1px solid rgba(255,255,255,0.06)",
-                      borderRadius:"4px",padding:"4px 10px",cursor:"pointer",
+              {/* View Toggle (team mode) + Round tabs */}
+              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6px",marginBottom:"clamp(8px,1.2vw,12px)"}}>
+                {/* My Picks / Full Draft toggle */}
+                {draftMode === "team" && (
+                  <div style={{display:"flex",borderRadius:"6px",overflow:"hidden",border:"1px solid rgba(255,255,255,0.08)"}}>
+                    <button onClick={()=>setResultsView("my")} style={{
+                      background: resultsView==="my" ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.04)",
+                      border:"none",borderRight:"1px solid rgba(255,255,255,0.08)",padding:"6px 16px",cursor:"pointer",
                       fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.2vw,12px)",fontWeight:600,
-                      color: resultRound===r ? "#2dd4bf" : "#64748b",letterSpacing:"0.5px",
-                    }}>R{r}</button>
-                  ))}
-                </div>
-              )}
+                      color: resultsView==="my" ? "#2dd4bf" : "#64748b",letterSpacing:"0.5px",textTransform:"uppercase",
+                    }}>My Picks</button>
+                    <button onClick={()=>{setResultsView("full");setResultRound(1);}} style={{
+                      background: resultsView==="full" ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.04)",
+                      border:"none",padding:"6px 16px",cursor:"pointer",
+                      fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.2vw,12px)",fontWeight:600,
+                      color: resultsView==="full" ? "#2dd4bf" : "#64748b",letterSpacing:"0.5px",textTransform:"uppercase",
+                    }}>Full Draft</button>
+                  </div>
+                )}
+
+                {/* Round tabs (full draft view or full draft mode) */}
+                {(resultsView === "full" || draftMode === "full") && (
+                  <div style={{display:"flex",justifyContent:"center",gap:"4px"}}>
+                    {ROUNDS.filter(r => roundPicks(r).some(s => picks[s.pick])).map(r => (
+                      <button key={r} onClick={()=>setResultRound(r)} style={{
+                        background: resultRound===r ? "rgba(45,212,191,0.15)" : "rgba(255,255,255,0.04)",
+                        border: resultRound===r ? "1px solid rgba(45,212,191,0.3)" : "1px solid rgba(255,255,255,0.06)",
+                        borderRadius:"4px",padding:"4px 10px",cursor:"pointer",
+                        fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.2vw,12px)",fontWeight:600,
+                        color: resultRound===r ? "#2dd4bf" : "#64748b",letterSpacing:"0.5px",
+                      }}>R{r}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Results grid */}
               {(() => {
-                const displaySlots = draftMode === "team" ? teamPicksOwned(userTeam) : roundPicks(resultRound);
-                const cols = draftMode === "team" ? Math.min(displaySlots.length, 4) : displaySlots.length <= 32 ? 4 : displaySlots.length <= 36 ? 4 : 4;
+                const showMyPicks = draftMode === "team" && resultsView === "my";
+                const displaySlots = showMyPicks
+                  ? teamPicksOwned(userTeam).filter(s => picks[s.pick])
+                  : roundPicks(resultRound).filter(s => picks[s.pick]);
+                const cols = displaySlots.length <= 4 ? displaySlots.length : 4;
                 const rows = Math.ceil(displaySlots.length / cols);
+                if (displaySlots.length === 0) return <div style={{textAlign:"center",padding:"40px",fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#475569"}}>No picks to display</div>;
                 return (
                   <div style={{
                     display:"grid",gridTemplateColumns:`repeat(${cols}, 1fr)`,gap:"0",
@@ -1754,25 +1787,27 @@ function MockDraftPage() {
                   }}>
                     {displaySlots.map((slot, idx) => {
                       const player = picks[slot.pick];
-                      if (!player) return <div key={slot.pick} style={{padding:"clamp(4px,0.7vw,8px) clamp(5px,0.8vw,10px)",borderBottom:Math.floor(idx/cols)<rows-1?"1px solid rgba(255,255,255,0.04)":"none",borderRight:idx%cols<cols-1?"1px solid rgba(255,255,255,0.06)":"none"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#334155"}}>—</div></div>;
+                      if (!player) return null;
                       const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
-                      const isUserTeamPick = draftMode === "team" && getPickOwner(slot.pick) === userTeam;
+                      const owner = getPickOwner(slot.pick);
+                      const isMyPick = draftMode === "team" && owner === userTeam;
                       const row = Math.floor(idx / cols);
                       return (
                         <div key={slot.pick} style={{
                           padding:"clamp(4px,0.7vw,8px) clamp(5px,0.8vw,10px)",
-                          background: row % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+                          background: isMyPick && resultsView==="full" ? "rgba(45,212,191,0.04)" : row % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
                           borderBottom: row < rows-1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                           borderRight: idx%cols < cols-1 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                          borderLeft: isMyPick && resultsView==="full" ? "2px solid rgba(45,212,191,0.3)" : "none",
                         }}>
                           <div style={{display:"flex",alignItems:"center",gap:"clamp(3px,0.5vw,6px)",marginBottom:"clamp(2px,0.3vw,4px)"}}>
                             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:700,color:"#2dd4bf",minWidth:"clamp(14px,2vw,20px)"}}>{slot.pick}</span>
-                            <span style={{width:"clamp(22px,3.5vw,30px)",height:"clamp(13px,2vw,17px)",borderRadius:"2px",background:TEAM_COLORS[getPickOwner(slot.pick)]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(6px,0.9vw,8px)",fontWeight:700,color:"#fff",flexShrink:0}}>{getPickOwner(slot.pick)}</span>
+                            <span style={{width:"clamp(22px,3.5vw,30px)",height:"clamp(13px,2vw,17px)",borderRadius:"2px",background:TEAM_COLORS[owner]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(6px,0.9vw,8px)",fontWeight:700,color:"#fff",flexShrink:0}}>{owner}</span>
                             <span style={{background:pc.bg,color:pc.text,padding:"0px clamp(3px,0.5vw,5px)",borderRadius:"2px",fontSize:"clamp(6px,0.85vw,8px)",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",marginLeft:"auto"}}>{player.p}</span>
                           </div>
                           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:600,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.2}}>{player.n}</div>
                           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.85vw,9px)",color:"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.3}}>{player.s}</div>
-                          {draftMode === "team" && (
+                          {showMyPicks && (
                             <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.8vw,8px)",color:"#475569",marginTop:"1px"}}>Rd {slot.round}</div>
                           )}
                         </div>
@@ -1781,6 +1816,18 @@ function MockDraftPage() {
                   </div>
                 );
               })()}
+
+              {/* Trade History */}
+              {tradeHistory.length > 0 && resultsView === "my" && draftMode === "team" && (
+                <div style={{marginTop:"clamp(8px,1.2vw,12px)"}}>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#f97316",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>Trades Made</div>
+                  {tradeHistory.map((t, i) => (
+                    <div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"#94a3b8",lineHeight:1.6}}>
+                      <span style={{color:"#f97316"}}>⇄</span> {getPickTeamName(t.team1)} sent {t.team1Gives.map(p=>`#${p}`).join(", ")} to {getPickTeamName(t.team2)} for {t.team2Gives.map(p=>`#${p}`).join(", ")}
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Footer */}
               <div style={{marginTop:"clamp(8px,1.2vw,14px)",paddingTop:"clamp(6px,1vw,10px)",borderTop:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -1951,8 +1998,10 @@ function MockDraftPage() {
           <div>
             {available.slice(0, 100).map((player, i) => {
               const canPick = isUserPick && !draftComplete && !picks[currentPick] && !autoPickAnimating;
+              const profile = PROFILES[player.n];
               return (
-              <div key={player.r} onClick={()=>{ if(canPick) handlePick(player); }}
+              <div key={player.r}>
+              <div onClick={()=>{ if(canPick) handlePick(player); }}
                 style={{display:"grid",gridTemplateColumns:"40px 44px 1fr auto",alignItems:"center",gap:"10px",padding:"10px 20px",background:i%2===0?"transparent":"rgba(255,255,255,0.015)",borderBottom:"1px solid rgba(255,255,255,0.03)",cursor:canPick?"pointer":"default",opacity:canPick?1:0.6,transition:"background 0.1s"}}
                 onMouseEnter={e=>{if(canPick) e.currentTarget.style.background="rgba(45,212,191,0.06)";}}
                 onMouseLeave={e=>{e.currentTarget.style.background=i%2===0?"transparent":"rgba(255,255,255,0.015)";}}
@@ -1960,12 +2009,66 @@ function MockDraftPage() {
                 <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:"#2dd4bf",textAlign:"right"}}>#{player.r}</span>
                 <PosBadge pos={player.p}/>
                 <div>
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,color:"#f1f5f9"}}>{player.n}</div>
-                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b"}}>{player.s}</div>
+                  <div style={{display:"flex",alignItems:"baseline",gap:"8px"}}>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,color:"#f1f5f9"}}>{player.n}</span>
+                    {profile && (
+                      <button onClick={e=>{e.stopPropagation();setExpandedMockPlayer(prev=>prev===player.n?null:player.n);}} style={{background:"none",border:"none",padding:0,cursor:"pointer",color:"#475569",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",display:"flex",alignItems:"center",gap:"2px"}} title="View profile">
+                        <span style={{fontSize:"10px"}}>{expandedMockPlayer===player.n?"▼":"▶"}</span>
+                      </button>
+                    )}
+                  </div>
+                  <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b"}}>{player.s}</span>
+                    {profile && (
+                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>
+                        {profile.height} · {profile.weight} lbs{profile.class ? ` · ${profile.class}` : ""}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {canPick && (
                   <button onClick={(e)=>{e.stopPropagation();handlePick(player);}} style={{background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"6px",padding:"5px 12px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#2dd4bf",letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap"}}>Draft</button>
                 )}
+              </div>
+              {/* Expandable Profile */}
+              {expandedMockPlayer === player.n && profile && (
+                <div style={{background:"linear-gradient(180deg, rgba(45,212,191,0.04) 0%, rgba(27,42,74,0.2) 100%)",borderBottom:"1px solid rgba(45,212,191,0.08)",padding:"14px 20px"}}>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:"14px",alignItems:"center",marginBottom:"12px",paddingBottom:"10px",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                    <div style={{display:"flex",gap:"12px",flexWrap:"wrap"}}>
+                      {[{label:"AGE",value:profile.age},{label:"HT",value:profile.height},{label:"WT",value:`${profile.weight} lbs`},{label:"CLASS",value:profile.class}].filter(s=>s.value).map(stat=>(
+                        <div key={stat.label} style={{textAlign:"center"}}>
+                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>{stat.label}</div>
+                          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9",marginTop:"1px"}}>{stat.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{marginLeft:"auto",display:"flex",gap:"12px",flexWrap:"wrap",alignItems:"center"}}>
+                      {profile.projected && <span style={{background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"5px",padding:"3px 10px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",fontWeight:600}}>{profile.projected}</span>}
+                      {profile.comp && (
+                        <div style={{textAlign:"right"}}>
+                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",color:"#475569",letterSpacing:"1px"}}>NFL COMP</div>
+                          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f59e0b"}}>{profile.comp}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {profile.summary && <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#94a3b8",lineHeight:1.6,margin:"0 0 10px"}}>{profile.summary}</p>}
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+                    {profile.pros && (
+                      <div>
+                        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#22c55e",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>Strengths</div>
+                        {profile.pros.slice(0,3).map((pro,i)=><div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",lineHeight:1.5}}>+ {pro}</div>)}
+                      </div>
+                    )}
+                    {profile.cons && (
+                      <div>
+                        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#ef4444",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>Weaknesses</div>
+                        {profile.cons.slice(0,3).map((con,i)=><div key={i} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",lineHeight:1.5}}>− {con}</div>)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               </div>
               );
             })}
