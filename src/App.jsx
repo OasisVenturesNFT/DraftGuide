@@ -926,11 +926,13 @@ const TEAM_NEEDS = {
   WAS:["TE","G","ED","LB","DB"],
 };
 
+const PICK_VALUES = {1:3000,2:2600,3:2200,4:1800,5:1700,6:1600,7:1500,8:1400,9:1350,10:1300,11:1250,12:1200,13:1150,14:1100,15:1050,16:1000,17:950,18:900,19:875,20:850,21:800,22:780,23:760,24:740,25:720,26:700,27:680,28:660,29:640,30:620,31:600,32:585,33:580,34:560,35:550,36:540,37:530,38:520,39:510,40:500,41:490,42:480,43:470,44:460,45:450,46:440,47:430,48:420,49:410,50:400,51:390,52:380,53:370,54:360,55:350,56:340,57:330,58:320,59:310,60:300,61:292,62:284,63:276,64:270,65:265,66:260,67:255,68:250,69:245,70:240,71:235,72:230,73:225,74:220,75:215,76:210,77:205,78:200,79:195,80:190,81:185,82:180,83:175,84:170,85:165,86:160,87:155,88:150,89:145,90:140,91:136,92:132,93:128,94:124,95:120,96:116,97:112,98:108,99:104,100:100,101:96,102:92,103:88,104:86,105:84,106:82,107:80,108:78,109:76,110:74,111:72,112:70,113:68,114:66,115:64,116:62,117:60,118:58,119:56,120:54,121:52,122:50,123:49,124:48,125:47,126:46,127:45,128:44,129:43,130:42,131:41,132:40,133:39.5,134:39,135:38.5,136:38,137:37.5,138:37,139:36.5,140:36,141:35.5,142:35,143:34.5,144:34,145:33.5,146:33,147:32.5,148:32,149:31.5,150:31,151:30.5,152:30,153:29.5,154:29,155:28.5,156:28,157:27.5,158:27,159:26.5,160:26,161:25.5,162:25,163:24.5,164:24,165:23.5,166:23,167:22.5,168:22,169:21.5,170:21,171:20.5,172:20,173:19.5,174:19,175:18.5,176:18,177:17.5,178:17,179:16.5,180:16,181:15.6,182:15.2,183:14.8,184:14.4,185:14,186:13.6,187:13.2,188:12.8,189:12.4,190:12,191:11.6,192:11.2,193:10.8,194:10.4,195:10,196:9.6,197:9.2,198:8.8,199:8.4,200:8,201:7.8,202:7.6,203:7.4,204:7.2,205:7,206:6.8,207:6.6,208:6.4,209:6.2,210:6,211:5.8,212:5.6,213:5.4,214:5.2,215:5,216:4.8,217:4.6,218:4.5,219:4.4,220:4.4,221:4.3,222:4.2,223:4.1,224:4,225:4,226:3.9,227:3.8,228:3.7,229:3.6,230:3.6,231:3.5,232:3.4,233:3.3,234:3.2,235:3.2,236:3.1,237:3,238:2.9,239:2.8,240:2.8,241:2.7,242:2.6,243:2.5,244:2.4,245:2.4,246:2.3,247:2.2,248:2.1,249:2,250:2,251:1.9,252:1.8,253:1.7,254:1.6,255:1.6,256:1.5,257:1.4};
+
 function MockDraftPage() {
   const TOTAL_PICKS = DRAFT_ORDER.length; // 257
   const ROUNDS = [1,2,3,4,5,6,7];
   const roundPicks = (r) => DRAFT_ORDER.filter(s=>s.round===r);
-  const teamPicks = (abbr) => DRAFT_ORDER.filter(s=>s.abbr===abbr);
+  const teamPicksOwned = (abbr) => DRAFT_ORDER.filter(s=> getPickOwner(s.pick) === abbr);
 
   const [draftMode, setDraftMode] = useState(null);
   const [userTeam, setUserTeam] = useState(null);
@@ -945,6 +947,14 @@ function MockDraftPage() {
   const [autoPickAnimating, setAutoPickAnimating] = useState(false);
   const [activeRound, setActiveRound] = useState(1);
   const [resultRound, setResultRound] = useState(1);
+  // Trade system state
+  const [tradeModalOpen, setTradeModalOpen] = useState(false);
+  const [tradePartner, setTradePartner] = useState(null);
+  const [userTradeOffers, setUserTradeOffers] = useState(new Set());
+  const [partnerTradeOffers, setPartnerTradeOffers] = useState(new Set());
+  const [tradeHistory, setTradeHistory] = useState([]);
+  const [pickOwnership, setPickOwnership] = useState({}); // {pickNum: abbr} overrides
+  const [tradeBanner, setTradeBanner] = useState(null);
 
   const pickedPlayerIds = useMemo(()=> new Set(Object.values(picks).map(p=>p.r)), [picks]);
 
@@ -961,6 +971,81 @@ function MockDraftPage() {
   const picksCount = Object.keys(picks).length;
   const draftComplete = picksCount === TOTAL_PICKS;
   const currentRound = DRAFT_ORDER.find(s=>s.pick===currentPick)?.round || 1;
+
+  // Resolve who owns a pick (accounting for trades)
+  const getPickOwner = (pickNum) => pickOwnership[pickNum] || DRAFT_ORDER.find(s=>s.pick===pickNum)?.abbr;
+  const getPickTeamName = (abbr) => DRAFT_ORDER.find(s=>s.abbr===abbr)?.team || abbr;
+
+  // Get all picks owned by a team (accounting for trades), that haven't been used yet
+  const getTeamAvailablePicks = (abbr) => {
+    return DRAFT_ORDER.filter(s => {
+      const owner = getPickOwner(s.pick);
+      return owner === abbr && !picks[s.pick];
+    }).map(s => s.pick);
+  };
+
+  // Calculate total trade value for a set of picks
+  const getTradeValue = (pickSet) => {
+    let total = 0;
+    for (const p of pickSet) total += (PICK_VALUES[p] || 0);
+    return total;
+  };
+
+  // Evaluate whether AI would accept a trade (flexible: 80-120% range)
+  const evaluateTrade = (userPicksOffered, partnerPicksOffered) => {
+    const userValue = getTradeValue(userPicksOffered);
+    const partnerValue = getTradeValue(partnerPicksOffered);
+    if (partnerValue === 0) return { acceptable: false, ratio: 0 };
+    const ratio = userValue / partnerValue;
+    return { acceptable: ratio >= 0.80 && ratio <= 1.25, ratio, userValue, partnerValue };
+  };
+
+  // Execute a trade
+  const executeTrade = () => {
+    const userPicksArr = [...userTradeOffers];
+    const partnerPicksArr = [...partnerTradeOffers];
+    const eval_ = evaluateTrade(userPicksArr, partnerPicksArr);
+    if (!eval_.acceptable || !tradePartner) return;
+
+    const myTeam = draftMode === "team" ? userTeam : (DRAFT_ORDER.find(s=>s.pick===currentPick)?.abbr);
+    const newOwnership = {...pickOwnership};
+    userPicksArr.forEach(p => { newOwnership[p] = tradePartner; });
+    partnerPicksArr.forEach(p => { newOwnership[p] = myTeam; });
+    setPickOwnership(newOwnership);
+
+    const trade = {
+      team1: myTeam, team2: tradePartner,
+      team1Gives: userPicksArr.sort((a,b)=>a-b),
+      team2Gives: partnerPicksArr.sort((a,b)=>a-b),
+      team1Value: eval_.userValue, team2Value: eval_.partnerValue,
+    };
+    setTradeHistory(prev => [...prev, trade]);
+
+    // Show trade banner
+    const t1Name = getPickTeamName(myTeam);
+    const t2Name = getPickTeamName(tradePartner);
+    const t1Picks = trade.team2Gives.map(p=>`#${p}`).join(", ");
+    const t2Picks = trade.team1Gives.map(p=>`#${p}`).join(", ");
+    setTradeBanner(`${t1Name} acquires ${t1Picks} from ${t2Name} for ${t2Picks}`);
+    setTimeout(() => setTradeBanner(null), 5000);
+
+    // Close modal and reset
+    setTradeModalOpen(false);
+    setTradePartner(null);
+    setUserTradeOffers(new Set());
+    setPartnerTradeOffers(new Set());
+
+    // If we acquired the current pick, stay on it. If we traded it away, the new owner picks.
+    // In team mode, if we now own an earlier pick, move to it
+    if (draftMode === "team") {
+      // Check if user now owns the current pick
+      const currentOwner = newOwnership[currentPick] || DRAFT_ORDER.find(s=>s.pick===currentPick)?.abbr;
+      if (currentOwner !== myTeam) {
+        // We traded away our current pick - need to auto-pick for the new owner and continue
+        // Trigger re-evaluation by just re-rendering; the isUserPick check will handle it
+      }
+    }
+  };
 
   const needsMapping = {"QB":"QB","RB":"RB","WR":"WR","TE":"TE","T":"OT","G":"IOL","C":"IOL","OL":"IOL","DL":"DL","DI":"DL","ED":"EDGE","EDGE":"EDGE","LB":"LB","CB":"CB","S":"S","DB":"S"};
 
@@ -997,8 +1082,9 @@ function MockDraftPage() {
           const slot = DRAFT_ORDER.find(s=>s.pick===p);
           if (!slot) { p++; continue; }
           if (tmpPicks[p]) { p++; continue; }
-          if (slot.abbr === userTeam) break;
-          const autoPick = getAutoPick(slot.abbr, tmpPicks);
+          const owner = getPickOwner(p);
+          if (owner === userTeam) break;
+          const autoPick = getAutoPick(owner, tmpPicks);
           if (autoPick) {
             autopickQueue.push({pick: p, player: autoPick});
             tmpPicks[p] = autoPick;
@@ -1081,6 +1167,13 @@ function MockDraftPage() {
     setAutoPickAnimating(false);
     setActiveRound(1);
     setResultRound(1);
+    setTradeModalOpen(false);
+    setTradePartner(null);
+    setUserTradeOffers(new Set());
+    setPartnerTradeOffers(new Set());
+    setTradeHistory([]);
+    setPickOwnership({});
+    setTradeBanner(null);
   };
 
   const exitToModal = () => {
@@ -1226,7 +1319,7 @@ function MockDraftPage() {
   if (!drafting) return null;
 
   const currentSlot = DRAFT_ORDER.find(s=>s.pick===currentPick);
-  const isUserPick = draftMode === "full" || (draftMode === "team" && currentSlot && currentSlot.abbr === userTeam);
+  const isUserPick = draftMode === "full" || (draftMode === "team" && currentSlot && getPickOwner(currentPick) === userTeam);
   const userTeamSlot = userTeam ? DRAFT_ORDER.find(s=>s.abbr===userTeam) : null;
   const currentRoundPicks = roundPicks(activeRound);
 
@@ -1296,6 +1389,169 @@ function MockDraftPage() {
         </div>
       )}
 
+      {/* Trade Banner */}
+      {tradeBanner && (
+        <div style={{background:"rgba(249,115,22,0.1)",border:"1px solid rgba(249,115,22,0.25)",margin:"0",padding:"10px 20px",display:"flex",alignItems:"center",gap:"10px",borderBottom:"1px solid rgba(249,115,22,0.15)"}}>
+          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:700,color:"#f97316",letterSpacing:"1px",textTransform:"uppercase",flexShrink:0}}>TRADE</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#fb923c"}}>{tradeBanner}</span>
+        </div>
+      )}
+
+      {/* Trade Modal */}
+      {tradeModalOpen && (
+        <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,0.8)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}} onClick={()=>{setTradeModalOpen(false);setTradePartner(null);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());}}>
+          <div onClick={e=>e.stopPropagation()} style={{background:"#1a2332",border:"1px solid rgba(249,115,22,0.2)",borderRadius:"16px",maxWidth:"700px",width:"100%",maxHeight:"85vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+            {/* Modal Header */}
+            <div style={{padding:"20px 24px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"12px"}}>
+                <div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Propose Trade</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>Select picks to trade · AI accepts within fair value range</div>
+                </div>
+                <button onClick={()=>{setTradeModalOpen(false);setTradePartner(null);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());}} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"20px",padding:"4px"}}>×</button>
+              </div>
+
+              {/* Trade Partner Selector */}
+              <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase",flexShrink:0}}>Trade with</span>
+                <select
+                  value={tradePartner || ""}
+                  onChange={e=>{setTradePartner(e.target.value||null);setPartnerTradeOffers(new Set());}}
+                  style={{flex:1,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"8px 12px",color:"#f1f5f9",fontSize:"12px",fontFamily:"'Oswald',sans-serif",cursor:"pointer",outline:"none"}}
+                >
+                  <option value="" style={{background:"#1a2332"}}>Select a team...</option>
+                  {[...new Set(DRAFT_ORDER.map(s=>s.abbr))].sort().filter(a => {
+                    const myTeam = draftMode === "team" ? userTeam : getPickOwner(currentPick);
+                    return a !== myTeam && getTeamAvailablePicks(a).length > 0;
+                  }).map(a => (
+                    <option key={a} value={a} style={{background:"#1a2332"}}>{getPickTeamName(a)} ({getTeamAvailablePicks(a).length} picks)</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Trade Body */}
+            <div style={{flex:1,overflowY:"auto",padding:"16px 24px"}}>
+              {tradePartner ? (
+                <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:"16px"}}>
+                  {/* Your Picks */}
+                  <div>
+                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"10px",display:"flex",alignItems:"center",gap:"6px"}}>
+                      <span style={{width:"20px",height:"12px",borderRadius:"2px",background:TEAM_COLORS[draftMode==="team"?userTeam:getPickOwner(currentPick)]||"#333"}}></span>
+                      Your Picks
+                    </div>
+                    <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+                      {getTeamAvailablePicks(draftMode==="team"?userTeam:getPickOwner(currentPick)).map(pickNum => {
+                        const slot = DRAFT_ORDER.find(s=>s.pick===pickNum);
+                        const selected = userTradeOffers.has(pickNum);
+                        return (
+                          <div key={pickNum} onClick={()=>{
+                            const next = new Set(userTradeOffers);
+                            selected ? next.delete(pickNum) : next.add(pickNum);
+                            setUserTradeOffers(next);
+                          }} style={{
+                            display:"flex",alignItems:"center",gap:"8px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",
+                            background: selected ? "rgba(45,212,191,0.1)" : "rgba(255,255,255,0.02)",
+                            border: selected ? "1px solid rgba(45,212,191,0.3)" : "1px solid rgba(255,255,255,0.06)",
+                            transition:"all 0.15s",
+                          }}>
+                            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:selected?"#2dd4bf":"#64748b"}}>#{pickNum}</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>R{slot?.round}</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",marginLeft:"auto"}}>{Math.round(PICK_VALUES[pickNum]||0)} pts</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Value Meter */}
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"8px",minWidth:"80px"}}>
+                    {(() => {
+                      const eval_ = evaluateTrade([...userTradeOffers], [...partnerTradeOffers]);
+                      const userVal = eval_.userValue || 0;
+                      const partnerVal = eval_.partnerValue || 0;
+                      const diff = userVal - partnerVal;
+                      const isBalanced = eval_.acceptable;
+                      return (
+                        <>
+                          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>Value</div>
+                          <div style={{width:"4px",height:"100px",background:"rgba(255,255,255,0.06)",borderRadius:"2px",position:"relative"}}>
+                            <div style={{
+                              position:"absolute",left:"-8px",right:"-8px",height:"20px",borderRadius:"3px",
+                              background: isBalanced ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)",
+                              border: isBalanced ? "1px solid rgba(34,197,94,0.5)" : "1px solid rgba(239,68,68,0.5)",
+                              top: `${Math.max(0, Math.min(80, 50 - (diff / Math.max(1, partnerVal) * 50)))}px`,
+                              transition:"all 0.2s",
+                            }}/>
+                          </div>
+                          <div style={{textAlign:"center"}}>
+                            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color: isBalanced ? "#22c55e" : "#ef4444"}}>{Math.round(userVal)} : {Math.round(partnerVal)}</div>
+                            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color: isBalanced ? "#22c55e" : "#ef4444",marginTop:"2px"}}>
+                              {userVal === 0 && partnerVal === 0 ? "Select picks" : isBalanced ? "Fair trade ✓" : diff > 0 ? "Overpaying" : "Underpaying"}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Partner Picks */}
+                  <div>
+                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#f97316",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"10px",display:"flex",alignItems:"center",gap:"6px"}}>
+                      <span style={{width:"20px",height:"12px",borderRadius:"2px",background:TEAM_COLORS[tradePartner]||"#333"}}></span>
+                      {getPickTeamName(tradePartner)}
+                    </div>
+                    <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+                      {getTeamAvailablePicks(tradePartner).map(pickNum => {
+                        const slot = DRAFT_ORDER.find(s=>s.pick===pickNum);
+                        const selected = partnerTradeOffers.has(pickNum);
+                        return (
+                          <div key={pickNum} onClick={()=>{
+                            const next = new Set(partnerTradeOffers);
+                            selected ? next.delete(pickNum) : next.add(pickNum);
+                            setPartnerTradeOffers(next);
+                          }} style={{
+                            display:"flex",alignItems:"center",gap:"8px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",
+                            background: selected ? "rgba(249,115,22,0.1)" : "rgba(255,255,255,0.02)",
+                            border: selected ? "1px solid rgba(249,115,22,0.3)" : "1px solid rgba(255,255,255,0.06)",
+                            transition:"all 0.15s",
+                          }}>
+                            <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:selected?"#f97316":"#64748b"}}>#{pickNum}</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>R{slot?.round}</span>
+                            <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",marginLeft:"auto"}}>{Math.round(PICK_VALUES[pickNum]||0)} pts</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{textAlign:"center",padding:"40px 0"}}>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#475569"}}>Select a team to start building a trade</div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{padding:"16px 24px",borderTop:"1px solid rgba(255,255,255,0.06)",display:"flex",gap:"10px",justifyContent:"flex-end"}}>
+              <button onClick={()=>{setTradeModalOpen(false);setTradePartner(null);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Cancel</button>
+              <button
+                onClick={executeTrade}
+                disabled={!evaluateTrade([...userTradeOffers],[...partnerTradeOffers]).acceptable}
+                style={{
+                  background: evaluateTrade([...userTradeOffers],[...partnerTradeOffers]).acceptable ? "#f97316" : "rgba(255,255,255,0.04)",
+                  border: evaluateTrade([...userTradeOffers],[...partnerTradeOffers]).acceptable ? "none" : "1px solid rgba(255,255,255,0.08)",
+                  borderRadius:"8px",padding:"10px 24px",cursor: evaluateTrade([...userTradeOffers],[...partnerTradeOffers]).acceptable ? "pointer" : "not-allowed",
+                  fontFamily:"'Oswald',sans-serif",fontSize:"13px",
+                  color: evaluateTrade([...userTradeOffers],[...partnerTradeOffers]).acceptable ? "#fff" : "#475569",
+                  fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",opacity: evaluateTrade([...userTradeOffers],[...partnerTradeOffers]).acceptable ? 1 : 0.5,
+                }}
+              >Execute Trade</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {draftComplete && !showResults && (
         <div style={{background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"10px",margin:"12px 20px",padding:"16px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px"}}>
           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:600,color:"#2dd4bf",textTransform:"uppercase",letterSpacing:"0.5px"}}>Draft Complete!</div>
@@ -1319,7 +1575,7 @@ function MockDraftPage() {
                 </div>
                 <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,3vw,24px)",fontWeight:700,color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.2}}>2026 Mock Draft</div>
                 <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1.2vw,10px)",color:"#64748b",letterSpacing:"1px",textTransform:"uppercase",marginTop:"2px"}}>
-                  {draftMode === "team" ? `${userTeamSlot?.team || ""} · ${teamPicks(userTeam).length} Picks` : `Round ${resultRound} · ${roundPicks(resultRound).length} Picks`}
+                  {draftMode === "team" ? `${userTeamSlot?.team || ""} · ${teamPicksOwned(userTeam).length} Picks` : `Round ${resultRound} · ${roundPicks(resultRound).length} Picks`}
                 </div>
               </div>
 
@@ -1340,7 +1596,7 @@ function MockDraftPage() {
 
               {/* Results grid */}
               {(() => {
-                const displaySlots = draftMode === "team" ? teamPicks(userTeam) : roundPicks(resultRound);
+                const displaySlots = draftMode === "team" ? teamPicksOwned(userTeam) : roundPicks(resultRound);
                 const cols = draftMode === "team" ? Math.min(displaySlots.length, 4) : displaySlots.length <= 32 ? 4 : displaySlots.length <= 36 ? 4 : 4;
                 const rows = Math.ceil(displaySlots.length / cols);
                 return (
@@ -1352,7 +1608,7 @@ function MockDraftPage() {
                       const player = picks[slot.pick];
                       if (!player) return <div key={slot.pick} style={{padding:"clamp(4px,0.7vw,8px) clamp(5px,0.8vw,10px)",borderBottom:Math.floor(idx/cols)<rows-1?"1px solid rgba(255,255,255,0.04)":"none",borderRight:idx%cols<cols-1?"1px solid rgba(255,255,255,0.06)":"none"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#334155"}}>—</div></div>;
                       const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
-                      const isUserTeamPick = draftMode === "team" && slot.abbr === userTeam;
+                      const isUserTeamPick = draftMode === "team" && getPickOwner(slot.pick) === userTeam;
                       const row = Math.floor(idx / cols);
                       return (
                         <div key={slot.pick} style={{
@@ -1363,7 +1619,7 @@ function MockDraftPage() {
                         }}>
                           <div style={{display:"flex",alignItems:"center",gap:"clamp(3px,0.5vw,6px)",marginBottom:"clamp(2px,0.3vw,4px)"}}>
                             <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:700,color:"#2dd4bf",minWidth:"clamp(14px,2vw,20px)"}}>{slot.pick}</span>
-                            <span style={{width:"clamp(22px,3.5vw,30px)",height:"clamp(13px,2vw,17px)",borderRadius:"2px",background:TEAM_COLORS[slot.abbr]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(6px,0.9vw,8px)",fontWeight:700,color:"#fff",flexShrink:0}}>{slot.abbr}</span>
+                            <span style={{width:"clamp(22px,3.5vw,30px)",height:"clamp(13px,2vw,17px)",borderRadius:"2px",background:TEAM_COLORS[getPickOwner(slot.pick)]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(6px,0.9vw,8px)",fontWeight:700,color:"#fff",flexShrink:0}}>{getPickOwner(slot.pick)}</span>
                             <span style={{background:pc.bg,color:pc.text,padding:"0px clamp(3px,0.5vw,5px)",borderRadius:"2px",fontSize:"clamp(6px,0.85vw,8px)",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",marginLeft:"auto"}}>{player.p}</span>
                           </div>
                           <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:600,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.2}}>{player.n}</div>
@@ -1412,7 +1668,9 @@ function MockDraftPage() {
           {currentRoundPicks.map((slot) => {
             const picked = picks[slot.pick];
             const isCurrent = slot.pick === currentPick && !draftComplete;
-            const isUserTeamRow = draftMode === "team" && slot.abbr === userTeam;
+            const owner = getPickOwner(slot.pick);
+            const wasTraded = owner !== slot.abbr;
+            const isUserTeamRow = draftMode === "team" && owner === userTeam;
             return (
               <div key={slot.pick}
                 onClick={()=>{ if(!draftComplete && draftMode === "full") { setCurrentPick(slot.pick); } }}
@@ -1426,7 +1684,10 @@ function MockDraftPage() {
                 }}
               >
                 <span style={{fontFamily:"'Oswald',sans-serif",fontSize:isCurrent?"16px":"13px",fontWeight:700,color:isCurrent?"#2dd4bf":"#475569",minWidth:"24px",textAlign:"right"}}>{slot.pick}</span>
-                <span style={{width:"32px",height:"20px",borderRadius:"3px",background:TEAM_COLORS[slot.abbr]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,color:"#fff",letterSpacing:"0.3px",flexShrink:0,boxShadow:isUserTeamRow?"0 0 0 1.5px rgba(45,212,191,0.5)":"none"}}>{slot.abbr}</span>
+                <div style={{display:"flex",alignItems:"center",gap:"2px",flexShrink:0}}>
+                  <span style={{width:"32px",height:"20px",borderRadius:"3px",background:TEAM_COLORS[owner]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,color:"#fff",letterSpacing:"0.3px",boxShadow:isUserTeamRow?"0 0 0 1.5px rgba(45,212,191,0.5)":"none"}}>{owner}</span>
+                  {wasTraded && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",color:"#f97316",marginLeft:"2px"}} title={`Traded from ${slot.abbr}`}>⇄</span>}
+                </div>
                 {picked ? (
                   <div style={{flex:1,display:"flex",alignItems:"center",gap:"8px",minWidth:0}}>
                     <PosBadge pos={picked.p}/>
@@ -1456,15 +1717,21 @@ function MockDraftPage() {
             <div style={{padding:"14px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)",background:isUserPick?"#0c1222":"rgba(255,255,255,0.02)",position:"sticky",top:0,zIndex:10}}>
               <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
                 <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"#2dd4bf"}}>#{currentPick}</span>
-                <span style={{width:"40px",height:"26px",borderRadius:"5px",background:TEAM_COLORS[currentSlot.abbr]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:700,color:"#fff"}}>{currentSlot.abbr}</span>
+                <span style={{width:"40px",height:"26px",borderRadius:"5px",background:TEAM_COLORS[getPickOwner(currentPick)]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:700,color:"#fff"}}>{getPickOwner(currentPick)}</span>
                 <div>
-                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:600,color:"#f1f5f9"}}>{currentSlot.team}</div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:600,color:"#f1f5f9"}}>{getPickTeamName(getPickOwner(currentPick))}</div>
                   <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:isUserPick?"#2dd4bf":"#64748b"}}>
                     {isUserPick ? `Round ${currentSlot.round} · Your pick — select a player` : autoPickAnimating ? "Simulating pick..." : `Round ${currentSlot.round}`}
                   </div>
                 </div>
                 {draftMode === "team" && isUserPick && (
-                  <span style={{marginLeft:"auto",background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.25)",borderRadius:"6px",padding:"4px 12px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>Your Pick</span>
+                  <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:"8px"}}>
+                    <button onClick={()=>{setTradeModalOpen(true);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());setTradePartner(null);}} style={{background:"rgba(249,115,22,0.1)",border:"1px solid rgba(249,115,22,0.25)",borderRadius:"6px",padding:"4px 12px",cursor:"pointer",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#f97316",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap"}}>⇄ Trade</button>
+                    <span style={{background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.25)",borderRadius:"6px",padding:"4px 12px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>Your Pick</span>
+                  </div>
+                )}
+                {draftMode === "full" && isUserPick && !draftComplete && (
+                  <button onClick={()=>{setTradeModalOpen(true);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());setTradePartner(null);}} style={{marginLeft:"auto",background:"rgba(249,115,22,0.1)",border:"1px solid rgba(249,115,22,0.25)",borderRadius:"6px",padding:"4px 12px",cursor:"pointer",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#f97316",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap"}}>⇄ Trade Pick</button>
                 )}
               </div>
               {TEAM_NEEDS[currentSlot.abbr] && (
@@ -1479,7 +1746,7 @@ function MockDraftPage() {
               {(() => {
                 const pickingAbbr = draftMode === "team" ? userTeam : currentSlot.abbr;
                 const alreadyDrafted = DRAFT_ORDER
-                  .filter(s => s.abbr === pickingAbbr && picks[s.pick])
+                  .filter(s => getPickOwner(s.pick) === pickingAbbr && picks[s.pick])
                   .map(s => ({ pick: s.pick, round: s.round, player: picks[s.pick] }));
                 if (alreadyDrafted.length === 0) return null;
                 return (
