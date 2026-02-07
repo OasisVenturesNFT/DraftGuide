@@ -1001,6 +1001,17 @@ function MockDraftPage() {
   };
 
   // Execute a trade
+  const needsMapping = {"QB":"QB","RB":"RB","WR":"WR","TE":"TE","T":"OT","G":"IOL","C":"IOL","OL":"IOL","DL":"DL","DI":"DL","ED":"EDGE","EDGE":"EDGE","LB":"LB","CB":"CB","S":"S","DB":"S"};
+
+  const getAutoPick = (slotAbbr, currentPicks) => {
+    const picked = new Set(Object.values(currentPicks).map(p=>p.r));
+    const avail = PLAYERS.filter(p => !picked.has(p.r));
+    const needs = TEAM_NEEDS[slotAbbr] || [];
+    const mappedNeeds = needs.map(n => needsMapping[n] || n);
+    const needMatch = avail.find(p => mappedNeeds.includes(p.p));
+    return needMatch || avail[0];
+  };
+
   const executeTrade = () => {
     const userPicksArr = [...userTradeOffers];
     const partnerPicksArr = [...partnerTradeOffers];
@@ -1090,17 +1101,6 @@ function MockDraftPage() {
       }
     }
     // In full draft mode, stay on current pick — user picks for whoever now owns it
-  };
-
-  const needsMapping = {"QB":"QB","RB":"RB","WR":"WR","TE":"TE","T":"OT","G":"IOL","C":"IOL","OL":"IOL","DL":"DL","DI":"DL","ED":"EDGE","EDGE":"EDGE","LB":"LB","CB":"CB","S":"S","DB":"S"};
-
-  const getAutoPick = (slotAbbr, currentPicks) => {
-    const picked = new Set(Object.values(currentPicks).map(p=>p.r));
-    const avail = PLAYERS.filter(p => !picked.has(p.r));
-    const needs = TEAM_NEEDS[slotAbbr] || [];
-    const mappedNeeds = needs.map(n => needsMapping[n] || n);
-    const needMatch = avail.find(p => mappedNeeds.includes(p.p));
-    return needMatch || avail[0];
   };
 
   // Shared auto-pick runner (can use a custom ownership map for post-trade scenarios)
