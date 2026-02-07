@@ -1475,6 +1475,48 @@ function MockDraftPage() {
                   ))}
                 </div>
               )}
+              {/* Already drafted roster for current picking team */}
+              {(() => {
+                const pickingAbbr = draftMode === "team" ? userTeam : currentSlot.abbr;
+                const alreadyDrafted = DRAFT_ORDER
+                  .filter(s => s.abbr === pickingAbbr && picks[s.pick])
+                  .map(s => ({ pick: s.pick, round: s.round, player: picks[s.pick] }));
+                if (alreadyDrafted.length === 0) return null;
+                return (
+                  <div style={{marginTop:"10px",paddingTop:"10px",borderTop:"1px solid rgba(255,255,255,0.04)"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:"6px",marginBottom:"6px"}}>
+                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>
+                        {draftMode === "team" ? "Your Roster" : `${currentSlot.abbr} Picks`}
+                      </span>
+                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#334155"}}>({alreadyDrafted.length})</span>
+                    </div>
+                    <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+                      {alreadyDrafted.map(d => {
+                        const pc = POS_COLORS[d.player.p] || {bg:"#555",text:"#fff"};
+                        return (
+                          <div key={d.pick} style={{
+                            display:"flex",alignItems:"center",gap:"5px",
+                            background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",
+                            borderRadius:"6px",padding:"4px 8px",
+                          }}>
+                            <span style={{
+                              background:pc.bg,color:pc.text,
+                              padding:"1px 4px",borderRadius:"3px",
+                              fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",
+                            }}>{d.player.p}</span>
+                            <span style={{
+                              fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:500,color:"#e2e8f0",
+                            }}>{d.player.n.split(" ").pop()}</span>
+                            <span style={{
+                              fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",
+                            }}>R{d.round}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
