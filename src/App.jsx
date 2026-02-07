@@ -1126,7 +1126,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
       </div>
 
       {/* Two column layout */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px"}}>
+      <div className="team-page-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px"}}>
 
         {/* Draft Capital */}
         <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"14px",overflow:"hidden"}}>
@@ -1494,11 +1494,13 @@ function MockDraftPage() {
 
   // Animate and apply an auto-pick queue, then land on nextUserPick
   const animateAutoPicks = (autopickQueue, nextUserPick, fromRound) => {
+    // Only pause at round boundaries if the completing round equals the user's selected scope
+    const shouldPauseAtRound = fromRound && fromRound === draftRounds;
+
     if (autopickQueue.length === 0) {
       if (nextUserPick) {
         const nr = DRAFT_ORDER.find(s=>s.pick===nextUserPick)?.round || 1;
-        // Check if we crossed into a new round
-        if (fromRound && nr > fromRound) {
+        if (shouldPauseAtRound && nr > fromRound) {
           setRoundCompletePrompt(fromRound);
         }
         setCurrentPick(nextUserPick);
@@ -1507,25 +1509,22 @@ function MockDraftPage() {
       return;
     }
 
-    // Check if the auto-pick queue crosses a round boundary — if so, truncate and pause
+    // Check if the auto-pick queue crosses a round boundary we should pause at
     let truncatedQueue = autopickQueue;
     let truncatedNext = nextUserPick;
-    if (fromRound) {
+    if (shouldPauseAtRound) {
       const crossIdx = autopickQueue.findIndex(ap => {
         const r = DRAFT_ORDER.find(s=>s.pick===ap.pick)?.round || 1;
         return r > fromRound;
       });
       if (crossIdx >= 0) {
-        // Truncate: only animate picks in the current round, then pause
         truncatedQueue = autopickQueue.slice(0, crossIdx);
-        // The next pick after truncation is the first pick of the new round
         truncatedNext = autopickQueue[crossIdx].pick;
       }
     }
 
     if (truncatedQueue.length === 0) {
-      // All auto-picks are in the next round — go straight to round prompt
-      if (fromRound) setRoundCompletePrompt(fromRound);
+      if (shouldPauseAtRound) setRoundCompletePrompt(fromRound);
       if (truncatedNext) {
         setCurrentPick(truncatedNext);
         const nr = DRAFT_ORDER.find(s=>s.pick===truncatedNext)?.round || 1;
@@ -1545,8 +1544,7 @@ function MockDraftPage() {
         if (idx === truncatedQueue.length - 1) {
           setTimeout(() => {
             setAutoPickAnimating(false);
-            // Did we truncate due to round boundary?
-            if (truncatedQueue.length < autopickQueue.length && fromRound) {
+            if (truncatedQueue.length < autopickQueue.length && shouldPauseAtRound) {
               setRoundCompletePrompt(fromRound);
               if (truncatedNext) {
                 setCurrentPick(truncatedNext);
@@ -1555,7 +1553,7 @@ function MockDraftPage() {
               }
             } else if (truncatedNext) {
               const nr = DRAFT_ORDER.find(s=>s.pick===truncatedNext)?.round || 1;
-              if (fromRound && nr > fromRound) {
+              if (shouldPauseAtRound && nr > fromRound) {
                 setRoundCompletePrompt(fromRound);
               }
               setCurrentPick(truncatedNext);
@@ -1590,11 +1588,10 @@ function MockDraftPage() {
       for (let i = currentPick + 1; i <= TOTAL_PICKS; i++) {
         const slot = DRAFT_ORDER.find(s=>s.pick===i);
         if (slot && !newPicks[i]) {
-          // Check if we crossed a round boundary
           const prevRound = DRAFT_ORDER.find(s=>s.pick===currentPick)?.round || 1;
           if (slot.round > prevRound && slot.round > draftRounds) return; // past scope
-          if (slot.round > prevRound && slot.round <= draftRounds) {
-            // Just finished a round - show prompt to continue or view results
+          // Only show round prompt if this round equals the selected draftRounds
+          if (slot.round > prevRound && prevRound === draftRounds) {
             setRoundCompletePrompt(prevRound);
             setCurrentPick(i);
             setActiveRound(slot.round);
@@ -1769,11 +1766,11 @@ function MockDraftPage() {
             </div>
           ) : (
             <div style={{padding:"16px 20px 24px"}}>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"12px"}}>
+              <div className="mock-team-grid" style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"12px"}}>
                 {Object.entries(divisions).map(([divName, teams]) => (
                   <div key={divName}>
                     <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px",paddingBottom:"6px",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>{divName}</div>
-                    <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+                    <div className="mock-div-teams" style={{display:"flex",flexDirection:"column",gap:"4px"}}>
                       {teams.map(abbr => {
                         const slot = DRAFT_ORDER.find(s=>s.abbr===abbr);
                         const shortName = slot ? slot.team.split(" ").pop() : abbr;
