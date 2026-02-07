@@ -579,6 +579,11 @@ function BigBoardPage({ navigateToTeam }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [expandedPlayer, setExpandedPlayer] = useState(null);
+  const [builderMode, setBuilderMode] = useState(false);
+  const [myBoard, setMyBoard] = useState([]); // array of player objects in order
+  const [builderSearch, setBuilderSearch] = useState("");
+  const [builderPosFilter, setBuilderPosFilter] = useState("ALL");
+  const [showBuilderResults, setShowBuilderResults] = useState(false);
   const PER_PAGE = 50;
 
   useEffect(()=>{ setPage(0); },[activePos, search]);
@@ -608,6 +613,221 @@ function BigBoardPage({ navigateToTeam }) {
   const isPositionView = activePos !== "ALL";
   const posTopPlayer = isPositionView && filtered.length>0 ? filtered[0] : null;
 
+  // Builder helpers
+  const boardSet = useMemo(() => new Set(myBoard.map(p=>p.r)), [myBoard]);
+  const builderAvailable = useMemo(() => {
+    let list = PLAYERS.filter(p => !boardSet.has(p.r));
+    if (builderPosFilter !== "ALL") list = list.filter(p => p.p === builderPosFilter);
+    if (builderSearch.trim()) {
+      const q = builderSearch.toLowerCase();
+      list = list.filter(p => p.n.toLowerCase().includes(q) || p.s.toLowerCase().includes(q));
+    }
+    return list;
+  }, [boardSet, builderPosFilter, builderSearch]);
+
+  const addToBoard = (player) => {
+    if (myBoard.length >= 100 || boardSet.has(player.r)) return;
+    setMyBoard(prev => [...prev, player]);
+  };
+  const removeFromBoard = (index) => {
+    setMyBoard(prev => prev.filter((_, i) => i !== index));
+  };
+  const moveUp = (index) => {
+    if (index === 0) return;
+    setMyBoard(prev => {
+      const arr = [...prev];
+      [arr[index-1], arr[index]] = [arr[index], arr[index-1]];
+      return arr;
+    });
+  };
+  const moveDown = (index) => {
+    if (index >= myBoard.length - 1) return;
+    setMyBoard(prev => {
+      const arr = [...prev];
+      [arr[index], arr[index+1]] = [arr[index+1], arr[index]];
+      return arr;
+    });
+  };
+
+  // Builder Results Screen
+  if (showBuilderResults) {
+    return (
+      <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"#0c1222",zIndex:300,display:"flex",flexDirection:"column"}}>
+        <div style={{flex:1,overflowY:"auto",display:"flex",alignItems:"flex-start",justifyContent:"center"}}>
+          <div style={{width:"100%",maxWidth:"820px",margin:"0 auto",padding:"clamp(10px,2vw,20px)"}}>
+            <div style={{textAlign:"center",marginBottom:"clamp(12px,2vw,20px)"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",marginBottom:"4px"}}>
+                <img src="/logo-light.png" alt="Draft Guide" style={{height:"clamp(20px,3vw,28px)",width:"auto"}}/>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(12px,2vw,16px)",fontWeight:700,color:"#f1f5f9",letterSpacing:"1px",textTransform:"uppercase"}}>Draft Guide</div>
+              </div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,3vw,24px)",fontWeight:700,color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.2}}>My Big Board</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1.2vw,10px)",color:"#64748b",letterSpacing:"1px",textTransform:"uppercase",marginTop:"2px"}}>{myBoard.length} Prospects Ranked</div>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"0",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"clamp(6px,1vw,10px)",overflow:"hidden"}}>
+              {myBoard.map((player, idx) => {
+                const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
+                const diff = player.r - (idx + 1);
+                const row = Math.floor(idx / 4);
+                const rows = Math.ceil(myBoard.length / 4);
+                return (
+                  <div key={player.r} style={{
+                    padding:"clamp(5px,0.8vw,10px) clamp(6px,0.9vw,12px)",
+                    background: row % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+                    borderBottom: row < rows - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                    borderRight: idx % 4 < 3 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                  }}>
+                    <div style={{display:"flex",alignItems:"center",gap:"clamp(3px,0.5vw,6px)",marginBottom:"clamp(2px,0.3vw,3px)"}}>
+                      <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,14px)",fontWeight:700,color:"#2dd4bf"}}>{idx+1}</span>
+                      <span style={{background:pc.bg,color:pc.text,padding:"1px clamp(3px,0.5vw,5px)",borderRadius:"2px",fontSize:"clamp(6px,0.85vw,8px)",fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{player.p}</span>
+                      <span style={{marginLeft:"auto",fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.9vw,9px)",fontWeight:600,color:diff>0?"#22c55e":diff<0?"#ef4444":"#475569"}}>
+                        {diff > 0 ? `↑${diff}` : diff < 0 ? `↓${Math.abs(diff)}` : "—"}
+                      </span>
+                    </div>
+                    <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:600,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",lineHeight:1.2}}>{player.n}</div>
+                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.85vw,9px)",color:"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.s}</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{marginTop:"clamp(8px,1.2vw,14px)",paddingTop:"clamp(6px,1vw,10px)",borderTop:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(9px,1.1vw,11px)",color:"#94a3b8",fontWeight:500}}>draft-guide.com</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"#475569"}}>· Build your own big board</span>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:"5px"}}>
+                <svg width="clamp(11px,1.5vw,14px)" height="clamp(11px,1.5vw,14px)" viewBox="0 0 24 24" fill="#475569"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(9px,1.1vw,11px)",color:"#2dd4bf",fontWeight:500}}>@DraftGuide_</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style={{borderTop:"1px solid rgba(255,255,255,0.06)",padding:"12px 20px",display:"flex",gap:"10px",justifyContent:"center",background:"#0c1222",flexShrink:0}}>
+          <button onClick={()=>setShowBuilderResults(false)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>← Back to Builder</button>
+          <button onClick={()=>{setBuilderMode(false);setShowBuilderResults(false);}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"10px 24px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit Builder</button>
+        </div>
+      </div>
+    );
+  }
+
+  // Builder Mode
+  if (builderMode) {
+    return (
+      <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"16px 24px 40px"}}>
+        {/* Builder Header */}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px",flexWrap:"wrap",gap:"10px"}}>
+          <div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Big Board Builder</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginTop:"2px"}}>Rank your top 100 prospects · {myBoard.length}/100 added</div>
+          </div>
+          <div style={{display:"flex",gap:"8px"}}>
+            {myBoard.length > 0 && (
+              <button onClick={()=>setShowBuilderResults(true)} style={{background:"#2dd4bf",border:"none",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#0c1222",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>View Board →</button>
+            )}
+            <button onClick={()=>setBuilderMode(false)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"8px",padding:"8px 16px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#94a3b8",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit</button>
+          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{height:"4px",background:"rgba(255,255,255,0.06)",borderRadius:"2px",marginBottom:"16px",overflow:"hidden"}}>
+          <div style={{width:`${(myBoard.length/100)*100}%`,height:"100%",background:"#2dd4bf",borderRadius:"2px",transition:"width 0.3s"}}/>
+        </div>
+
+        {/* Split layout */}
+        <div className="draft-split" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"12px",overflow:"hidden",minHeight:"calc(100vh - 220px)"}}>
+          {/* Left - My Board */}
+          <div style={{borderRight:"1px solid rgba(255,255,255,0.06)",overflowY:"auto",maxHeight:"calc(100vh - 220px)"}}>
+            <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(255,255,255,0.06)",fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9",letterSpacing:"0.8px",textTransform:"uppercase",position:"sticky",top:0,background:"#0c1222",zIndex:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <span>My Board ({myBoard.length})</span>
+              {myBoard.length > 0 && <button onClick={()=>setMyBoard([])} style={{background:"none",border:"none",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b",cursor:"pointer",letterSpacing:"0.5px",textTransform:"uppercase"}}>Clear All</button>}
+            </div>
+            {myBoard.length === 0 ? (
+              <div style={{padding:"40px 20px",textAlign:"center"}}>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#475569",lineHeight:1.6}}>Click "Add" on any player<br/>to start building your board</div>
+              </div>
+            ) : (
+              myBoard.map((player, idx) => {
+                const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
+                const diff = player.r - (idx + 1);
+                return (
+                  <div key={player.r} style={{
+                    display:"flex",alignItems:"center",gap:"8px",
+                    padding:"8px 12px",
+                    background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+                    borderBottom:"1px solid rgba(255,255,255,0.03)",
+                  }}>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:"#2dd4bf",minWidth:"24px",textAlign:"right"}}>{idx+1}</span>
+                    <span style={{background:pc.bg,color:pc.text,padding:"2px 5px",borderRadius:"3px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>{player.p}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b"}}>{player.s}</div>
+                    </div>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:600,color:diff>0?"#22c55e":diff<0?"#ef4444":"#475569",minWidth:"28px",textAlign:"center"}}>
+                      {diff > 0 ? `↑${diff}` : diff < 0 ? `↓${Math.abs(diff)}` : "—"}
+                    </span>
+                    <div style={{display:"flex",flexDirection:"column",gap:"1px"}}>
+                      <button onClick={()=>moveUp(idx)} disabled={idx===0} style={{background:"none",border:"none",color:idx===0?"#1e293b":"#64748b",cursor:idx===0?"default":"pointer",fontSize:"10px",padding:"0",lineHeight:1}}>▲</button>
+                      <button onClick={()=>moveDown(idx)} disabled={idx>=myBoard.length-1} style={{background:"none",border:"none",color:idx>=myBoard.length-1?"#1e293b":"#64748b",cursor:idx>=myBoard.length-1?"default":"pointer",fontSize:"10px",padding:"0",lineHeight:1}}>▼</button>
+                    </div>
+                    <button onClick={()=>removeFromBoard(idx)} style={{background:"none",border:"none",color:"#475569",cursor:"pointer",fontSize:"14px",padding:"0 2px",lineHeight:1}}>×</button>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Right - Available Players */}
+          <div style={{overflowY:"auto",maxHeight:"calc(100vh - 220px)"}}>
+            <div style={{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.06)",position:"sticky",top:0,background:"#0c1222",zIndex:10}}>
+              <div style={{display:"flex",gap:"6px",alignItems:"center",marginBottom:"8px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:"6px",flex:1,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"5px 8px"}}>
+                  <SearchIcon/>
+                  <input value={builderSearch} onChange={e=>setBuilderSearch(e.target.value)} placeholder="Search..." style={{background:"transparent",border:"none",outline:"none",color:"#f1f5f9",fontSize:"11px",fontFamily:"'JetBrains Mono',monospace",width:"100%"}}/>
+                  {builderSearch && <button onClick={()=>setBuilderSearch("")} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"12px",padding:"0"}}>×</button>}
+                </div>
+                <select value={builderPosFilter} onChange={e=>setBuilderPosFilter(e.target.value)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:"6px",padding:"5px 8px",color:"#f1f5f9",fontSize:"10px",fontFamily:"'JetBrains Mono',monospace",cursor:"pointer",outline:"none"}}>
+                  <option value="ALL" style={{background:"#1a2332"}}>ALL</option>
+                  {[...OFF_POSITIONS,...DEF_POSITIONS].map(pos=>(<option key={pos} value={pos} style={{background:"#1a2332"}}>{pos}</option>))}
+                </select>
+              </div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"0.5px"}}>{builderAvailable.length} available · {100 - myBoard.length} spots remaining</div>
+            </div>
+            <div>
+              {builderAvailable.slice(0, 100).map((player, i) => {
+                const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
+                const canAdd = myBoard.length < 100;
+                const profile = PROFILES[player.n];
+                return (
+                  <div key={player.r} style={{
+                    display:"flex",alignItems:"center",gap:"8px",
+                    padding:"8px 14px",
+                    background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+                    borderBottom:"1px solid rgba(255,255,255,0.03)",
+                  }}>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:700,color:"#2dd4bf",minWidth:"28px",textAlign:"right"}}>#{player.r}</span>
+                    <span style={{background:pc.bg,color:pc.text,padding:"2px 5px",borderRadius:"3px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>{player.p}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
+                      <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b"}}>{player.s}</span>
+                        {profile && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569"}}>{profile.height} · {profile.weight}</span>}
+                      </div>
+                    </div>
+                    {canAdd && (
+                      <button onClick={()=>addToBoard(player)} style={{background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"5px",padding:"4px 10px",cursor:"pointer",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap",flexShrink:0}}>Add</button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Normal Big Board view
   return (
     <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"16px 24px 40px"}}>
       {/* Position filter */}
@@ -643,7 +863,7 @@ function BigBoardPage({ navigateToTeam }) {
         </div>
       )}
 
-      {/* Search */}
+      {/* Search + Builder CTA */}
       <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"12px",flexWrap:"wrap"}}>
         <div className="search-bar" style={{
           display:"flex",alignItems:"center",gap:"8px",flex:"1",minWidth:"200px",
@@ -660,6 +880,13 @@ function BigBoardPage({ navigateToTeam }) {
           />
           {search && <button onClick={()=>setSearch("")} style={{background:"none",border:"none",color:"#64748b",cursor:"pointer",fontSize:"16px",padding:"0 4px"}}>×</button>}
         </div>
+        <button onClick={()=>setBuilderMode(true)} style={{
+          background:"linear-gradient(135deg, rgba(45,212,191,0.12), rgba(45,212,191,0.06))",
+          border:"1px solid rgba(45,212,191,0.25)",borderRadius:"8px",padding:"8px 16px",
+          cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#2dd4bf",
+          fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap",
+          transition:"all 0.15s",
+        }}>✎ Build Your Board</button>
         <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",whiteSpace:"nowrap"}}>
           {filtered.length} player{filtered.length!==1?"s":""}
         </div>
