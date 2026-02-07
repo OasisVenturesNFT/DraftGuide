@@ -2920,15 +2920,31 @@ function CompareOverlay({ players, onClose, onUpdate }) {
 }
 
 /* ───── Main App ───── */
+const HASH_TO_PAGE = {"":"HOME","#/board":"BIG BOARD","#/mock":"MOCK DRAFT"};
+const PAGE_TO_HASH = {"HOME":"","BIG BOARD":"#/board","MOCK DRAFT":"#/mock"};
+
 export default function App() {
   const [activePage, setActivePage] = useState("HOME");
   const [teamPageAbbr, setTeamPageAbbr] = useState(null);
-  const [comparePlayers, setComparePlayers] = useState(null); // array of player objects for comparison
+  const [comparePlayers, setComparePlayers] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem("dg-theme") || "dark"; } catch { return "dark"; }
+  });
 
-  // Hash-based routing for team pages
+  const isDark = theme === "dark";
+
+  // Persist theme
+  useEffect(() => {
+    try { localStorage.setItem("dg-theme", theme); } catch {}
+    document.body.style.background = isDark ? "#0c1222" : "#f8fafc";
+    document.body.style.color = isDark ? "#f1f5f9" : "#1e293b";
+  }, [theme, isDark]);
+
+  // Hash-based routing for ALL pages
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash;
+      // Team pages
       const teamMatch = hash.match(/^#\/team\/([A-Z]{2,3})$/i);
       if (teamMatch) {
         const abbr = teamMatch[1].toUpperCase();
@@ -2938,11 +2954,16 @@ export default function App() {
           return;
         }
       }
-      // If not a team page hash, clear team state
-      if (activePage === "TEAM") {
+      // Standard pages
+      const page = HASH_TO_PAGE[hash];
+      if (page !== undefined) {
+        setActivePage(page);
         setTeamPageAbbr(null);
-        setActivePage("HOME");
+        return;
       }
+      // Unknown hash — go home
+      setActivePage("HOME");
+      setTeamPageAbbr(null);
     };
     handleHash();
     window.addEventListener("hashchange", handleHash);
@@ -2957,21 +2978,43 @@ export default function App() {
   };
 
   const handleSetPage = (page) => {
-    if (page !== "TEAM") {
+    const hash = PAGE_TO_HASH[page];
+    if (hash !== undefined) {
+      window.location.hash = hash;
+    } else if (page !== "TEAM") {
       window.location.hash = "";
-      setTeamPageAbbr(null);
     }
+    if (page !== "TEAM") setTeamPageAbbr(null);
     setActivePage(page);
+    window.scrollTo(0, 0);
+  };
+
+  // Theme colors
+  const t = isDark ? {
+    bg: "#0c1222", headerBg: "#0c1222", headerBorder: "rgba(255,255,255,0.06)",
+    headerShadow: "none", text: "#f1f5f9", textMuted: "#94a3b8", textDim: "#64748b",
+    textFaint: "#475569", textGhost: "#334155", navActive: "#f1f5f9", navInactive: "#64748b",
+    navActiveBg: "rgba(45,212,191,0.08)", cardBg: "rgba(255,255,255,0.02)",
+    cardBorder: "rgba(255,255,255,0.06)", rowAlt: "rgba(255,255,255,0.015)",
+    logo: "/logo-light.png",
+  } : {
+    bg: "#f8fafc", headerBg: "#ffffff", headerBorder: "#e5e7eb",
+    headerShadow: "0 1px 3px rgba(0,0,0,0.08)", text: "#1e293b", textMuted: "#475569",
+    textDim: "#64748b", textFaint: "#94a3b8", textGhost: "#cbd5e1", navActive: "#1B2A4A",
+    navInactive: "#94a3b8", navActiveBg: "rgba(27,42,74,0.08)", cardBg: "rgba(0,0,0,0.02)",
+    cardBorder: "rgba(0,0,0,0.08)", rowAlt: "rgba(0,0,0,0.02)",
+    logo: "/logo.png",
   };
 
   return (
-    <div style={{minHeight:"100vh"}}>
+    <div style={{minHeight:"100vh",background:t.bg,transition:"background 0.2s"}}>
       {/* ── Sticky Header ── */}
       <header className="site-header" style={{
-        background:"#ffffff",
-        borderBottom:"1px solid #e5e7eb",
+        background:t.headerBg,
+        borderBottom:`1px solid ${t.headerBorder}`,
         padding:"0 24px",position:"sticky",top:0,zIndex:100,
-        boxShadow:"0 1px 3px rgba(0,0,0,0.08)",
+        boxShadow:t.headerShadow,
+        transition:"background 0.2s, border-color 0.2s",
       }}>
         <div style={{
           maxWidth:"960px",margin:"0 auto",
@@ -2981,13 +3024,14 @@ export default function App() {
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:"12px",cursor:"pointer"}}
             onClick={()=>handleSetPage("HOME")}>
-            <img src="/logo.png" alt="Draft Guide" style={{
+            <img src={t.logo} alt="Draft Guide" style={{
               height:"36px",width:"auto",flexShrink:0,
             }}/>
             <div className="logo-text">
               <div style={{
                 fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
-                color:"#1B2A4A",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.1,
+                color:t.text,letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.1,
+                transition:"color 0.2s",
               }}>Draft Guide</div>
               <div style={{
                 fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",
@@ -2996,14 +3040,14 @@ export default function App() {
             </div>
           </div>
 
-          {/* Main Nav */}
+          {/* Main Nav + Theme Toggle */}
           <nav style={{display:"flex",gap:"4px",alignItems:"center"}}>
             {PAGES.map(pg=>{
               const active = activePage===pg;
               return (
                 <button className="nav-btn" key={pg} onClick={()=>handleSetPage(pg)} style={{
-                  background: active ? "rgba(27,42,74,0.08)" : "transparent",
-                  color: active ? "#1B2A4A" : "#94a3b8",
+                  background: active ? t.navActiveBg : "transparent",
+                  color: active ? t.navActive : t.navInactive,
                   border:"none",
                   borderBottom: active ? "2px solid #2dd4bf" : "2px solid transparent",
                   padding:"18px 20px",cursor:"pointer",
@@ -3016,6 +3060,21 @@ export default function App() {
                 </button>
               );
             })}
+            <button className="theme-toggle" onClick={()=>setTheme(isDark?"light":"dark")} title={isDark?"Switch to light mode":"Switch to dark mode"} style={{
+              background:"transparent",border:"none",cursor:"pointer",
+              padding:"8px",marginLeft:"8px",borderRadius:"6px",
+              display:"flex",alignItems:"center",justifyContent:"center",
+              transition:"background 0.15s",
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.background=isDark?"rgba(255,255,255,0.06)":"rgba(0,0,0,0.06)";}}
+            onMouseLeave={e=>{e.currentTarget.style.background="transparent";}}
+            >
+              {isDark ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              )}
+            </button>
           </nav>
         </div>
       </header>
@@ -3047,10 +3106,11 @@ export default function App() {
       {/* ── Footer ── */}
       <div style={{maxWidth:"960px",margin:"0 auto",padding:"0 24px 40px"}}>
         <div style={{
-          borderTop:"1px solid rgba(255,255,255,0.04)",
+          borderTop:`1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.06)"}`,
           paddingTop:"16px",textAlign:"center",
           fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",
-          color:"#334155",letterSpacing:"0.5px",
+          color:t.textGhost,letterSpacing:"0.5px",
+          transition:"color 0.2s",
         }}>
           DRAFT GUIDE © 2026 · draft-guide.com
         </div>
