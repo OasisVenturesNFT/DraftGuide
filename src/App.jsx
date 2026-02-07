@@ -241,7 +241,7 @@ function PositionFilter({ activePos, setActivePos }) {
 }
 
 /* ───── Home Page ───── */
-function HomePage({ setPage }) {
+function HomePage({ setPage, navigateToTeam }) {
   const topByPos = useMemo(()=>{
     const result = {};
     PLAYERS.forEach(p=>{ if(!result[p.p]) result[p.p] = p; });
@@ -494,6 +494,45 @@ function HomePage({ setPage }) {
           </div>
         ))}
       </div>
+
+      {/* Team Draft Profiles */}
+      {navigateToTeam && (
+        <div style={{
+          background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+          borderRadius:"14px",marginTop:"24px",overflow:"hidden",
+        }}>
+          <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Team Draft Profiles</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>Draft capital, team needs & prospect fits for all 32 teams</div>
+            </div>
+          </div>
+          <div style={{padding:"16px 20px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"6px"}}>
+              {Object.entries(TEAM_INFO).sort((a,b) => a[1].name.localeCompare(b[1].name)).map(([abbr, info]) => {
+                const picks = DRAFT_ORDER.filter(s => s.abbr === abbr);
+                const firstPick = picks[0]?.pick;
+                return (
+                  <div key={abbr} onClick={()=>navigateToTeam(abbr)} style={{
+                    display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px",
+                    background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.04)",
+                    borderRadius:"8px",cursor:"pointer",transition:"all 0.15s",
+                  }}
+                  onMouseEnter={e=>{e.currentTarget.style.background="rgba(45,212,191,0.06)";e.currentTarget.style.borderColor="rgba(45,212,191,0.15)";}}
+                  onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,0.02)";e.currentTarget.style.borderColor="rgba(255,255,255,0.04)";}}
+                  >
+                    <span style={{width:"28px",height:"18px",borderRadius:"3px",background:TEAM_COLORS[abbr]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,color:"#fff",flexShrink:0}}>{abbr}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{info.name.split(" ").pop()}</div>
+                    </div>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",flexShrink:0}}>#{firstPick}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -927,6 +966,267 @@ const TEAM_NEEDS = {
 };
 
 const PICK_VALUES = {1:3000,2:2600,3:2200,4:1800,5:1700,6:1600,7:1500,8:1400,9:1350,10:1300,11:1250,12:1200,13:1150,14:1100,15:1050,16:1000,17:950,18:900,19:875,20:850,21:800,22:780,23:760,24:740,25:720,26:700,27:680,28:660,29:640,30:620,31:600,32:585,33:580,34:560,35:550,36:540,37:530,38:520,39:510,40:500,41:490,42:480,43:470,44:460,45:450,46:440,47:430,48:420,49:410,50:400,51:390,52:380,53:370,54:360,55:350,56:340,57:330,58:320,59:310,60:300,61:292,62:284,63:276,64:270,65:265,66:260,67:255,68:250,69:245,70:240,71:235,72:230,73:225,74:220,75:215,76:210,77:205,78:200,79:195,80:190,81:185,82:180,83:175,84:170,85:165,86:160,87:155,88:150,89:145,90:140,91:136,92:132,93:128,94:124,95:120,96:116,97:112,98:108,99:104,100:100,101:96,102:92,103:88,104:86,105:84,106:82,107:80,108:78,109:76,110:74,111:72,112:70,113:68,114:66,115:64,116:62,117:60,118:58,119:56,120:54,121:52,122:50,123:49,124:48,125:47,126:46,127:45,128:44,129:43,130:42,131:41,132:40,133:39.5,134:39,135:38.5,136:38,137:37.5,138:37,139:36.5,140:36,141:35.5,142:35,143:34.5,144:34,145:33.5,146:33,147:32.5,148:32,149:31.5,150:31,151:30.5,152:30,153:29.5,154:29,155:28.5,156:28,157:27.5,158:27,159:26.5,160:26,161:25.5,162:25,163:24.5,164:24,165:23.5,166:23,167:22.5,168:22,169:21.5,170:21,171:20.5,172:20,173:19.5,174:19,175:18.5,176:18,177:17.5,178:17,179:16.5,180:16,181:15.6,182:15.2,183:14.8,184:14.4,185:14,186:13.6,187:13.2,188:12.8,189:12.4,190:12,191:11.6,192:11.2,193:10.8,194:10.4,195:10,196:9.6,197:9.2,198:8.8,199:8.4,200:8,201:7.8,202:7.6,203:7.4,204:7.2,205:7,206:6.8,207:6.6,208:6.4,209:6.2,210:6,211:5.8,212:5.6,213:5.4,214:5.2,215:5,216:4.8,217:4.6,218:4.5,219:4.4,220:4.4,221:4.3,222:4.2,223:4.1,224:4,225:4,226:3.9,227:3.8,228:3.7,229:3.6,230:3.6,231:3.5,232:3.4,233:3.3,234:3.2,235:3.2,236:3.1,237:3,238:2.9,239:2.8,240:2.8,241:2.7,242:2.6,243:2.5,244:2.4,245:2.4,246:2.3,247:2.2,248:2.1,249:2,250:2,251:1.9,252:1.8,253:1.7,254:1.6,255:1.6,256:1.5,257:1.4};
+
+/* ───── Team Page Data ───── */
+const TEAM_INFO = {
+  ARI:{name:"Arizona Cardinals",conf:"NFC",div:"NFC West"},ATL:{name:"Atlanta Falcons",conf:"NFC",div:"NFC South"},
+  BAL:{name:"Baltimore Ravens",conf:"AFC",div:"AFC North"},BUF:{name:"Buffalo Bills",conf:"AFC",div:"AFC East"},
+  CAR:{name:"Carolina Panthers",conf:"NFC",div:"NFC South"},CHI:{name:"Chicago Bears",conf:"NFC",div:"NFC North"},
+  CIN:{name:"Cincinnati Bengals",conf:"AFC",div:"AFC North"},CLE:{name:"Cleveland Browns",conf:"AFC",div:"AFC North"},
+  DAL:{name:"Dallas Cowboys",conf:"NFC",div:"NFC East"},DEN:{name:"Denver Broncos",conf:"AFC",div:"AFC West"},
+  DET:{name:"Detroit Lions",conf:"NFC",div:"NFC North"},GB:{name:"Green Bay Packers",conf:"NFC",div:"NFC North"},
+  HOU:{name:"Houston Texans",conf:"AFC",div:"AFC South"},IND:{name:"Indianapolis Colts",conf:"AFC",div:"AFC South"},
+  JAX:{name:"Jacksonville Jaguars",conf:"AFC",div:"AFC South"},KC:{name:"Kansas City Chiefs",conf:"AFC",div:"AFC West"},
+  LV:{name:"Las Vegas Raiders",conf:"AFC",div:"AFC West"},LAC:{name:"Los Angeles Chargers",conf:"AFC",div:"AFC West"},
+  LAR:{name:"Los Angeles Rams",conf:"NFC",div:"NFC West"},MIA:{name:"Miami Dolphins",conf:"AFC",div:"AFC East"},
+  MIN:{name:"Minnesota Vikings",conf:"NFC",div:"NFC North"},NE:{name:"New England Patriots",conf:"AFC",div:"AFC East"},
+  NO:{name:"New Orleans Saints",conf:"NFC",div:"NFC South"},NYG:{name:"New York Giants",conf:"NFC",div:"NFC East"},
+  NYJ:{name:"New York Jets",conf:"AFC",div:"AFC East"},PHI:{name:"Philadelphia Eagles",conf:"NFC",div:"NFC East"},
+  PIT:{name:"Pittsburgh Steelers",conf:"AFC",div:"AFC North"},SF:{name:"San Francisco 49ers",conf:"NFC",div:"NFC West"},
+  SEA:{name:"Seattle Seahawks",conf:"NFC",div:"NFC West"},TB:{name:"Tampa Bay Buccaneers",conf:"NFC",div:"NFC South"},
+  TEN:{name:"Tennessee Titans",conf:"AFC",div:"AFC South"},WAS:{name:"Washington Commanders",conf:"NFC",div:"NFC East"},
+};
+
+function TeamPage({ abbr, setActivePage, navigateToTeam }) {
+  const team = TEAM_INFO[abbr];
+  if (!team) return <div style={{padding:"60px",textAlign:"center",color:"#64748b",fontFamily:"'JetBrains Mono',monospace"}}>Team not found</div>;
+
+  const teamColor = TEAM_COLORS[abbr] || "#333";
+  const needs = TEAM_NEEDS[abbr] || [];
+  const teamDraftPicks = DRAFT_ORDER.filter(s => s.abbr === abbr);
+  const totalValue = teamDraftPicks.reduce((sum, s) => sum + (PICK_VALUES[s.pick] || 0), 0);
+  const needsMapping = {"QB":"QB","RB":"RB","WR":"WR","TE":"TE","T":"OT","G":"IOL","C":"IOL","OL":"IOL","DL":"DL","DI":"DL","ED":"EDGE","EDGE":"EDGE","LB":"LB","CB":"CB","S":"S","DB":"S"};
+  const mappedNeeds = needs.map(n => needsMapping[n] || n);
+
+  // Find prospect fits: players whose position matches a team need, within realistic range of their picks
+  const firstPick = teamDraftPicks[0]?.pick || 999;
+  const lastPick = teamDraftPicks[teamDraftPicks.length - 1]?.pick || 0;
+
+  // For each need, find top available prospects in a window around the team's picks
+  const prospectFits = [];
+  const seen = new Set();
+  teamDraftPicks.forEach(slot => {
+    const pickVal = PICK_VALUES[slot.pick] || 0;
+    // Find players ranked near this pick's value range
+    const rangeStart = Math.max(1, slot.pick - 15);
+    const rangeEnd = Math.min(PLAYERS.length, slot.pick + 20);
+    PLAYERS.slice(rangeStart - 1, rangeEnd).forEach(p => {
+      if (seen.has(p.r)) return;
+      if (mappedNeeds.includes(p.p)) {
+        seen.add(p.r);
+        prospectFits.push({ player: p, targetPick: slot.pick, targetRound: slot.round });
+      }
+    });
+  });
+
+  // Sort by rank
+  prospectFits.sort((a, b) => a.player.r - b.player.r);
+
+  // Division rivals for context
+  const divTeams = Object.entries(TEAM_INFO).filter(([a, t]) => t.div === team.div && a !== abbr).map(([a]) => a);
+
+  return (
+    <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"24px 24px 60px"}}>
+      {/* Back nav */}
+      <button onClick={()=>setActivePage("HOME")} style={{
+        background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px",
+        fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginBottom:"20px",padding:0,
+      }}>
+        ← All Teams
+      </button>
+
+      {/* Team Header */}
+      <div style={{
+        background:`linear-gradient(135deg, ${teamColor}22 0%, rgba(27,42,74,0.5) 50%, ${teamColor}11 100%)`,
+        border:`1px solid ${teamColor}44`,borderRadius:"16px",
+        padding:"32px",marginBottom:"24px",position:"relative",overflow:"hidden",
+      }}>
+        <div style={{position:"absolute",top:0,left:0,right:0,height:"4px",background:teamColor}}/>
+        <div style={{display:"flex",alignItems:"center",gap:"16px",flexWrap:"wrap"}}>
+          <div style={{width:"60px",height:"60px",borderRadius:"12px",background:teamColor,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:"#fff",letterSpacing:"1px"}}>{abbr}</div>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:"4px"}}>{team.div}</div>
+            <h1 style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(24px,4vw,36px)",fontWeight:700,color:"#f1f5f9",margin:"0 0 4px",letterSpacing:"1px",textTransform:"uppercase"}}>{team.name}</h1>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"#94a3b8"}}>2026 NFL Draft Profile</div>
+          </div>
+          <div style={{display:"flex",gap:"20px",flexWrap:"wrap"}}>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>Picks</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"28px",fontWeight:700,color:"#2dd4bf"}}>{teamDraftPicks.length}</div>
+            </div>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>Capital</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"28px",fontWeight:700,color:"#f1f5f9"}}>{Math.round(totalValue)}</div>
+            </div>
+            <div style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>1st Pick</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"28px",fontWeight:700,color:"#f59e0b"}}>#{firstPick}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Two column layout */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px"}}>
+
+        {/* Draft Capital */}
+        <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"14px",overflow:"hidden"}}>
+          <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Draft Capital</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>{teamDraftPicks.length} picks · {Math.round(totalValue)} total value</div>
+          </div>
+          <div style={{padding:"16px 20px"}}>
+            {[1,2,3,4,5,6,7].map(r => {
+              const roundP = teamDraftPicks.filter(s => s.round === r);
+              if (roundP.length === 0) return null;
+              return (
+                <div key={r} style={{marginBottom:"12px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"6px"}}>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,color:"#f1f5f9"}}>Round {r}</span>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{roundP.length} pick{roundP.length>1?"s":""}</span>
+                  </div>
+                  <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+                    {roundP.map(s => (
+                      <div key={s.pick} style={{
+                        display:"flex",alignItems:"center",gap:"6px",
+                        background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",
+                        borderRadius:"8px",padding:"6px 10px",
+                      }}>
+                        <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:700,color:"#2dd4bf"}}>#{s.pick}</span>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{Math.round(PICK_VALUES[s.pick]||0)} pts</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Value Comparison */}
+            <div style={{marginTop:"16px",paddingTop:"14px",borderTop:"1px solid rgba(255,255,255,0.04)"}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px"}}>Division Capital Comparison</div>
+              {[abbr, ...divTeams].map(a => {
+                const picks = DRAFT_ORDER.filter(s => s.abbr === a);
+                const val = picks.reduce((sum, s) => sum + (PICK_VALUES[s.pick] || 0), 0);
+                const maxVal = Math.max(...[abbr, ...divTeams].map(t => DRAFT_ORDER.filter(s=>s.abbr===t).reduce((sum,s)=>sum+(PICK_VALUES[s.pick]||0),0)));
+                return (
+                  <div key={a} style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"6px"}}>
+                    <span style={{width:"32px",height:"18px",borderRadius:"3px",background:TEAM_COLORS[a]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",fontWeight:700,color:"#fff",flexShrink:0}}>{a}</span>
+                    <div style={{flex:1,height:"6px",background:"rgba(255,255,255,0.04)",borderRadius:"3px",overflow:"hidden"}}>
+                      <div style={{width:`${(val/maxVal)*100}%`,height:"100%",background:a===abbr?"#2dd4bf":"rgba(255,255,255,0.15)",borderRadius:"3px",transition:"width 0.3s"}}/>
+                    </div>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:a===abbr?"#2dd4bf":"#64748b",fontWeight:a===abbr?600:400,minWidth:"40px",textAlign:"right"}}>{Math.round(val)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Team Needs + Prospect Fits */}
+        <div style={{display:"flex",flexDirection:"column",gap:"20px"}}>
+
+          {/* Team Needs */}
+          <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"14px",overflow:"hidden"}}>
+            <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Team Needs</div>
+            </div>
+            <div style={{padding:"16px 20px",display:"flex",gap:"8px",flexWrap:"wrap"}}>
+              {needs.map((need, i) => (
+                <div key={need} style={{
+                  display:"flex",alignItems:"center",gap:"6px",
+                  background: i < 2 ? "rgba(245,158,11,0.08)" : "rgba(255,255,255,0.03)",
+                  border: i < 2 ? "1px solid rgba(245,158,11,0.2)" : "1px solid rgba(255,255,255,0.06)",
+                  borderRadius:"8px",padding:"8px 14px",
+                }}>
+                  <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:i<2?"#f59e0b":"#94a3b8"}}>{need}</span>
+                  {i < 2 && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#f59e0b",letterSpacing:"0.5px",textTransform:"uppercase"}}>Priority</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Best Prospect Fits */}
+          <div style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:"14px",overflow:"hidden",flex:1}}>
+            <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Best Prospect Fits</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",marginTop:"2px"}}>Consensus prospects matching team needs near draft position</div>
+            </div>
+            <div>
+              {prospectFits.slice(0, 15).map((fit, i) => {
+                const { player, targetPick, targetRound } = fit;
+                const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
+                const profile = PROFILES[player.n];
+                const valueDiff = player.r - targetPick;
+                return (
+                  <div key={player.r} style={{
+                    display:"flex",alignItems:"center",gap:"10px",
+                    padding:"10px 20px",
+                    background: i%2===0 ? "transparent" : "rgba(255,255,255,0.015)",
+                    borderBottom:"1px solid rgba(255,255,255,0.03)",
+                  }}>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:700,color:"#2dd4bf",minWidth:"28px",textAlign:"right"}}>#{player.r}</span>
+                    <span style={{background:pc.bg,color:pc.text,padding:"2px 6px",borderRadius:"3px",fontSize:"9px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",flexShrink:0}}>{player.p}</span>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:500,color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</div>
+                      <div style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#64748b"}}>{player.s}</span>
+                        {profile && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#475569"}}>{profile.height} · {profile.weight} lbs</span>}
+                      </div>
+                    </div>
+                    <div style={{textAlign:"right",flexShrink:0}}>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#94a3b8"}}>R{targetRound} · #{targetPick}</div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:valueDiff<-5?"#22c55e":valueDiff>5?"#ef4444":"#475569"}}>
+                        {valueDiff < -5 ? `↑ Value` : valueDiff > 5 ? `↓ Reach` : "≈ Match"}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA to Mock Draft */}
+      <div style={{
+        background:"linear-gradient(135deg, rgba(45,212,191,0.06) 0%, rgba(27,42,74,0.3) 100%)",
+        border:"1px solid rgba(45,212,191,0.12)",borderRadius:"14px",
+        padding:"24px 32px",marginTop:"24px",
+        display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"12px",
+      }}>
+        <div>
+          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f1f5f9",letterSpacing:"0.5px",textTransform:"uppercase"}}>Draft for {team.name.split(" ").pop()}</div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#64748b",marginTop:"2px"}}>Run a mock draft as the {abbr} GM</div>
+        </div>
+        <button onClick={()=>setActivePage("MOCK DRAFT")} style={{
+          background:"#2dd4bf",color:"#0c1222",border:"none",borderRadius:"8px",
+          padding:"12px 28px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",
+          fontSize:"14px",fontWeight:600,letterSpacing:"1px",textTransform:"uppercase",
+        }}>Start Mock Draft →</button>
+      </div>
+
+      {/* Division Rivals */}
+      {navigateToTeam && divTeams.length > 0 && (
+        <div style={{marginTop:"20px",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}}>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",letterSpacing:"1px",textTransform:"uppercase"}}>{team.div}</span>
+          {divTeams.map(a => (
+            <div key={a} onClick={()=>navigateToTeam(a)} style={{
+              display:"flex",alignItems:"center",gap:"6px",padding:"6px 12px",
+              background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+              borderRadius:"8px",cursor:"pointer",transition:"all 0.15s",
+            }}
+            onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(45,212,191,0.2)";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.06)";}}
+            >
+              <span style={{width:"24px",height:"15px",borderRadius:"2px",background:TEAM_COLORS[a]||"#333",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff"}}>{a}</span>
+              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"#94a3b8"}}>{TEAM_INFO[a]?.name.split(" ").pop()}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function MockDraftPage() {
   const TOTAL_PICKS = DRAFT_ORDER.length; // 257
@@ -2082,6 +2382,46 @@ function MockDraftPage() {
 /* ───── Main App ───── */
 export default function App() {
   const [activePage, setActivePage] = useState("HOME");
+  const [teamPageAbbr, setTeamPageAbbr] = useState(null);
+
+  // Hash-based routing for team pages
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      const teamMatch = hash.match(/^#\/team\/([A-Z]{2,3})$/i);
+      if (teamMatch) {
+        const abbr = teamMatch[1].toUpperCase();
+        if (TEAM_INFO[abbr]) {
+          setTeamPageAbbr(abbr);
+          setActivePage("TEAM");
+          return;
+        }
+      }
+      // If not a team page hash, clear team state
+      if (activePage === "TEAM") {
+        setTeamPageAbbr(null);
+        setActivePage("HOME");
+      }
+    };
+    handleHash();
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
+  }, []);
+
+  const navigateToTeam = (abbr) => {
+    window.location.hash = `/team/${abbr}`;
+    setTeamPageAbbr(abbr);
+    setActivePage("TEAM");
+    window.scrollTo(0, 0);
+  };
+
+  const handleSetPage = (page) => {
+    if (page !== "TEAM") {
+      window.location.hash = "";
+      setTeamPageAbbr(null);
+    }
+    setActivePage(page);
+  };
 
   return (
     <div style={{minHeight:"100vh"}}>
@@ -2099,7 +2439,7 @@ export default function App() {
         }}>
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:"12px",cursor:"pointer"}}
-            onClick={()=>setActivePage("HOME")}>
+            onClick={()=>handleSetPage("HOME")}>
             <img src="/logo.png" alt="Draft Guide" style={{
               height:"36px",width:"auto",flexShrink:0,
             }}/>
@@ -2120,7 +2460,7 @@ export default function App() {
             {PAGES.map(pg=>{
               const active = activePage===pg;
               return (
-                <button className="nav-btn" key={pg} onClick={()=>setActivePage(pg)} style={{
+                <button className="nav-btn" key={pg} onClick={()=>handleSetPage(pg)} style={{
                   background: active ? "rgba(27,42,74,0.08)" : "transparent",
                   color: active ? "#1B2A4A" : "#94a3b8",
                   border:"none",
@@ -2155,9 +2495,10 @@ export default function App() {
       )}
 
       {/* ── Page Content ── */}
-      {activePage==="HOME" && <HomePage setPage={setActivePage}/>}
+      {activePage==="HOME" && <HomePage setPage={handleSetPage} navigateToTeam={navigateToTeam}/>}
       {activePage==="BIG BOARD" && <BigBoardPage/>}
       {activePage==="MOCK DRAFT" && <MockDraftPage/>}
+      {activePage==="TEAM" && teamPageAbbr && <TeamPage abbr={teamPageAbbr} setActivePage={handleSetPage} navigateToTeam={navigateToTeam}/>}
 
       {/* ── Footer ── */}
       <div style={{maxWidth:"960px",margin:"0 auto",padding:"0 24px 40px"}}>
