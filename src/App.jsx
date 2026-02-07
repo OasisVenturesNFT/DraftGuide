@@ -1266,114 +1266,138 @@ function MockDraftPage() {
       {showResults && (
         <div style={{
           position:"fixed",top:0,left:0,right:0,bottom:0,
-          background:"#0c1222",zIndex:300,overflowY:"auto",
+          background:"#0c1222",zIndex:300,
+          display:"flex",flexDirection:"column",
         }}>
-          <div id="draft-results" style={{
-            maxWidth:"640px",margin:"0 auto",padding:"24px 20px 20px",
-          }}>
-            {/* Results header */}
-            <div style={{textAlign:"center",marginBottom:"20px"}}>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"10px",marginBottom:"8px"}}>
-                <img src="/logo-light.png" alt="Draft Guide" style={{height:"28px",width:"auto"}}/>
-                <div style={{
-                  fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,
-                  color:"#f1f5f9",letterSpacing:"1px",textTransform:"uppercase",
-                }}>Draft Guide</div>
-              </div>
-              <div style={{
-                fontFamily:"'Oswald',sans-serif",fontSize:"clamp(20px,4vw,28px)",fontWeight:700,
-                color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.2,
-              }}>2026 Mock Draft</div>
-              <div style={{
-                fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#64748b",
-                letterSpacing:"1px",textTransform:"uppercase",marginTop:"4px",
-              }}>Round 1 · 32 Picks</div>
-            </div>
-
-            {/* Results grid - two columns */}
-            <div style={{
-              display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0",
-              border:"1px solid rgba(255,255,255,0.08)",borderRadius:"10px",
-              overflow:"hidden",
+          {/* Scrollable screenshot area */}
+          <div style={{flex:1,overflowY:"auto",display:"flex",alignItems:"flex-start",justifyContent:"center"}}>
+            <div id="draft-results" style={{
+              width:"100%",maxWidth:"820px",margin:"0 auto",
+              padding:"clamp(10px,2vw,20px) clamp(10px,2vw,20px)",
+              display:"flex",flexDirection:"column",
+              minHeight:"min-content",
             }}>
-              {DRAFT_ORDER.map((slot) => {
-                const player = picks[slot.pick];
-                if (!player) return null;
-                const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
-                return (
-                  <div key={slot.pick} style={{
-                    display:"flex",alignItems:"center",gap:"8px",
-                    padding:"7px 10px",
-                    background: slot.pick % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
-                    borderBottom:"1px solid rgba(255,255,255,0.04)",
-                    borderRight: slot.pick % 2 === 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
-                  }}>
-                    {/* Pick # */}
-                    <span style={{
-                      fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:700,
-                      color:"#2dd4bf",minWidth:"18px",textAlign:"right",
-                    }}>{slot.pick}</span>
+              {/* Results header - compact */}
+              <div style={{textAlign:"center",marginBottom:"clamp(8px,1.5vw,16px)"}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",marginBottom:"4px"}}>
+                  <img src="/logo-light.png" alt="Draft Guide" style={{height:"clamp(20px,3vw,28px)",width:"auto"}}/>
+                  <div style={{
+                    fontFamily:"'Oswald',sans-serif",fontSize:"clamp(12px,2vw,16px)",fontWeight:700,
+                    color:"#f1f5f9",letterSpacing:"1px",textTransform:"uppercase",
+                  }}>Draft Guide</div>
+                </div>
+                <div style={{
+                  fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,3vw,24px)",fontWeight:700,
+                  color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",lineHeight:1.2,
+                }}>2026 Mock Draft</div>
+                <div style={{
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1.2vw,10px)",color:"#64748b",
+                  letterSpacing:"1px",textTransform:"uppercase",marginTop:"2px",
+                }}>Round 1 · 32 Picks</div>
+              </div>
 
-                    {/* Team badge */}
-                    <span style={{
-                      width:"28px",height:"17px",borderRadius:"3px",
-                      background:TEAM_COLORS[slot.abbr]||"#333",
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,
-                      color:"#fff",letterSpacing:"0.3px",flexShrink:0,
-                    }}>{slot.abbr}</span>
-
-                    {/* Position badge */}
-                    <span style={{
-                      background:pc.bg,color:pc.text,
-                      padding:"1px 5px",borderRadius:"3px",
-                      fontSize:"8px",fontWeight:700,letterSpacing:"0.3px",
-                      fontFamily:"'JetBrains Mono',monospace",
-                      minWidth:"30px",textAlign:"center",flexShrink:0,
-                    }}>{player.p}</span>
-
-                    {/* Player name */}
-                    <div style={{flex:1,minWidth:0}}>
+              {/* Results grid - 4 columns × 8 rows */}
+              <div style={{
+                display:"grid",gridTemplateColumns:"repeat(4, 1fr)",gap:"0",
+                border:"1px solid rgba(255,255,255,0.08)",borderRadius:"clamp(6px,1vw,10px)",
+                overflow:"hidden",flex:"1 0 auto",
+              }}>
+                {DRAFT_ORDER.map((slot, idx) => {
+                  const player = picks[slot.pick];
+                  if (!player) return null;
+                  const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
+                  const col = idx % 4;
+                  const row = Math.floor(idx / 4);
+                  const isUserTeamPick = draftMode === "team" && slot.abbr === userTeam;
+                  // Last name only for space
+                  const lastName = player.n.split(" ").slice(-1)[0];
+                  const firstName = player.n.split(" ").slice(0,-1).join(" ");
+                  return (
+                    <div key={slot.pick} style={{
+                      padding:"clamp(4px,0.7vw,8px) clamp(5px,0.8vw,10px)",
+                      background: isUserTeamPick ? "rgba(45,212,191,0.06)"
+                        : row % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+                      borderBottom: row < 7 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                      borderRight: col < 3 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                      borderLeft: isUserTeamPick ? "2px solid #2dd4bf" : "none",
+                    }}>
+                      {/* Row 1: Pick # + Team */}
+                      <div style={{display:"flex",alignItems:"center",gap:"clamp(3px,0.5vw,6px)",marginBottom:"clamp(2px,0.3vw,4px)"}}>
+                        <span style={{
+                          fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:700,
+                          color:"#2dd4bf",minWidth:"clamp(14px,2vw,20px)",
+                        }}>{slot.pick}</span>
+                        <span style={{
+                          width:"clamp(22px,3.5vw,30px)",height:"clamp(13px,2vw,17px)",borderRadius:"2px",
+                          background:TEAM_COLORS[slot.abbr]||"#333",
+                          display:"flex",alignItems:"center",justifyContent:"center",
+                          fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(6px,0.9vw,8px)",fontWeight:700,
+                          color:"#fff",letterSpacing:"0.2px",flexShrink:0,
+                        }}>{slot.abbr}</span>
+                        <span style={{
+                          background:pc.bg,color:pc.text,
+                          padding:"0px clamp(3px,0.5vw,5px)",borderRadius:"2px",
+                          fontSize:"clamp(6px,0.85vw,8px)",fontWeight:700,letterSpacing:"0.2px",
+                          fontFamily:"'JetBrains Mono',monospace",
+                          marginLeft:"auto",
+                        }}>{player.p}</span>
+                      </div>
+                      {/* Row 2: Player name */}
                       <div style={{
-                        fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:500,
+                        fontFamily:"'Oswald',sans-serif",fontSize:"clamp(10px,1.3vw,13px)",fontWeight:600,
                         color:"#f1f5f9",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                        lineHeight:1.2,
                       }}>{player.n}</div>
+                      {/* Row 3: School */}
                       <div style={{
-                        fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#64748b",
+                        fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.85vw,9px)",
+                        color:"#64748b",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                        lineHeight:1.3,
                       }}>{player.s}</div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
 
-            {/* Footer with branding */}
-            <div style={{
-              marginTop:"16px",paddingTop:"12px",
-              borderTop:"1px solid rgba(255,255,255,0.06)",
-              display:"flex",alignItems:"center",justifyContent:"space-between",
-            }}>
+              {/* Footer with branding */}
               <div style={{
-                fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#475569",
-              }}>draft-guide.com</div>
-              <div style={{
-                display:"flex",alignItems:"center",gap:"6px",
+                marginTop:"clamp(8px,1.2vw,14px)",paddingTop:"clamp(6px,1vw,10px)",
+                borderTop:"1px solid rgba(255,255,255,0.06)",
+                display:"flex",alignItems:"center",justifyContent:"space-between",
               }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#475569">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-                <span style={{
-                  fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",
-                  color:"#2dd4bf",fontWeight:500,
-                }}>@DraftGuide_</span>
+                <div style={{
+                  display:"flex",alignItems:"center",gap:"6px",
+                }}>
+                  <span style={{
+                    fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(9px,1.1vw,11px)",
+                    color:"#94a3b8",fontWeight:500,
+                  }}>draft-guide.com</span>
+                  <span style={{
+                    fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",
+                    color:"#475569",
+                  }}>· Create your own mock draft</span>
+                </div>
+                <div style={{
+                  display:"flex",alignItems:"center",gap:"5px",
+                }}>
+                  <svg width="clamp(11px,1.5vw,14px)" height="clamp(11px,1.5vw,14px)" viewBox="0 0 24 24" fill="#475569">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                  <span style={{
+                    fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(9px,1.1vw,11px)",
+                    color:"#2dd4bf",fontWeight:500,
+                  }}>@DraftGuide_</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Action buttons - outside the screenshot area */}
+          {/* Action buttons - fixed at bottom, outside screenshot */}
           <div style={{
-            maxWidth:"640px",margin:"0 auto",padding:"16px 20px 40px",
+            borderTop:"1px solid rgba(255,255,255,0.06)",
+            padding:"12px 20px",
             display:"flex",gap:"10px",justifyContent:"center",
+            background:"#0c1222",flexShrink:0,
           }}>
             <button onClick={()=>setShowResults(false)} style={{
               background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",
