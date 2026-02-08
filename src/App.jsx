@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import PLAYERS from "./players.js";
 import PROFILES from "./profiles.js";
+import FREE_AGENTS from "./freeagents.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -14,7 +15,7 @@ const POS_COLORS = {
 const OFF_POSITIONS = ["QB","RB","WR","TE","OT","IOL"];
 const DEF_POSITIONS = ["DL","EDGE","LB","CB","S"];
 
-const PAGES = ["HOME","BIG BOARD","MOCK DRAFT"];
+const PAGES = ["HOME","BIG BOARD","MOCK DRAFT","FREE AGENCY"];
 
 /* ───── small components ───── */
 function PosBadge({ pos }) {
@@ -388,6 +389,13 @@ function HomePage({ setPage, navigateToTeam }) {
             fontSize:"14px",fontWeight:600,letterSpacing:"1px",textTransform:"uppercase",
             transition:"all 0.2s ease",
           }}>Mock Draft</button>
+          <button onClick={()=>setPage("FREE AGENCY")} style={{
+            background:"transparent",color:"#f97316",
+            border:"1.5px solid rgba(249,115,22,0.3)",borderRadius:"8px",
+            padding:"12px 28px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",
+            fontSize:"14px",fontWeight:600,letterSpacing:"1px",textTransform:"uppercase",
+            transition:"all 0.2s ease",
+          }}>Free Agency</button>
         </div>
         {/* Team Quick Access */}
         {navigateToTeam && (
@@ -2751,6 +2759,237 @@ function MockDraftPage() {
   );
 }
 
+/* ───── Free Agency Page ───── */
+function FreeAgencyPage({ navigateToTeam }) {
+  const [activePos, setActivePos] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [expandedFA, setExpandedFA] = useState(null);
+  const [page, setPage] = useState(0);
+  const PER_PAGE = 50;
+
+  const FA_POSITIONS = ["QB","RB","WR","TE","OT","IOL","DL","EDGE","LB","CB","S","K","P"];
+
+  useEffect(()=>{ setPage(0); },[activePos, search]);
+
+  const filtered = useMemo(()=>{
+    let list = [...FREE_AGENTS].sort((a,b)=>a.r-b.r);
+    if (activePos !== "ALL") list = list.filter(p=>p.p===activePos);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(p=>p.n.toLowerCase().includes(q)||p.tm.toLowerCase().includes(q)||p.p.toLowerCase().includes(q));
+    }
+    return list;
+  },[activePos,search]);
+
+  const totalPages = Math.ceil(filtered.length/PER_PAGE);
+  const pageData = filtered.slice(page*PER_PAGE,(page+1)*PER_PAGE);
+
+  // Position counts
+  const posCounts = useMemo(()=>{
+    const m = {};
+    FREE_AGENTS.forEach(p=>{m[p.p]=(m[p.p]||0)+1;});
+    return m;
+  },[]);
+
+  // Top AAV for scale
+  const maxAAV = useMemo(()=> Math.max(...FREE_AGENTS.map(p=>p.aav)), []);
+
+  return (
+    <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"16px 24px 40px"}}>
+      {/* Hero */}
+      <div style={{
+        background:"linear-gradient(135deg, rgba(249,115,22,0.08) 0%, rgba(27,42,74,0.5) 50%, rgba(249,115,22,0.04) 100%)",
+        border:"1px solid rgba(249,115,22,0.15)",borderRadius:"16px",
+        padding:"32px",marginBottom:"20px",textAlign:"center",
+      }}>
+        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"#f97316",letterSpacing:"2px",textTransform:"uppercase",marginBottom:"8px"}}>2026 NFL</div>
+        <h2 style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(28px,5vw,42px)",fontWeight:700,color:"var(--dg-text)",margin:"0 0 8px",letterSpacing:"1px",textTransform:"uppercase"}}>Free Agency</h2>
+        <p style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"13px",color:"var(--dg-text-dim)",maxWidth:"500px",margin:"0 auto",lineHeight:1.6}}>
+          Top {FREE_AGENTS.length} free agents ranked by projected market value.
+        </p>
+        <div style={{display:"flex",justifyContent:"center",gap:"24px",marginTop:"16px",flexWrap:"wrap"}}>
+          {[
+            {label:"Total FAs",value:FREE_AGENTS.length},
+            {label:"Positions",value:Object.keys(posCounts).length},
+            {label:"Top AAV",value:`$${maxAAV}M`},
+          ].map(s=>(
+            <div key={s.label}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:"#f97316"}}>{s.value}</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Position filter */}
+      <div className="pos-filter" style={{display:"flex",gap:"4px",flexWrap:"wrap",marginBottom:"12px",padding:"10px 14px",background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"10px"}}>
+        <button onClick={()=>setActivePos("ALL")} style={{
+          background:activePos==="ALL"?"#f97316":"transparent",
+          color:activePos==="ALL"?"#fff":"var(--dg-text-muted)",
+          border:"none",borderRadius:"4px",padding:"5px 10px",cursor:"pointer",
+          fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:600,letterSpacing:"0.5px",
+        }}>ALL ({FREE_AGENTS.length})</button>
+        {FA_POSITIONS.filter(pos=>posCounts[pos]).map(pos=>{
+          const pc = POS_COLORS[pos]||{bg:"#555",text:"#fff"};
+          const active = activePos===pos;
+          return (
+            <button key={pos} onClick={()=>setActivePos(pos)} style={{
+              background:active?pc.bg:"transparent",
+              color:active?pc.text:"var(--dg-text-muted)",
+              border:"none",borderRadius:"4px",padding:"5px 10px",cursor:"pointer",
+              fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:600,letterSpacing:"0.5px",
+            }}>{pos} ({posCounts[pos]})</button>
+          );
+        })}
+      </div>
+
+      {/* Search */}
+      <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"12px",flexWrap:"wrap"}}>
+        <div className="search-bar" style={{
+          display:"flex",alignItems:"center",gap:"8px",flex:"1",minWidth:"200px",
+          background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",
+          borderRadius:"8px",padding:"8px 14px",
+        }}>
+          <SearchIcon/>
+          <input value={search} onChange={e=>setSearch(e.target.value)}
+            placeholder="Search player, team, or position..."
+            style={{background:"transparent",border:"none",outline:"none",color:"var(--dg-text)",fontSize:"13px",fontFamily:"'JetBrains Mono',monospace",width:"100%"}}
+          />
+          {search && <button onClick={()=>setSearch("")} style={{background:"none",border:"none",color:"var(--dg-text-dim)",cursor:"pointer",fontSize:"16px",padding:"0 4px"}}>×</button>}
+        </div>
+        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",whiteSpace:"nowrap"}}>
+          {filtered.length} player{filtered.length!==1?"s":""}
+        </div>
+      </div>
+
+      {/* Table Header */}
+      <div className="table-header fa-table-header" style={{
+        display:"grid",gridTemplateColumns:"60px 52px 1fr 60px 90px",
+        gap:"12px",padding:"8px 20px",
+        borderBottom:"1px solid rgba(249,115,22,0.2)",
+        fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",
+        letterSpacing:"1px",textTransform:"uppercase",
+      }}>
+        <div>RANK</div>
+        <div>POS</div>
+        <div>PLAYER</div>
+        <div style={{textAlign:"center"}}>AGE</div>
+        <div style={{textAlign:"right"}}>PROJ AAV</div>
+      </div>
+
+      {/* Rows */}
+      <div>
+        {pageData.map((fa, i) => {
+          const pc = POS_COLORS[fa.p]||{bg:"#555",text:"#fff"};
+          const expanded = expandedFA === fa.r;
+          const aavPct = (fa.aav / maxAAV) * 100;
+          return (
+            <div key={fa.r}>
+              <div
+                onClick={()=>setExpandedFA(expanded?null:fa.r)}
+                style={{
+                  display:"grid",gridTemplateColumns:"60px 52px 1fr 60px 90px",
+                  alignItems:"center",gap:"12px",padding:"12px 20px",
+                  background:expanded?"rgba(249,115,22,0.06)":i%2===0?"transparent":"var(--dg-row-alt)",
+                  borderBottom:expanded?"none":"1px solid var(--dg-divider)",
+                  cursor:"pointer",transition:"background 0.15s",
+                }}
+                onMouseEnter={e=>{if(!expanded)e.currentTarget.style.background="rgba(249,115,22,0.04)";}}
+                onMouseLeave={e=>{if(!expanded)e.currentTarget.style.background=i%2===0?"transparent":"var(--dg-row-alt)";}}
+              >
+                <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
+                  <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"#f97316"}}>{fa.r}</span>
+                </div>
+                <span style={{background:pc.bg,color:pc.text,padding:"3px 8px",borderRadius:"4px",fontSize:"10px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",textAlign:"center",minWidth:"40px",display:"inline-block"}}>{fa.p}</span>
+                <div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:500,color:"var(--dg-text)",letterSpacing:"0.3px"}}>{fa.n}</div>
+                  <div style={{display:"flex",alignItems:"center",gap:"6px",marginTop:"1px"}}>
+                    <span style={{width:"22px",height:"14px",borderRadius:"2px",background:TEAM_COLORS[fa.tm]||"#333",display:"inline-flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff"}}>{fa.tm}</span>
+                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)"}}>{TEAM_INFO[fa.tm]?.name||fa.tm}</span>
+                  </div>
+                </div>
+                <div style={{textAlign:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-muted)"}}>{fa.age}</div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:fa.aav>=20?"#f97316":fa.aav>=10?"#f59e0b":"var(--dg-text-muted)"}}>${fa.aav}M</div>
+                  <div style={{height:"3px",background:"rgba(255,255,255,0.06)",borderRadius:"2px",marginTop:"3px",overflow:"hidden"}}>
+                    <div style={{width:`${aavPct}%`,height:"100%",background:fa.aav>=20?"#f97316":fa.aav>=10?"#f59e0b":"var(--dg-text-faint)",borderRadius:"2px"}}/>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expanded Details */}
+              {expanded && (
+                <div style={{
+                  padding:"16px 20px",background:"rgba(249,115,22,0.03)",
+                  borderBottom:"1px solid var(--dg-card-border)",
+                  borderLeft:"3px solid #f97316",
+                }}>
+                  <div style={{display:"flex",gap:"20px",flexWrap:"wrap",marginBottom:"12px"}}>
+                    <div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"3px"}}>2025 Stats</div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-muted)"}}>{fa.stats}</div>
+                    </div>
+                    <div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"3px"}}>Projected AAV</div>
+                      <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f97316"}}>${fa.aav}M/yr</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>Projected Landing Spots</div>
+                    <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
+                      {fa.tags.filter(t=>t!=="RETIRE"&&t!=="RETIRED").map(tm=>(
+                        <span key={tm} onClick={navigateToTeam?()=>navigateToTeam(tm):undefined} style={{
+                          display:"inline-flex",alignItems:"center",gap:"5px",
+                          background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",
+                          borderRadius:"6px",padding:"4px 10px",cursor:navigateToTeam?"pointer":"default",
+                          transition:"all 0.15s",
+                        }}
+                        onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(249,115,22,0.3)";}}
+                        onMouseLeave={e=>{e.currentTarget.style.borderColor="var(--dg-card-border2)";}}
+                        >
+                          <span style={{width:"20px",height:"13px",borderRadius:"2px",background:TEAM_COLORS[tm]||"#333",display:"inline-flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff"}}>{tm}</span>
+                          <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"var(--dg-text)"}}>{TEAM_INFO[tm]?.name?.split(" ").pop()||tm}</span>
+                        </span>
+                      ))}
+                      {fa.tags.includes("RETIRE") && (
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",padding:"4px 10px",border:"1px dashed var(--dg-card-border2)",borderRadius:"6px"}}>Possible Retirement</span>
+                      )}
+                      {fa.tags.includes("RETIRED") && (
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",padding:"4px 10px",border:"1px dashed var(--dg-card-border2)",borderRadius:"6px"}}>Retired</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Pagination */}
+      {totalPages>1 && (
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"8px",marginTop:"20px"}}>
+          <button onClick={()=>setPage(Math.max(0,page-1))} disabled={page===0} style={{
+            background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",
+            borderRadius:"6px",padding:"8px 16px",cursor:page===0?"default":"pointer",
+            color:page===0?"var(--dg-text-ghost)":"var(--dg-text)",fontFamily:"'Oswald',sans-serif",fontSize:"13px",
+            letterSpacing:"0.5px",opacity:page===0?0.4:1,
+          }}>← PREV</button>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text-dim)",padding:"8px 16px"}}>
+            {page*PER_PAGE+1}–{Math.min((page+1)*PER_PAGE,filtered.length)} of {filtered.length}
+          </div>
+          <button onClick={()=>setPage(Math.min(totalPages-1,page+1))} disabled={page>=totalPages-1} style={{
+            background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",
+            borderRadius:"6px",padding:"8px 16px",cursor:page>=totalPages-1?"default":"pointer",
+            color:page>=totalPages-1?"var(--dg-text-ghost)":"var(--dg-text)",fontFamily:"'Oswald',sans-serif",fontSize:"13px",
+            letterSpacing:"0.5px",opacity:page>=totalPages-1?0.4:1,
+          }}>NEXT →</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ───── Prospect Comparison Overlay ───── */
 function CompareOverlay({ players, onClose, onUpdate }) {
   const [addSearch, setAddSearch] = useState("");
@@ -2939,8 +3178,8 @@ function CompareOverlay({ players, onClose, onUpdate }) {
 }
 
 /* ───── Main App ───── */
-const HASH_TO_PAGE = {"":"HOME","#/board":"BIG BOARD","#/mock":"MOCK DRAFT"};
-const PAGE_TO_HASH = {"HOME":"","BIG BOARD":"#/board","MOCK DRAFT":"#/mock"};
+const HASH_TO_PAGE = {"":"HOME","#/board":"BIG BOARD","#/mock":"MOCK DRAFT","#/free-agency":"FREE AGENCY"};
+const PAGE_TO_HASH = {"HOME":"","BIG BOARD":"#/board","MOCK DRAFT":"#/mock","FREE AGENCY":"#/free-agency"};
 
 export default function App() {
   const [activePage, setActivePage] = useState("HOME");
@@ -3118,6 +3357,7 @@ export default function App() {
       {activePage==="HOME" && <HomePage setPage={handleSetPage} navigateToTeam={navigateToTeam}/>}
       {activePage==="BIG BOARD" && <BigBoardPage navigateToTeam={navigateToTeam} openCompare={setComparePlayers}/>}
       {activePage==="MOCK DRAFT" && <MockDraftPage/>}
+      {activePage==="FREE AGENCY" && <FreeAgencyPage navigateToTeam={navigateToTeam}/>}
       {activePage==="TEAM" && teamPageAbbr && <TeamPage abbr={teamPageAbbr} setActivePage={handleSetPage} navigateToTeam={navigateToTeam}/>}
 
       {/* ── Compare Overlay ── */}

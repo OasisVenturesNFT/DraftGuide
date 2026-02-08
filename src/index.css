@@ -136,6 +136,9 @@ input::placeholder {
     grid-template-columns: 54px 44px 1fr 80px !important; 
     padding: 8px 12px !important; 
   }
+  .fa-table-header {
+    grid-template-columns: 50px 44px 1fr 36px 70px !important;
+  }
 
   /* Position filter - tighter */
   .pos-filter { padding: 10px 10px !important; }
