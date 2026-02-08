@@ -1890,10 +1890,51 @@ function MockDraftPage() {
     setTradeHistory([]);
     setPickOwnership({});
     setTradeBanner(null);
-    setDraftRounds(1);
     setRoundCompletePrompt(null);
     setExpandedMockPlayer(null);
     setResultsView("my");
+    // Re-trigger auto-picks after state clears
+    setTimeout(() => {
+      if (draftMode === "team" && userTeam) {
+        const slot1 = DRAFT_ORDER[0];
+        if (slot1.abbr === userTeam) { setCurrentPick(1); return; }
+        let tmpPicks = {};
+        const autopickQueue = [];
+        for (let i = 0; i < DRAFT_ORDER.length; i++) {
+          const slot = DRAFT_ORDER[i];
+          if (slot.abbr === userTeam) break;
+          const autoPick = getAutoPick(slot.abbr, tmpPicks);
+          if (autoPick) {
+            autopickQueue.push({pick: slot.pick, player: autoPick});
+            tmpPicks[slot.pick] = autoPick;
+          }
+        }
+        if (autopickQueue.length > 0) {
+          setAutoPickAnimating(true);
+          const delay = autopickQueue.length > 10 ? 150 : 350;
+          autopickQueue.forEach((ap, idx) => {
+            setTimeout(() => {
+              setPicks(prev => ({...prev, [ap.pick]: ap.player}));
+              setCurrentPick(ap.pick);
+              const apRound = DRAFT_ORDER.find(s=>s.pick===ap.pick)?.round || 1;
+              setActiveRound(apRound);
+              if (idx === autopickQueue.length - 1) {
+                setTimeout(() => {
+                  setAutoPickAnimating(false);
+                  const userSlot = DRAFT_ORDER.find(s => s.abbr === userTeam);
+                  if (userSlot) {
+                    setCurrentPick(userSlot.pick);
+                    setActiveRound(userSlot.round);
+                  }
+                }, 200);
+              }
+            }, delay * (idx + 1));
+          });
+        }
+      } else if (draftMode === "full") {
+        setCurrentPick(1);
+      }
+    }, 50);
   };
 
   const exitToModal = () => {
