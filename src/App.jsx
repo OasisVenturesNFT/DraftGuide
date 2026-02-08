@@ -403,16 +403,16 @@ function HomePage({ setPage, navigateToTeam }) {
           <div style={{marginTop:"28px",paddingTop:"20px",borderTop:"1px solid rgba(45,212,191,0.08)"}}>
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase",marginBottom:"4px"}}>Team Draft Profiles</div>
             <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",letterSpacing:"0.5px",marginBottom:"12px"}}>Draft capital · team needs · prospect fits</div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:"4px",justifyContent:"center",maxWidth:"600px",margin:"0 auto"}}>
+            <div className="team-badges-grid" style={{display:"flex",flexWrap:"wrap",gap:"6px",justifyContent:"center",maxWidth:"800px",margin:"0 auto"}}>
               {Object.entries(TEAM_INFO).sort((a,b) => a[1].name.localeCompare(b[1].name)).map(([ab]) => (
-                <span key={ab} onClick={()=>navigateToTeam(ab)} title={TEAM_INFO[ab]?.name} style={{
-                  width:"30px",height:"20px",borderRadius:"3px",background:TEAM_COLORS[ab]||"#333",
+                <span key={ab} onClick={()=>navigateToTeam(ab)} title={TEAM_INFO[ab]?.name} className="team-badge" style={{
+                  width:"48px",height:"32px",borderRadius:"5px",background:TEAM_COLORS[ab]||"#333",
                   display:"inline-flex",alignItems:"center",justifyContent:"center",
-                  fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff",
-                  cursor:"pointer",opacity:0.65,transition:"all 0.15s",
+                  fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",fontWeight:700,color:"#fff",
+                  cursor:"pointer",opacity:0.75,transition:"all 0.15s",
                 }}
-                onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="scale(1.15)";}}
-                onMouseLeave={e=>{e.currentTarget.style.opacity="0.65";e.currentTarget.style.transform="scale(1)";}}
+                onMouseEnter={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="scale(1.1)";}}
+                onMouseLeave={e=>{e.currentTarget.style.opacity="0.75";e.currentTarget.style.transform="scale(1)";}}
                 >{ab}</span>
               ))}
             </div>

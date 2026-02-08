@@ -167,6 +167,13 @@ input::placeholder {
 
   /* Homepage team grid - 2 columns on mobile */
   .home-team-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Team badges - smaller on mobile */
+  .team-badge { width: 34px !important; height: 24px !important; font-size: 8px !important; }
+  .team-badges-grid { gap: 4px !important; }
+
+  /* Team page tabs & grid */
+  .team-page-grid { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 480px) {
