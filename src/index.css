@@ -202,4 +202,6 @@ input::placeholder {
 
   /* Team page two column → single column */
   .team-page-grid { grid-template-columns: 1fr !important; }
+  .gm-conf-grid { grid-template-columns: 1fr 1fr !important; }
+  .gm-summary-grid { grid-template-columns: 1fr !important; }
 }

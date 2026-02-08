@@ -35,6 +35,7 @@ import { CAR_CAP, CAR_DEPTH_CHART } from "./panthers-roster.js";
 import { NO_CAP, NO_DEPTH_CHART } from "./saints-roster.js";
 import { TB_CAP, TB_DEPTH_CHART } from "./bucs-roster.js";
 import { TEAM_GRADES, getGradeLetter, getGradeColor } from "./team-needs-grades.js";
+import GMModePage from "./GMMode.jsx";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -48,7 +49,7 @@ const POS_COLORS = {
 const OFF_POSITIONS = ["QB","RB","WR","TE","OT","IOL"];
 const DEF_POSITIONS = ["DL","EDGE","LB","CB","S"];
 
-const PAGES = ["HOME","BIG BOARD","MOCK DRAFT","FREE AGENCY"];
+const PAGES = ["HOME","BIG BOARD","MOCK DRAFT","FREE AGENCY","GM MODE"];
 
 /* ───── small components ───── */
 function PosBadge({ pos }) {
@@ -3517,8 +3518,8 @@ function CompareOverlay({ players, onClose, onUpdate }) {
 }
 
 /* ───── Main App ───── */
-const HASH_TO_PAGE = {"":"HOME","#/board":"BIG BOARD","#/mock":"MOCK DRAFT","#/free-agency":"FREE AGENCY"};
-const PAGE_TO_HASH = {"HOME":"","BIG BOARD":"#/board","MOCK DRAFT":"#/mock","FREE AGENCY":"#/free-agency"};
+const HASH_TO_PAGE = {"":"HOME","#/board":"BIG BOARD","#/mock":"MOCK DRAFT","#/free-agency":"FREE AGENCY","#/gm-mode":"GM MODE"};
+const PAGE_TO_HASH = {"HOME":"","BIG BOARD":"#/board","MOCK DRAFT":"#/mock","FREE AGENCY":"#/free-agency","GM MODE":"#/gm-mode"};
 
 export default function App() {
   const [activePage, setActivePage] = useState("HOME");
@@ -3697,6 +3698,7 @@ export default function App() {
       {activePage==="BIG BOARD" && <BigBoardPage navigateToTeam={navigateToTeam} openCompare={setComparePlayers}/>}
       {activePage==="MOCK DRAFT" && <MockDraftPage/>}
       {activePage==="FREE AGENCY" && <FreeAgencyPage navigateToTeam={navigateToTeam}/>}
+      {activePage==="GM MODE" && <GMModePage teamData={TEAM_DATA} teamInfo={TEAM_INFO} teamColors={TEAM_COLORS} navigateToTeam={navigateToTeam}/>}
       {activePage==="TEAM" && teamPageAbbr && <TeamPage abbr={teamPageAbbr} setActivePage={handleSetPage} navigateToTeam={navigateToTeam}/>}
 
       {/* ── Compare Overlay ── */}
