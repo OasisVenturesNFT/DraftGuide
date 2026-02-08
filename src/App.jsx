@@ -22,6 +22,18 @@ import { DAL_CAP, DAL_DEPTH_CHART } from "./cowboys-roster.js";
 import { NYG_CAP, NYG_DEPTH_CHART } from "./giants-roster.js";
 import { PHI_CAP, PHI_DEPTH_CHART } from "./eagles-roster.js";
 import { WAS_CAP, WAS_DEPTH_CHART } from "./commanders-roster.js";
+import { ARI_CAP, ARI_DEPTH_CHART } from "./cardinals-roster.js";
+import { LAR_CAP, LAR_DEPTH_CHART } from "./rams-roster.js";
+import { SF_CAP, SF_DEPTH_CHART } from "./niners-roster.js";
+import { SEA_CAP, SEA_DEPTH_CHART } from "./seahawks-roster.js";
+import { CHI_CAP, CHI_DEPTH_CHART } from "./bears-roster.js";
+import { DET_CAP, DET_DEPTH_CHART } from "./lions-roster.js";
+import { GB_CAP, GB_DEPTH_CHART } from "./packers-roster.js";
+import { MIN_CAP, MIN_DEPTH_CHART } from "./vikings-roster.js";
+import { ATL_CAP, ATL_DEPTH_CHART } from "./falcons-roster.js";
+import { CAR_CAP, CAR_DEPTH_CHART } from "./panthers-roster.js";
+import { NO_CAP, NO_DEPTH_CHART } from "./saints-roster.js";
+import { TB_CAP, TB_DEPTH_CHART } from "./bucs-roster.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -1277,6 +1289,18 @@ const TEAM_DATA = {
   NYG: { cap: NYG_CAP, depth: NYG_DEPTH_CHART, roster: null },
   PHI: { cap: PHI_CAP, depth: PHI_DEPTH_CHART, roster: null },
   WAS: { cap: WAS_CAP, depth: WAS_DEPTH_CHART, roster: null },
+  ARI: { cap: ARI_CAP, depth: ARI_DEPTH_CHART, roster: null },
+  LAR: { cap: LAR_CAP, depth: LAR_DEPTH_CHART, roster: null },
+  SF:  { cap: SF_CAP,  depth: SF_DEPTH_CHART,  roster: null },
+  SEA: { cap: SEA_CAP, depth: SEA_DEPTH_CHART, roster: null },
+  CHI: { cap: CHI_CAP, depth: CHI_DEPTH_CHART, roster: null },
+  DET: { cap: DET_CAP, depth: DET_DEPTH_CHART, roster: null },
+  GB:  { cap: GB_CAP,  depth: GB_DEPTH_CHART,  roster: null },
+  MIN: { cap: MIN_CAP, depth: MIN_DEPTH_CHART, roster: null },
+  ATL: { cap: ATL_CAP, depth: ATL_DEPTH_CHART, roster: null },
+  CAR: { cap: CAR_CAP, depth: CAR_DEPTH_CHART, roster: null },
+  NO:  { cap: NO_CAP,  depth: NO_DEPTH_CHART,  roster: null },
+  TB:  { cap: TB_CAP,  depth: TB_DEPTH_CHART,  roster: null },
 };
 
 const TEAM_COLORS = {
