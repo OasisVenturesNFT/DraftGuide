@@ -18,6 +18,10 @@ import { HOU_CAP, HOU_DEPTH_CHART } from "./texans-roster.js";
 import { IND_CAP, IND_DEPTH_CHART } from "./colts-roster.js";
 import { JAX_CAP, JAX_DEPTH_CHART } from "./jaguars-roster.js";
 import { TEN_CAP, TEN_DEPTH_CHART } from "./titans-roster.js";
+import { DAL_CAP, DAL_DEPTH_CHART } from "./cowboys-roster.js";
+import { NYG_CAP, NYG_DEPTH_CHART } from "./giants-roster.js";
+import { PHI_CAP, PHI_DEPTH_CHART } from "./eagles-roster.js";
+import { WAS_CAP, WAS_DEPTH_CHART } from "./commanders-roster.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -1269,6 +1273,10 @@ const TEAM_DATA = {
   IND: { cap: IND_CAP, depth: IND_DEPTH_CHART, roster: null },
   JAX: { cap: JAX_CAP, depth: JAX_DEPTH_CHART, roster: null },
   TEN: { cap: TEN_CAP, depth: TEN_DEPTH_CHART, roster: null },
+  DAL: { cap: DAL_CAP, depth: DAL_DEPTH_CHART, roster: null },
+  NYG: { cap: NYG_CAP, depth: NYG_DEPTH_CHART, roster: null },
+  PHI: { cap: PHI_CAP, depth: PHI_DEPTH_CHART, roster: null },
+  WAS: { cap: WAS_CAP, depth: WAS_DEPTH_CHART, roster: null },
 };
 
 const TEAM_COLORS = {
