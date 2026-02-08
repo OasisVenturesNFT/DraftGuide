@@ -8,6 +8,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { TEAM_GRADES, getGradeLetter, getGradeColor } from "./team-needs-grades.js";
 import FREE_AGENTS from "./freeagents.js";
+import { generateRoster } from "./roster-generator.js";
 
 const POS_GROUPS = ["QB","RB","WR","TE","OL","EDGE","DL","LB","CB","S"];
 const POS_LABELS = {QB:"Quarterback",RB:"Running Back",WR:"Wide Receiver",TE:"Tight End",OL:"Offensive Line",EDGE:"Edge Rusher",DL:"Defensive Line",LB:"Linebacker",CB:"Cornerback",S:"Safety",ST:"Special Teams"};
@@ -128,12 +129,24 @@ export default function GMModePage({ teamData, teamInfo, teamColors, navigateToT
   const adjustedCap = originalCap + totalRosterSavings;
   const effectiveCap = adjustedCap - faBudgetUsed * 1000000;
 
+  // Get or generate roster for selected team
+  const teamRoster = useMemo(() => {
+    if (!selectedTeam || !teamData[selectedTeam]) return [];
+    // Use real roster data if available (e.g. Patriots)
+    if (teamData[selectedTeam].roster) return teamData[selectedTeam].roster;
+    // Otherwise generate from depth chart
+    const depth = teamData[selectedTeam].depth;
+    const cap = teamData[selectedTeam].cap;
+    if (depth) return generateRoster(depth, cap);
+    return [];
+  }, [selectedTeam, teamData]);
+
   const activeRoster = useMemo(() => {
-    if (!selectedTeam || !teamData[selectedTeam]?.roster) return [];
+    if (!teamRoster.length) return [];
     const cutNames = new Set(cutPlayers.map(p => p.n));
     const tradeNames = new Set(tradedPlayers.map(p => p.n));
-    return teamData[selectedTeam].roster.filter(p => !cutNames.has(p.n) && !tradeNames.has(p.n) && p.status !== "PS" && p.status !== "PS/IR");
-  }, [selectedTeam, teamData, cutPlayers, tradedPlayers]);
+    return teamRoster.filter(p => !cutNames.has(p.n) && !tradeNames.has(p.n) && p.status !== "PS" && p.status !== "PS/IR");
+  }, [teamRoster, cutPlayers, tradedPlayers]);
 
   // ── STYLE HELPERS ──
   const mono9 = {fontFamily:"'JetBrains Mono',monospace",fontSize:"9px"};
@@ -203,8 +216,8 @@ export default function GMModePage({ teamData, teamInfo, teamColors, navigateToT
   // ══════════════════════════════════════════════════════════
   if (phase === PHASE_REVIEW && selectedTeam && teamGrades) {
     const tg = teamGrades;
-    const roster = teamData[selectedTeam]?.roster || [];
-    const hasRoster = roster.length > 0;
+    const hasRoster = teamRoster.length > 0;
+    const hasRealRoster = !!(teamData[selectedTeam]?.roster);
     const rosterByGroup = {};
     activeRoster.forEach(p => { const g = rosterPosToGroup(p.p); if (!rosterByGroup[g]) rosterByGroup[g] = []; rosterByGroup[g].push(p); });
     const displayGroups = rosterFilter === "ALL" ? [...POS_GROUPS, "ST"] : [rosterFilter];
@@ -366,6 +379,11 @@ export default function GMModePage({ teamData, teamInfo, teamColors, navigateToT
 
         {/* ── TAB: ROSTER ── */}
         {reviewTab === TAB_ROSTER && hasRoster && (<>
+          {!hasRealRoster && (
+            <div style={{background:"rgba(59,130,246,0.04)",border:"1px solid rgba(59,130,246,0.12)",borderRadius:"8px",padding:"10px 14px",marginBottom:"12px"}}>
+              <div style={{...mono10,color:"#3b82f6",lineHeight:1.5}}>💡 Contract values are market-based estimates from depth chart data. Star player salaries use known values. Cap savings and dead money are approximations.</div>
+            </div>
+          )}
           <div style={{display:"flex",gap:"4px",marginBottom:"12px",flexWrap:"wrap"}}>
             {["ALL",...POS_GROUPS,"ST"].map(f => (
               <button key={f} onClick={() => setRosterFilter(f)} style={{
