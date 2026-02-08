@@ -6,6 +6,10 @@ import { NE_ROSTER, NE_CAP, NE_DEPTH_CHART, NE_DEAD_MONEY } from "./patriots-ros
 import { BUF_CAP, BUF_DEPTH_CHART } from "./bills-roster.js";
 import { NYJ_CAP, NYJ_DEPTH_CHART } from "./jets-roster.js";
 import { MIA_CAP, MIA_DEPTH_CHART } from "./dolphins-roster.js";
+import { DEN_CAP, DEN_DEPTH_CHART } from "./broncos-roster.js";
+import { KC_CAP, KC_DEPTH_CHART } from "./chiefs-roster.js";
+import { LV_CAP, LV_DEPTH_CHART } from "./raiders-roster.js";
+import { LAC_CAP, LAC_DEPTH_CHART } from "./chargers-roster.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -1245,6 +1249,10 @@ const TEAM_DATA = {
   BUF: { cap: BUF_CAP, depth: BUF_DEPTH_CHART, roster: null },
   NYJ: { cap: NYJ_CAP, depth: NYJ_DEPTH_CHART, roster: null },
   MIA: { cap: MIA_CAP, depth: MIA_DEPTH_CHART, roster: null },
+  DEN: { cap: DEN_CAP, depth: DEN_DEPTH_CHART, roster: null },
+  KC:  { cap: KC_CAP,  depth: KC_DEPTH_CHART,  roster: null },
+  LV:  { cap: LV_CAP,  depth: LV_DEPTH_CHART,  roster: null },
+  LAC: { cap: LAC_CAP, depth: LAC_DEPTH_CHART, roster: null },
 };
 
 const TEAM_COLORS = {
