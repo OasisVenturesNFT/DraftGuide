@@ -34,6 +34,7 @@ import { ATL_CAP, ATL_DEPTH_CHART } from "./falcons-roster.js";
 import { CAR_CAP, CAR_DEPTH_CHART } from "./panthers-roster.js";
 import { NO_CAP, NO_DEPTH_CHART } from "./saints-roster.js";
 import { TB_CAP, TB_DEPTH_CHART } from "./bucs-roster.js";
+import { TEAM_GRADES, getGradeLetter, getGradeColor } from "./team-needs-grades.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -1462,7 +1463,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
       {/* Tab Bar */}
       {(TEAM_DATA[abbr]) && (
         <div style={{display:"flex",gap:"2px",marginBottom:"20px",background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"10px",padding:"4px",overflow:"hidden"}}>
-          {[{k:"overview",label:"Draft Profile"},{k:"depth",label:"Depth Chart"},{k:"cap",label:"Cap Overview"}].map(tab=>(
+          {[{k:"overview",label:"Draft Profile"},{k:"depth",label:"Depth Chart"},{k:"needs",label:"Team Needs"},{k:"cap",label:"Cap Overview"}].map(tab=>(
             <button key={tab.k} onClick={()=>setTeamTab(tab.k)} style={{
               flex:1,padding:"10px 16px",border:"none",borderRadius:"8px",cursor:"pointer",
               background:teamTab===tab.k?teamColor:"transparent",
@@ -1650,6 +1651,110 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
           </div>
         ))}
       </div>
+      ) : teamTab === "needs" && TEAM_GRADES[abbr] ? (
+      (() => {
+        const tg = TEAM_GRADES[abbr];
+        const overallGrade = getGradeLetter(tg.overall);
+        const overallColor = getGradeColor(overallGrade);
+        const groups = Object.entries(tg.groups).filter(([k]) => k !== "ST");
+        const strengths = groups.filter(([,d]) => d.score >= 80).sort((a,b) => b[1].score - a[1].score);
+        const weaknesses = groups.filter(([,d]) => d.score < 64).sort((a,b) => a[1].score - b[1].score);
+        return (
+      <div>
+        {/* Summary Row */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"12px",marginBottom:"20px"}} className="team-page-grid">
+          <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"12px",padding:"20px",textAlign:"center"}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>Overall Roster</div>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"42px",fontWeight:700,color:overallColor,lineHeight:1}}>{overallGrade}</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",marginTop:"4px"}}>{tg.overall}/100</div>
+          </div>
+          <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"12px",padding:"16px"}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#22c55e",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px"}}>★ Strengths</div>
+            {strengths.slice(0,3).map(([pos,d]) => (
+              <div key={pos} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0"}}>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text)"}}>{pos}</span>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:700,color:getGradeColor(d.grade)}}>{d.grade}</span>
+              </div>
+            ))}
+            {strengths.length===0 && <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)"}}>No groups above B+</div>}
+          </div>
+          <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"12px",padding:"16px"}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#ef4444",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px"}}>⚠ Weaknesses</div>
+            {weaknesses.slice(0,3).map(([pos,d]) => (
+              <div key={pos} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 0"}}>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text)"}}>{pos}</span>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"15px",fontWeight:700,color:getGradeColor(d.grade)}}>{d.grade}</span>
+              </div>
+            ))}
+            {weaknesses.length===0 && <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)"}}>No major weaknesses</div>}
+          </div>
+        </div>
+
+        {/* Draft Priority */}
+        <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"12px",padding:"16px 20px",marginBottom:"20px"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"8px"}}>Draft Priority Analysis</div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"12px",color:"var(--dg-text)",lineHeight:1.6}}>{tg.draftPriority}</div>
+          <div style={{display:"flex",gap:"6px",marginTop:"12px",flexWrap:"wrap"}}>
+            {tg.topNeeds.map((n,i) => (
+              <span key={n} style={{
+                fontFamily:"'Oswald',sans-serif",fontSize:"11px",fontWeight:600,letterSpacing:"0.5px",
+                padding:"4px 10px",borderRadius:"6px",
+                background:i===0?"rgba(239,68,68,0.15)":i===1?"rgba(249,115,22,0.12)":"rgba(250,204,21,0.08)",
+                color:i===0?"#ef4444":i===1?"#f97316":"#facc15",
+                border:`1px solid ${i===0?"rgba(239,68,68,0.3)":i===1?"rgba(249,115,22,0.25)":"rgba(250,204,21,0.15)"}`,
+              }}>#{i+1} {n}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Position Group Detail Cards */}
+        <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"12px",overflow:"hidden"}}>
+          <div style={{padding:"16px 20px",borderBottom:"1px solid var(--dg-card-border)"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Position Group Grades</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",marginTop:"2px"}}>Composite: Starter Quality · Depth · Age · Cap · Contract · Trajectory</div>
+          </div>
+          {Object.entries(tg.groups).map(([pos, data], idx, arr) => {
+            const isNeed = tg.topNeeds.includes(pos);
+            const gradeColor = getGradeColor(data.grade);
+            const barWidth = Math.max(data.score, 5);
+            return (
+              <div key={pos} style={{
+                padding:"14px 20px",
+                borderBottom:idx < arr.length - 1 ? "1px solid var(--dg-card-border)" : "none",
+                background:isNeed ? "rgba(239,68,68,0.03)" : "transparent",
+              }}>
+                <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"6px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"6px",minWidth:"70px"}}>
+                    <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:"var(--dg-text)"}}>{pos}</span>
+                    {isNeed && <span style={{fontSize:"7px",color:"#ef4444",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,background:"rgba(239,68,68,0.12)",padding:"2px 4px",borderRadius:"3px",letterSpacing:"0.5px"}}>NEED</span>}
+                  </div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"20px",fontWeight:700,color:gradeColor,minWidth:"36px",textAlign:"center"}}>{data.grade}</div>
+                  <div style={{flex:1,height:"6px",background:"rgba(255,255,255,0.05)",borderRadius:"3px",overflow:"hidden"}}>
+                    <div style={{width:`${barWidth}%`,height:"100%",background:gradeColor,borderRadius:"3px",transition:"width 0.3s"}} />
+                  </div>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",minWidth:"24px",textAlign:"right"}}>{data.score}</span>
+                </div>
+                <div style={{display:"flex",gap:"16px",paddingLeft:"0",flexWrap:"wrap"}}>
+                  {data.starter && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)"}}>★ {data.starter}</span>}
+                  {data.age && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:data.age >= 32 ? "#f97316" : data.age >= 29 ? "#facc15" : "var(--dg-text-faint)"}}>Age {data.age}{data.age >= 32 ? " ⚠" : ""}</span>}
+                  {data.capHit && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)"}}>Cap: ${data.capHit}</span>}
+                </div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",marginTop:"4px",lineHeight:1.4}}>{data.note}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Methodology Footer */}
+        <div style={{marginTop:"16px",padding:"12px 16px",background:"rgba(45,212,191,0.04)",border:"1px solid rgba(45,212,191,0.1)",borderRadius:"10px"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"#2dd4bf",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>Methodology</div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",lineHeight:1.5}}>
+            Draft Guide Composite Score (0-100): Starter quality via contract value, draft capital &amp; accolades (30%) · Depth chart thickness (20%) · Age curve from positional peak (15%) · Cap efficiency vs league avg (15%) · Contract security &amp; FA risk (10%) · Trajectory &amp; scheme fit (10%). Sources: Pro Football Reference, Over The Cap, Ourlads, PFF public data.
+          </div>
+        </div>
+      </div>
+        );
+      })()
       ) : teamTab === "cap" && TEAM_DATA[abbr] ? (
       <div>
         {/* Cap Summary Cards */}
