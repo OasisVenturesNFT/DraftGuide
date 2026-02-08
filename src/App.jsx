@@ -1297,7 +1297,7 @@ const TEAM_INFO = {
   TEN:{name:"Tennessee Titans",conf:"AFC",div:"AFC South"},WAS:{name:"Washington Commanders",conf:"NFC",div:"NFC East"},
 };
 
-function TeamPage({ abbr, setActivePage, navigateToTeam }) {
+function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
   const team = TEAM_INFO[abbr];
   if (!team) return <div style={{padding:"60px",textAlign:"center",color:"var(--dg-text-dim)",fontFamily:"'JetBrains Mono',monospace"}}>Team not found</div>;
 
@@ -1338,11 +1338,17 @@ function TeamPage({ abbr, setActivePage, navigateToTeam }) {
   return (
     <div className="page-content" style={{maxWidth:"960px",margin:"0 auto",padding:"24px 24px 60px"}}>
       {/* Back nav */}
-      <button onClick={()=>setActivePage("HOME")} style={{
+      <button onClick={onClose ? onClose : ()=>setActivePage("HOME")} style={{
         background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:"6px",
-        fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)",marginBottom:"20px",padding:0,
+        fontFamily:onClose ? "'Oswald',sans-serif" : "'JetBrains Mono',monospace",
+        fontSize:onClose ? "16px" : "11px",
+        fontWeight:onClose ? 700 : 400,
+        color:onClose ? "#2dd4bf" : "var(--dg-text-dim)",
+        marginBottom:"20px",padding:0,
+        letterSpacing:onClose ? "0.5px" : "normal",
+        textTransform:onClose ? "uppercase" : "none",
       }}>
-        ← All Teams
+        {onClose ? "← Back to Draft" : "← All Teams"}
       </button>
 
       {/* Team Header */}
@@ -2738,13 +2744,7 @@ function MockDraftPage() {
     {/* Team Profile Overlay */}
     {teamProfileOverlay && (
       <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"var(--dg-bg)",zIndex:500,overflowY:"auto"}}>
-        <div style={{position:"sticky",top:0,zIndex:10,background:"var(--dg-bg)",borderBottom:"1px solid var(--dg-card-border)",padding:"12px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>
-            {TEAM_INFO[teamProfileOverlay]?.name || teamProfileOverlay} — Draft Profile
-          </div>
-          <button onClick={()=>setTeamProfileOverlay(null)} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"8px",padding:"8px 20px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>← Back to Draft</button>
-        </div>
-        <TeamPage abbr={teamProfileOverlay} setActivePage={()=>{}} navigateToTeam={(ab)=>setTeamProfileOverlay(ab)}/>
+        <TeamPage abbr={teamProfileOverlay} setActivePage={()=>{}} navigateToTeam={(ab)=>setTeamProfileOverlay(ab)} onClose={()=>setTeamProfileOverlay(null)}/>
       </div>
     )}
     </>
