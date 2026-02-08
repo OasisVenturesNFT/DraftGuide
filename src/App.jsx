@@ -2765,21 +2765,44 @@ function FreeAgencyPage({ navigateToTeam }) {
   const [search, setSearch] = useState("");
   const [expandedFA, setExpandedFA] = useState(null);
   const [page, setPage] = useState(0);
+  const [sortField, setSortField] = useState("r");
+  const [sortDir, setSortDir] = useState("asc");
   const PER_PAGE = 50;
 
   const FA_POSITIONS = ["QB","RB","WR","TE","OT","IOL","DL","EDGE","LB","CB","S","K","P"];
 
-  useEffect(()=>{ setPage(0); },[activePos, search]);
+  useEffect(()=>{ setPage(0); },[activePos, search, sortField, sortDir]);
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDir(field === "r" ? "asc" : field === "aav" ? "desc" : "asc");
+    }
+  };
 
   const filtered = useMemo(()=>{
-    let list = [...FREE_AGENTS].sort((a,b)=>a.r-b.r);
+    let list = [...FREE_AGENTS];
     if (activePos !== "ALL") list = list.filter(p=>p.p===activePos);
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(p=>p.n.toLowerCase().includes(q)||p.tm.toLowerCase().includes(q)||p.p.toLowerCase().includes(q));
     }
+    list.sort((a,b)=>{
+      let av, bv;
+      if (sortField === "r") { av = a.r; bv = b.r; }
+      else if (sortField === "n") { av = a.n.toLowerCase(); bv = b.n.toLowerCase(); }
+      else if (sortField === "p") { av = a.p; bv = b.p; }
+      else if (sortField === "age") { av = a.age; bv = b.age; }
+      else if (sortField === "aav") { av = a.aav; bv = b.aav; }
+      else { av = a.r; bv = b.r; }
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
     return list;
-  },[activePos,search]);
+  },[activePos,search,sortField,sortDir]);
 
   const totalPages = Math.ceil(filtered.length/PER_PAGE);
   const pageData = filtered.slice(page*PER_PAGE,(page+1)*PER_PAGE);
@@ -2870,11 +2893,12 @@ function FreeAgencyPage({ navigateToTeam }) {
         fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)",
         letterSpacing:"1px",textTransform:"uppercase",
       }}>
-        <div>RANK</div>
-        <div>POS</div>
-        <div>PLAYER</div>
-        <div style={{textAlign:"center"}}>AGE</div>
-        <div style={{textAlign:"right"}}>PROJ AAV</div>
+        {[{k:"r",label:"RANK"},{k:"p",label:"POS"},{k:"n",label:"PLAYER"},{k:"age",label:"AGE",align:"center"},{k:"aav",label:"PROJ AAV",align:"right"}].map(col=>(
+          <div key={col.k} onClick={()=>handleSort(col.k)} style={{cursor:"pointer",textAlign:col.align||"left",display:"flex",alignItems:"center",gap:"3px",justifyContent:col.align==="right"?"flex-end":col.align==="center"?"center":"flex-start",userSelect:"none"}}>
+            {col.label}
+            <span style={{fontSize:"8px",opacity:sortField===col.k?1:0.3}}>{sortField===col.k?(sortDir==="asc"?"▲":"▼"):"▲"}</span>
+          </div>
+        ))}
       </div>
 
       {/* Rows */}
