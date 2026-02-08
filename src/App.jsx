@@ -10,6 +10,10 @@ import { DEN_CAP, DEN_DEPTH_CHART } from "./broncos-roster.js";
 import { KC_CAP, KC_DEPTH_CHART } from "./chiefs-roster.js";
 import { LV_CAP, LV_DEPTH_CHART } from "./raiders-roster.js";
 import { LAC_CAP, LAC_DEPTH_CHART } from "./chargers-roster.js";
+import { BAL_CAP, BAL_DEPTH_CHART } from "./ravens-roster.js";
+import { CIN_CAP, CIN_DEPTH_CHART } from "./bengals-roster.js";
+import { CLE_CAP, CLE_DEPTH_CHART } from "./browns-roster.js";
+import { PIT_CAP, PIT_DEPTH_CHART } from "./steelers-roster.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -1253,6 +1257,10 @@ const TEAM_DATA = {
   KC:  { cap: KC_CAP,  depth: KC_DEPTH_CHART,  roster: null },
   LV:  { cap: LV_CAP,  depth: LV_DEPTH_CHART,  roster: null },
   LAC: { cap: LAC_CAP, depth: LAC_DEPTH_CHART, roster: null },
+  BAL: { cap: BAL_CAP, depth: BAL_DEPTH_CHART, roster: null },
+  CIN: { cap: CIN_CAP, depth: CIN_DEPTH_CHART, roster: null },
+  CLE: { cap: CLE_CAP, depth: CLE_DEPTH_CHART, roster: null },
+  PIT: { cap: PIT_CAP, depth: PIT_DEPTH_CHART, roster: null },
 };
 
 const TEAM_COLORS = {
