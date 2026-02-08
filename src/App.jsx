@@ -3,6 +3,9 @@ import PLAYERS from "./players.js";
 import PROFILES from "./profiles.js";
 import FREE_AGENTS from "./freeagents.js";
 import { NE_ROSTER, NE_CAP, NE_DEPTH_CHART, NE_DEAD_MONEY } from "./patriots-roster.js";
+import { BUF_CAP, BUF_DEPTH_CHART } from "./bills-roster.js";
+import { NYJ_CAP, NYJ_DEPTH_CHART } from "./jets-roster.js";
+import { MIA_CAP, MIA_DEPTH_CHART } from "./dolphins-roster.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -1236,6 +1239,14 @@ const DRAFT_ORDER = [
   {pick:257,round:7,team:"Green Bay Packers",abbr:"GB"},
 ];
 
+// Team roster/cap data lookup — add entries as teams are built out
+const TEAM_DATA = {
+  NE:  { cap: NE_CAP, depth: NE_DEPTH_CHART, roster: NE_ROSTER },
+  BUF: { cap: BUF_CAP, depth: BUF_DEPTH_CHART, roster: null },
+  NYJ: { cap: NYJ_CAP, depth: NYJ_DEPTH_CHART, roster: null },
+  MIA: { cap: MIA_CAP, depth: MIA_DEPTH_CHART, roster: null },
+};
+
 const TEAM_COLORS = {
   LV:"#a5acaf",NYJ:"#125740",ARI:"#97233f",TEN:"#4b92db",NYG:"#1b478c",
   CLE:"#311d00",WAS:"#5a1414",NO:"#d3bc8d",KC:"#e31837",CIN:"#fb4f14",
@@ -1393,7 +1404,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
       </div>
 
       {/* Tab Bar */}
-      {(abbr === "NE") && (
+      {(TEAM_DATA[abbr]) && (
         <div style={{display:"flex",gap:"2px",marginBottom:"20px",background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"10px",padding:"4px",overflow:"hidden"}}>
           {[{k:"overview",label:"Draft Profile"},{k:"depth",label:"Depth Chart"},{k:"cap",label:"Cap Overview"}].map(tab=>(
             <button key={tab.k} onClick={()=>setTeamTab(tab.k)} style={{
@@ -1408,7 +1419,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
       )}
 
       {/* Tab Content */}
-      {(teamTab === "overview" || abbr !== "NE") ? (
+      {(teamTab === "overview" || !TEAM_DATA[abbr]) ? (
       <>
       {/* Two column layout */}
       <div className="team-page-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px"}}>
@@ -1533,11 +1544,11 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
 
       {/* CTA to Mock Draft */}
       </>
-      ) : teamTab === "depth" && abbr === "NE" ? (
+      ) : teamTab === "depth" && TEAM_DATA[abbr] ? (
       <div>
         {/* Coaching Staff */}
         <div style={{display:"flex",gap:"12px",marginBottom:"16px",flexWrap:"wrap"}}>
-          {[{label:"HC",val:NE_DEPTH_CHART.coaching.hc},{label:"OC",val:NE_DEPTH_CHART.coaching.oc},{label:"DC",val:NE_DEPTH_CHART.coaching.dc}].map(c=>(
+          {[{label:"HC",val:TEAM_DATA[abbr].depth.coaching.hc},{label:"OC",val:TEAM_DATA[abbr].depth.coaching.oc},{label:"DC",val:TEAM_DATA[abbr].depth.coaching.dc}].map(c=>(
             <div key={c.label} style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"8px",padding:"8px 14px",display:"flex",gap:"8px",alignItems:"center"}}>
               <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:teamColor,fontWeight:700,letterSpacing:"0.5px"}}>{c.label}</span>
               <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text)",fontWeight:500}}>{c.val}</span>
@@ -1546,7 +1557,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
         </div>
 
         {/* Offense Depth Chart */}
-        {[{title:"Offense",sub:NE_DEPTH_CHART.scheme.offense,data:NE_DEPTH_CHART.offense},{title:"Defense",sub:NE_DEPTH_CHART.scheme.defense,data:NE_DEPTH_CHART.defense},{title:"Special Teams",sub:"",data:NE_DEPTH_CHART.specialTeams}].map(section=>(
+        {[{title:"Offense",sub:TEAM_DATA[abbr].depth.scheme.offense,data:TEAM_DATA[abbr].depth.offense},{title:"Defense",sub:TEAM_DATA[abbr].depth.scheme.defense,data:TEAM_DATA[abbr].depth.defense},{title:"Special Teams",sub:"",data:TEAM_DATA[abbr].depth.specialTeams}].map(section=>(
           <div key={section.title} style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden",marginBottom:"16px"}}>
             <div style={{padding:"14px 20px",borderBottom:"1px solid var(--dg-card-border)",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"6px"}}>
               <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>{section.title}</div>
@@ -1569,7 +1580,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
                   {[0,1,2].map(slot=>{
                     const name = row.players[slot];
                     if(!name) return <div key={slot}/>;
-                    const rp = NE_ROSTER.find(p=>p.n===name);
+                    const rp = TEAM_DATA[abbr].roster ? TEAM_DATA[abbr].roster.find(p=>p.n===name) : null;
                     return (
                       <div key={slot}>
                         <div style={{fontFamily:"'Oswald',sans-serif",fontSize:slot===0?"13px":"12px",fontWeight:slot===0?600:400,color:slot===0?"var(--dg-text)":"var(--dg-text-muted)"}}>{name}</div>
@@ -1583,16 +1594,16 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
           </div>
         ))}
       </div>
-      ) : teamTab === "cap" && abbr === "NE" ? (
+      ) : teamTab === "cap" && TEAM_DATA[abbr] ? (
       <div>
         {/* Cap Summary Cards */}
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:"12px",marginBottom:"20px"}}>
           {[
-            {label:"Cap Space",val:`$${(NE_CAP.capSpace/1e6).toFixed(1)}M`,color:"#22c55e"},
-            {label:"Cap Ceiling",val:`$${(NE_CAP.capCeiling/1e6).toFixed(0)}M`,color:"var(--dg-text)"},
-            {label:"Offense",val:`$${(NE_CAP.offenseSpend/1e6).toFixed(1)}M`,color:"#f59e0b"},
-            {label:"Defense",val:`$${(NE_CAP.defenseSpend/1e6).toFixed(1)}M`,color:"#3b82f6"},
-            {label:"Contracts",val:NE_CAP.activeContracts,color:"var(--dg-text)"},
+            {label:"Cap Space",val:`${TEAM_DATA[abbr].cap.capSpace<0?"-":""}$${Math.abs(TEAM_DATA[abbr].cap.capSpace/1e6).toFixed(1)}M`,color:TEAM_DATA[abbr].cap.capSpace>=0?"#22c55e":"#ef4444"},
+            {label:"Cap Ceiling",val:`$${(TEAM_DATA[abbr].cap.capCeiling/1e6).toFixed(0)}M`,color:"var(--dg-text)"},
+            {label:"Offense",val:`$${(TEAM_DATA[abbr].cap.offenseSpend/1e6).toFixed(1)}M`,color:"#f59e0b"},
+            {label:"Defense",val:`$${(TEAM_DATA[abbr].cap.defenseSpend/1e6).toFixed(1)}M`,color:"#3b82f6"},
+            {label:"Contracts",val:TEAM_DATA[abbr].cap.activeContracts,color:"var(--dg-text)"},
           ].map(s=>(
             <div key={s.label} style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"10px",padding:"12px 16px",textAlign:"center"}}>
               <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>{s.label}</div>
@@ -1609,18 +1620,18 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
           </div>
           <div style={{padding:"20px"}}>
             <div style={{display:"flex",height:"32px",borderRadius:"6px",overflow:"hidden",marginBottom:"16px"}}>
-              <div style={{width:`${(NE_CAP.offenseSpend/NE_CAP.capCeiling)*100}%`,background:"#f59e0b",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:"#000"}}>OFF</div>
-              <div style={{width:`${(NE_CAP.defenseSpend/NE_CAP.capCeiling)*100}%`,background:"#3b82f6",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:"#fff"}}>DEF</div>
-              <div style={{width:`${(NE_CAP.specialSpend/NE_CAP.capCeiling)*100}%`,background:"#8b5cf6",display:"flex",alignItems:"center",justifyContent:"center"}}/>
-              <div style={{flex:1,background:"rgba(34,197,94,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:"#22c55e"}}>CAP SPACE</div>
+              <div style={{width:`${(TEAM_DATA[abbr].cap.offenseSpend/TEAM_DATA[abbr].cap.capCeiling)*100}%`,background:"#f59e0b",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:"#000"}}>OFF</div>
+              <div style={{width:`${(TEAM_DATA[abbr].cap.defenseSpend/TEAM_DATA[abbr].cap.capCeiling)*100}%`,background:"#3b82f6",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:"#fff"}}>DEF</div>
+              <div style={{width:`${(TEAM_DATA[abbr].cap.specialSpend/TEAM_DATA[abbr].cap.capCeiling)*100}%`,background:"#8b5cf6",display:"flex",alignItems:"center",justifyContent:"center"}}/>
+              <div style={{flex:1,background:TEAM_DATA[abbr].cap.capSpace>=0?"rgba(34,197,94,0.15)":"rgba(239,68,68,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:TEAM_DATA[abbr].cap.capSpace>=0?"#22c55e":"#ef4444"}}>{TEAM_DATA[abbr].cap.capSpace>=0?"CAP SPACE":"OVER CAP"}</div>
             </div>
             {/* Legend */}
             <div style={{display:"flex",gap:"16px",flexWrap:"wrap"}}>
               {[
-                {label:"Offense",val:`$${(NE_CAP.offenseSpend/1e6).toFixed(1)}M`,color:"#f59e0b"},
-                {label:"Defense",val:`$${(NE_CAP.defenseSpend/1e6).toFixed(1)}M`,color:"#3b82f6"},
-                {label:"Special Teams",val:`$${(NE_CAP.specialSpend/1e6).toFixed(1)}M`,color:"#8b5cf6"},
-                {label:"Cap Space",val:`$${(NE_CAP.capSpace/1e6).toFixed(1)}M`,color:"#22c55e"},
+                {label:"Offense",val:`$${(TEAM_DATA[abbr].cap.offenseSpend/1e6).toFixed(1)}M`,color:"#f59e0b"},
+                {label:"Defense",val:`$${(TEAM_DATA[abbr].cap.defenseSpend/1e6).toFixed(1)}M`,color:"#3b82f6"},
+                {label:"Special Teams",val:`$${(TEAM_DATA[abbr].cap.specialSpend/1e6).toFixed(1)}M`,color:"#8b5cf6"},
+                {label:"Cap Space",val:`${TEAM_DATA[abbr].cap.capSpace<0?"-":""}$${Math.abs(TEAM_DATA[abbr].cap.capSpace/1e6).toFixed(1)}M`,color:TEAM_DATA[abbr].cap.capSpace>=0?"#22c55e":"#ef4444"},
               ].map(l=>(
                 <div key={l.label} style={{display:"flex",alignItems:"center",gap:"6px"}}>
                   <div style={{width:"8px",height:"8px",borderRadius:"2px",background:l.color}}/>
@@ -1637,8 +1648,8 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
             <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Key Offseason Questions</div>
           </div>
           <div style={{padding:"16px 20px"}}>
-            {NE_CAP.keyQuestions.map((q,i)=>(
-              <div key={i} style={{display:"flex",gap:"10px",padding:"8px 0",borderBottom:i<NE_CAP.keyQuestions.length-1?"1px solid var(--dg-divider)":"none"}}>
+            {TEAM_DATA[abbr].cap.keyQuestions.map((q,i)=>(
+              <div key={i} style={{display:"flex",gap:"10px",padding:"8px 0",borderBottom:i<TEAM_DATA[abbr].cap.keyQuestions.length-1?"1px solid var(--dg-divider)":"none"}}>
                 <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:teamColor,flexShrink:0}}>?</span>
                 <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",lineHeight:1.6}}>{q}</span>
               </div>
