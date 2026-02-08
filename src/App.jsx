@@ -2092,10 +2092,6 @@ function MockDraftPage() {
             <span style={{display:"inline-flex",alignItems:"center",gap:"6px",background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"3px 10px"}}>
               <span style={{width:"22px",height:"14px",borderRadius:"3px",background:TEAM_COLORS[userTeam]||"#333",display:"inline-flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",fontWeight:700,color:"#fff"}}>{userTeam}</span>
               <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-muted)"}}>{userTeamSlot.team}</span>
-              <span onClick={()=>{setTeamProfileOverlay(userTeam);}} style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"#2dd4bf",cursor:"pointer",opacity:0.7,borderLeft:"1px solid var(--dg-card-border2)",paddingLeft:"6px",marginLeft:"2px"}}
-                onMouseEnter={e=>{e.currentTarget.style.opacity="1";}}
-                onMouseLeave={e=>{e.currentTarget.style.opacity="0.7";}}
-              >Profile</span>
             </span>
           )}
           <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-dim)"}}>{picksCount}/{lastPickInScope}</span>
@@ -2104,6 +2100,9 @@ function MockDraftPage() {
           </div>
         </div>
         <div style={{display:"flex",gap:"8px"}}>
+          {draftMode === "team" && userTeam && (
+            <button onClick={()=>setTeamProfileOverlay(userTeam)} style={{background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#2dd4bf",letterSpacing:"0.5px",textTransform:"uppercase"}}>Team Profile</button>
+          )}
           <button onClick={resetDraft} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Reset</button>
           <button onClick={exitToModal} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit</button>
         </div>
