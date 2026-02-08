@@ -2100,9 +2100,6 @@ function MockDraftPage() {
           </div>
         </div>
         <div style={{display:"flex",gap:"8px"}}>
-          {draftMode === "team" && userTeam && (
-            <button onClick={()=>setTeamProfileOverlay(userTeam)} style={{background:"rgba(45,212,191,0.08)",border:"1px solid rgba(45,212,191,0.2)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"#2dd4bf",letterSpacing:"0.5px",textTransform:"uppercase"}}>Team Profile</button>
-          )}
           <button onClick={resetDraft} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Reset</button>
           <button onClick={exitToModal} style={{background:"var(--dg-input)",border:"1px solid var(--dg-card-border2)",borderRadius:"6px",padding:"6px 14px",cursor:"pointer",fontFamily:"'Oswald',sans-serif",fontSize:"11px",color:"var(--dg-text-muted)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Exit</button>
         </div>
@@ -2542,7 +2539,7 @@ function MockDraftPage() {
                 {draftMode === "team" && isUserPick && (
                   <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:"8px"}}>
                     <button onClick={()=>{setTradeModalOpen(true);setUserTradeOffers(new Set());setPartnerTradeOffers(new Set());setTradePartner(null);}} style={{background:"rgba(249,115,22,0.1)",border:"1px solid rgba(249,115,22,0.25)",borderRadius:"6px",padding:"4px 12px",cursor:"pointer",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#f97316",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap"}}>⇄ Trade</button>
-                    <span style={{background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.25)",borderRadius:"6px",padding:"4px 12px",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase"}}>Your Pick</span>
+                    <button onClick={()=>setTeamProfileOverlay(userTeam)} style={{background:"rgba(45,212,191,0.1)",border:"1px solid rgba(45,212,191,0.25)",borderRadius:"6px",padding:"4px 12px",cursor:"pointer",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#2dd4bf",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",whiteSpace:"nowrap"}}>Team Profile</button>
                   </div>
                 )}
                 {draftMode === "full" && isUserPick && !draftComplete && (
