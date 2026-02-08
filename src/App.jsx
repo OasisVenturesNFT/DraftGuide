@@ -2919,7 +2919,7 @@ function FreeAgencyPage({ navigateToTeam }) {
 
               {/* Expanded Details */}
               {expanded && (
-                <div style={{
+                  <div style={{
                   padding:"16px 20px",background:"rgba(249,115,22,0.03)",
                   borderBottom:"1px solid var(--dg-card-border)",
                   borderLeft:"3px solid #f97316",
@@ -2934,6 +2934,12 @@ function FreeAgencyPage({ navigateToTeam }) {
                       <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#f97316"}}>${fa.aav}M/yr</div>
                     </div>
                   </div>
+                  {fa.note && (
+                    <div style={{marginBottom:"12px"}}>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"3px"}}>Scouting Notes</div>
+                      <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",lineHeight:1.6}}>{fa.note}</div>
+                    </div>
+                  )}
                   <div>
                     <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"}}>Projected Landing Spots</div>
                     <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>
