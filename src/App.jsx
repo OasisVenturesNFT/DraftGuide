@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import PLAYERS from "./players.js";
 import PROFILES from "./profiles.js";
 import FREE_AGENTS from "./freeagents.js";
+import { NE_ROSTER, NE_CAP } from "./patriots-roster.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -1306,6 +1307,7 @@ const TEAM_INFO = {
 };
 
 function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
+  const [teamTab, setTeamTab] = useState("overview");
   const team = TEAM_INFO[abbr];
   if (!team) return <div style={{padding:"60px",textAlign:"center",color:"var(--dg-text-dim)",fontFamily:"'JetBrains Mono',monospace"}}>Team not found</div>;
 
@@ -1390,6 +1392,24 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
         </div>
       </div>
 
+      {/* Tab Bar */}
+      {(abbr === "NE") && (
+        <div style={{display:"flex",gap:"2px",marginBottom:"20px",background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"10px",padding:"4px",overflow:"hidden"}}>
+          {[{k:"overview",label:"Draft Profile"},{k:"roster",label:"Roster & Contracts"},{k:"cap",label:"Cap Analysis"}].map(tab=>(
+            <button key={tab.k} onClick={()=>setTeamTab(tab.k)} style={{
+              flex:1,padding:"10px 16px",border:"none",borderRadius:"8px",cursor:"pointer",
+              background:teamTab===tab.k?teamColor:"transparent",
+              color:teamTab===tab.k?"#fff":"var(--dg-text-muted)",
+              fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:600,letterSpacing:"0.5px",textTransform:"uppercase",
+              transition:"all 0.2s",
+            }}>{tab.label}</button>
+          ))}
+        </div>
+      )}
+
+      {/* Tab Content */}
+      {(teamTab === "overview" || abbr !== "NE") ? (
+      <>
       {/* Two column layout */}
       <div className="team-page-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"20px"}}>
 
@@ -1510,6 +1530,141 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
           </div>
         </div>
       </div>
+
+      {/* CTA to Mock Draft */}
+      </>
+      ) : teamTab === "roster" && abbr === "NE" ? (
+      <div>
+        {/* Cap Summary Bar */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(140px,1fr))",gap:"12px",marginBottom:"20px"}}>
+          {[
+            {label:"Cap Space",val:`$${(NE_CAP.capSpace/1e6).toFixed(1)}M`,color:"#22c55e"},
+            {label:"Cap Ceiling",val:`$${(NE_CAP.capCeiling/1e6).toFixed(0)}M`,color:"var(--dg-text)"},
+            {label:"Offense",val:`$${(NE_CAP.offenseSpend/1e6).toFixed(1)}M`,color:"#f59e0b"},
+            {label:"Defense",val:`$${(NE_CAP.defenseSpend/1e6).toFixed(1)}M`,color:"#3b82f6"},
+            {label:"Contracts",val:NE_CAP.activeContracts,color:"var(--dg-text)"},
+          ].map(s=>(
+            <div key={s.label} style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"10px",padding:"12px 16px",textAlign:"center"}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"4px"}}>{s.label}</div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"22px",fontWeight:700,color:s.color}}>{s.val}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Roster Table */}
+        <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden"}}>
+          <div style={{padding:"16px 20px",borderBottom:"1px solid var(--dg-card-border)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Active Roster</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",marginTop:"2px"}}>{NE_ROSTER.length} players · Sorted by cap hit</div>
+            </div>
+          </div>
+          {/* Table Header */}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 50px 52px 60px 90px 90px",gap:"8px",padding:"8px 20px",borderBottom:`1px solid ${teamColor}33`,fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>
+            <div>Player</div><div>Age</div><div>POS</div><div>Role</div><div style={{textAlign:"right"}}>Cap Hit</div><div style={{textAlign:"right"}}>Base</div>
+          </div>
+          {/* Rows */}
+          {[...NE_ROSTER].sort((a,b)=>b.cap-a.cap).map((p,i)=>{
+            const pc = POS_COLORS[p.p]||{bg:"#555",text:"#fff"};
+            const maxCap = NE_ROSTER.reduce((m,x)=>Math.max(m,x.cap),0);
+            const pct = maxCap > 0 ? (p.cap/maxCap)*100 : 0;
+            return (
+              <div key={p.n} style={{
+                display:"grid",gridTemplateColumns:"1fr 50px 52px 60px 90px 90px",gap:"8px",padding:"10px 20px",alignItems:"center",
+                background:i%2===0?"transparent":"var(--dg-row-alt)",
+                borderBottom:"1px solid var(--dg-divider)",position:"relative",overflow:"hidden",
+              }}>
+                <div style={{position:"absolute",left:0,bottom:0,height:"2px",width:`${pct}%`,background:`${teamColor}33`,borderRadius:"0 2px 0 0"}}/>
+                <div style={{minWidth:0}}>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",fontWeight:p.starter?600:400,color:p.starter?"var(--dg-text)":"var(--dg-text-muted)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.n}</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)"}}>{p.dp}</div>
+                </div>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",textAlign:"center"}}>{p.age}</div>
+                <span style={{background:pc.bg,color:pc.text,padding:"2px 6px",borderRadius:"3px",fontSize:"8px",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",textAlign:"center",display:"inline-block"}}>{p.p}</span>
+                <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:p.starter?"#22c55e":"var(--dg-text-faint)",textAlign:"center"}}>{p.starter?"Starter":"Depth"}</div>
+                <div style={{textAlign:"right",fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",fontWeight:600,color:p.cap>15000000?"#ef4444":p.cap>8000000?"#f59e0b":"var(--dg-text-muted)"}}>
+                  ${p.cap>=1000000?(p.cap/1e6).toFixed(1)+"M":(p.cap/1e3).toFixed(0)+"K"}
+                </div>
+                <div style={{textAlign:"right",fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-faint)"}}>
+                  ${p.base>=1000000?(p.base/1e6).toFixed(1)+"M":(p.base/1e3).toFixed(0)+"K"}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      ) : teamTab === "cap" && abbr === "NE" ? (
+      <div>
+        {/* Cap Breakdown Visualization */}
+        <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden",marginBottom:"20px"}}>
+          <div style={{padding:"16px 20px",borderBottom:"1px solid var(--dg-card-border)"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Cap Allocation</div>
+          </div>
+          <div style={{padding:"20px"}}>
+            {/* Stacked bar */}
+            <div style={{display:"flex",height:"32px",borderRadius:"6px",overflow:"hidden",marginBottom:"16px"}}>
+              <div style={{width:`${(NE_CAP.offenseSpend/NE_CAP.capCeiling)*100}%`,background:"#f59e0b",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:"#000"}}>OFF</div>
+              <div style={{width:`${(NE_CAP.defenseSpend/NE_CAP.capCeiling)*100}%`,background:"#3b82f6",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:"#fff"}}>DEF</div>
+              <div style={{width:`${(NE_CAP.specialSpend/NE_CAP.capCeiling)*100}%`,background:"#8b5cf6",display:"flex",alignItems:"center",justifyContent:"center"}}/>
+              <div style={{flex:1,background:"rgba(34,197,94,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",fontWeight:700,color:"#22c55e"}}>CAP SPACE</div>
+            </div>
+            {/* Top Cap Hits */}
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase",marginBottom:"10px"}}>Top Cap Hits</div>
+            {[...NE_ROSTER].sort((a,b)=>b.cap-a.cap).slice(0,10).map((p,i)=>{
+              const pct = (p.cap/NE_CAP.capCeiling)*100;
+              return (
+                <div key={p.n} style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}}>
+                  <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",color:"var(--dg-text)",minWidth:"140px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.n}</span>
+                  <div style={{flex:1,height:"10px",background:"var(--dg-input)",borderRadius:"4px",overflow:"hidden"}}>
+                    <div style={{width:`${pct*3}%`,height:"100%",background:p.cap>20000000?"#ef4444":p.cap>10000000?"#f59e0b":teamColor,borderRadius:"4px"}}/>
+                  </div>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",minWidth:"60px",textAlign:"right"}}>${(p.cap/1e6).toFixed(1)}M</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Restructure Candidates */}
+        <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden",marginBottom:"20px"}}>
+          <div style={{padding:"16px 20px",borderBottom:"1px solid var(--dg-card-border)"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Restructure Candidates</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"var(--dg-text-dim)",marginTop:"2px"}}>Potential cap savings via salary-to-bonus conversion</div>
+          </div>
+          <div style={{padding:"16px 20px"}}>
+            {NE_CAP.restructurePotential.map((r,i)=>(
+              <div key={r.n} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 0",borderBottom:i<NE_CAP.restructurePotential.length-1?"1px solid var(--dg-divider)":"none"}}>
+                <div>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:600,color:"var(--dg-text)"}}>{r.n}</div>
+                  <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)",marginTop:"2px"}}>{r.note}</div>
+                </div>
+                <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,color:"#22c55e"}}>+${(r.savings/1e6).toFixed(1)}M</div>
+              </div>
+            ))}
+            <div style={{marginTop:"12px",padding:"10px",background:"rgba(34,197,94,0.06)",borderRadius:"8px",border:"1px solid rgba(34,197,94,0.15)"}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"10px",color:"#22c55e",textAlign:"center"}}>
+                Total potential savings: <strong>${(NE_CAP.restructurePotential.reduce((s,r)=>s+r.savings,0)/1e6).toFixed(1)}M</strong> → Could create <strong>${((NE_CAP.capSpace+NE_CAP.restructurePotential.reduce((s,r)=>s+r.savings,0))/1e6).toFixed(1)}M</strong> in total cap space
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Key Offseason Questions */}
+        <div style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden"}}>
+          <div style={{padding:"16px 20px",borderBottom:"1px solid var(--dg-card-border)"}}>
+            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Key Offseason Questions</div>
+          </div>
+          <div style={{padding:"16px 20px"}}>
+            {NE_CAP.keyQuestions.map((q,i)=>(
+              <div key={i} style={{display:"flex",gap:"10px",padding:"8px 0",borderBottom:i<NE_CAP.keyQuestions.length-1?"1px solid var(--dg-divider)":"none"}}>
+                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"14px",fontWeight:700,color:teamColor,flexShrink:0}}>?</span>
+                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"11px",color:"var(--dg-text-muted)",lineHeight:1.6}}>{q}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      ) : null}
 
       {/* CTA to Mock Draft */}
       <div style={{
