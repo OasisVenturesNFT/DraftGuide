@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import PLAYERS from "./players.js";
 import PROFILES from "./profiles.js";
 import FREE_AGENTS from "./freeagents.js";
-import { NE_ROSTER, NE_CAP, NE_DEPTH_CHART } from "./patriots-roster.js";
+import { NE_ROSTER, NE_CAP, NE_DEPTH_CHART, NE_DEAD_MONEY } from "./patriots-roster.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
