@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import PLAYERS from "./players.js";
 import PROFILES from "./profiles.js";
 import FREE_AGENTS from "./freeagents.js";
-import { NE_ROSTER, NE_CAP } from "./patriots-roster.js";
+import { NE_ROSTER, NE_CAP, NE_DEPTH_CHART } from "./patriots-roster.js";
 
 /* ───── constants ───── */
 const POS_COLORS = {
@@ -1395,7 +1395,7 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
       {/* Tab Bar */}
       {(abbr === "NE") && (
         <div style={{display:"flex",gap:"2px",marginBottom:"20px",background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"10px",padding:"4px",overflow:"hidden"}}>
-          {[{k:"overview",label:"Draft Profile"},{k:"roster",label:"Roster & Contracts"},{k:"cap",label:"Cap Analysis"}].map(tab=>(
+          {[{k:"overview",label:"Draft Profile"},{k:"depth",label:"Depth Chart"},{k:"roster",label:"Roster & Contracts"},{k:"cap",label:"Cap Analysis"}].map(tab=>(
             <button key={tab.k} onClick={()=>setTeamTab(tab.k)} style={{
               flex:1,padding:"10px 16px",border:"none",borderRadius:"8px",cursor:"pointer",
               background:teamTab===tab.k?teamColor:"transparent",
@@ -1533,6 +1533,62 @@ function TeamPage({ abbr, setActivePage, navigateToTeam, onClose }) {
 
       {/* CTA to Mock Draft */}
       </>
+      ) : teamTab === "depth" && abbr === "NE" ? (
+      <div>
+        {/* Coaching Staff */}
+        <div style={{display:"flex",gap:"12px",marginBottom:"16px",flexWrap:"wrap"}}>
+          {[{label:"HC",val:NE_DEPTH_CHART.coaching.hc},{label:"OC",val:NE_DEPTH_CHART.coaching.oc},{label:"DC",val:NE_DEPTH_CHART.coaching.dc}].map(c=>(
+            <div key={c.label} style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"8px",padding:"8px 14px",display:"flex",gap:"8px",alignItems:"center"}}>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:teamColor,fontWeight:700,letterSpacing:"0.5px"}}>{c.label}</span>
+              <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"13px",color:"var(--dg-text)",fontWeight:500}}>{c.val}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Offense Depth Chart */}
+        {[{title:"Offense",sub:NE_DEPTH_CHART.scheme.offense,data:NE_DEPTH_CHART.offense},{title:"Defense",sub:NE_DEPTH_CHART.scheme.defense,data:NE_DEPTH_CHART.defense},{title:"Special Teams",sub:"",data:NE_DEPTH_CHART.specialTeams}].map(section=>(
+          <div key={section.title} style={{background:"var(--dg-card)",border:"1px solid var(--dg-card-border)",borderRadius:"14px",overflow:"hidden",marginBottom:"16px"}}>
+            <div style={{padding:"14px 20px",borderBottom:"1px solid var(--dg-card-border)",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:"6px"}}>
+              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"16px",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase"}}>{section.title}</div>
+              {section.sub && <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-dim)"}}>{section.sub}</div>}
+            </div>
+            {/* Header */}
+            <div style={{display:"grid",gridTemplateColumns:"60px 1fr 1fr 1fr",gap:"4px",padding:"8px 20px 4px",borderBottom:`1px solid ${teamColor}22`}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>POS</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>Starter</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>2nd</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"8px",color:"var(--dg-text-faint)",letterSpacing:"1px",textTransform:"uppercase"}}>3rd+</div>
+            </div>
+            {section.data.map((row,i)=>{
+              const rosterPlayer = (name) => NE_ROSTER.find(p=>p.n===name);
+              return (
+                <div key={row.pos} style={{
+                  display:"grid",gridTemplateColumns:"60px 1fr 1fr 1fr",gap:"4px",padding:"8px 20px",alignItems:"center",
+                  background:i%2===0?"transparent":"var(--dg-row-alt)",borderBottom:"1px solid var(--dg-divider)",
+                }}>
+                  <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"12px",fontWeight:700,color:teamColor}}>{row.pos}</div>
+                  {[0,1,2].map(slot=>{
+                    const name = row.players[slot];
+                    if(!name) return <div key={slot}/>;
+                    const rp = rosterPlayer(name);
+                    const capStr = rp && rp.cap >= 1000000 ? `$${(rp.cap/1e6).toFixed(1)}M` : rp ? `$${(rp.cap/1e3).toFixed(0)}K` : "";
+                    return (
+                      <div key={slot}>
+                        <div style={{fontFamily:"'Oswald',sans-serif",fontSize:slot===0?"13px":"12px",fontWeight:slot===0?600:400,color:slot===0?"var(--dg-text)":"var(--dg-text-muted)"}}>{name}</div>
+                        <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
+                          {rp && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:"var(--dg-text-faint)"}}>Age {rp.age}</span>}
+                          {capStr && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"9px",color:rp&&rp.cap>15000000?"#ef4444":rp&&rp.cap>8000000?"#f59e0b":"var(--dg-text-faint)"}}>{capStr}</span>}
+                          {rp && rp.yrs<=1 && <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"7px",color:"#f59e0b",background:"rgba(245,158,11,0.1)",padding:"1px 4px",borderRadius:"3px"}}>FA</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
       ) : teamTab === "roster" && abbr === "NE" ? (
       <div>
         {/* Cap Summary Bar */}

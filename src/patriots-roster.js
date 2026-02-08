@@ -116,4 +116,45 @@ const NE_CAP = {
   ],
 };
 
-export { NE_ROSTER, NE_CAP };
+// Depth Chart - sourced from Ourlads.com (updated 02/07/2026)
+// Base Offense: 11 Personnel (1 RB, 1 TE) — 61% usage
+// Base Defense: 3-3 Nickel
+const NE_DEPTH_CHART = {
+  offense: [
+    {pos:"QB",  players:["Drake Maye","Joshua Dobbs","Tommy DeVito"]},
+    {pos:"RB",  players:["Rhamondre Stevenson","TreVeyon Henderson","D'Ernest Johnson"]},
+    {pos:"FB",  players:["Jack Westover"]},
+    {pos:"LWR", players:["Kayshon Boutte","Kyle Williams"]},
+    {pos:"SWR", players:["Stefon Diggs","DeMario Douglas"]},
+    {pos:"RWR", players:["Mack Hollins","Efton Chism III"]},
+    {pos:"TE",  players:["Hunter Henry","Austin Hooper","CJ Dippre"]},
+    {pos:"LT",  players:["Will Campbell","Vederian Lowe"]},
+    {pos:"LG",  players:["Jared Wilson","Ben Brown"]},
+    {pos:"C",   players:["Garrett Bradbury"]},
+    {pos:"RG",  players:["Michael Onwenu","Caedan Wallace"]},
+    {pos:"RT",  players:["Morgan Moses","Thayer Munford Jr.","Marcus Bryant"]},
+  ],
+  defense: [
+    {pos:"DE",   players:["Milton Williams"]},
+    {pos:"NT",   players:["Khyiris Tonga","Cory Durden"]},
+    {pos:"DT",   players:["Christian Barmore","Leonard Taylor III"]},
+    {pos:"LOLB", players:["Harold Landry III","Elijah Ponder"]},
+    {pos:"LILB", players:["Robert Spillane","Jack Gibbens","Marte Mapu"]},
+    {pos:"RILB", players:["Christian Elliss","Jahlani Tavai","Chad Muma"]},
+    {pos:"ROLB", players:["K'Lavon Chaisson","Anfernee Jennings","Bradyn Swinson"]},
+    {pos:"LCB",  players:["Carlton Davis III","Alex Austin","Kobee Minor"]},
+    {pos:"RCB",  players:["Christian Gonzalez","Marcellas Dial"]},
+    {pos:"Nickel",players:["Marcus Jones","Charles Woods"]},
+    {pos:"SS",   players:["Craig Woodson","Dell Pettus"]},
+    {pos:"FS",   players:["Kyle Dugger","Marte Mapu"]},
+  ],
+  specialTeams: [
+    {pos:"K",  players:["Andres Borregales"]},
+    {pos:"P",  players:["Bryce Baringer"]},
+    {pos:"LS", players:["Brenden Schooler"]},
+  ],
+  scheme: {offense:"11 Personnel (1 RB, 1 TE) — 61% usage",defense:"Base 3-3 Nickel"},
+  coaching: {hc:"Mike Vrabel",oc:"Josh McDaniels",dc:"Terrell Williams"},
+};
+
+export { NE_ROSTER, NE_CAP, NE_DEPTH_CHART };
