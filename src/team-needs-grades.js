@@ -57,7 +57,7 @@ const TEAM_GRADES = {
       S:    { score: 68, starter: "Hawkins / Woodson", age: 26, capHit: "~5M", note: "Dugger traded to PIT. Hawkins had breakout year. Woodson (4th rd) surprise rookie starter." },
       ST:   { score: 70, starter: "Slye / Baringer", age: null, capHit: "~3M", note: "Adequate special teams." },
     },
-    topNeeds: ["WR","EDGE","OL","S"],
+    topNeeds: ["EDGE","OL","LB","WR"],
     draftPriority: "Reached Super Bowl LX (14-3) despite middling LB corps. Premium EDGE and off-ball LB are priorities to sustain window.",
   },
   BUF: {

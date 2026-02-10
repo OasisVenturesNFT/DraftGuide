@@ -1315,7 +1315,7 @@ const TEAM_NEEDS = {
   HOU:["DI","T","RB","G"],IND:["ED","LB","S","QB"],JAX:["DI","DB","RB","G"],
   KC:["RB","TE","WR","G"],LV:["QB","ED","G","T"],
   LAC:["G","T","DI","WR"],LAR:["WR","DB","LB","T"],MIA:["CB","TE","QB","G"],
-  MIN:["LB","WR","DI","G"],NE:["WR","ED","T","G"],NO:["WR","G","RB","ED"],
+  MIN:["LB","WR","DI","G"],NE:["ED","T","LB","WR"],NO:["WR","G","RB","ED"],
   NYG:["T","G","WR","LB"],NYJ:["QB","DI","WR","CB"],
   PHI:["TE","ED","CB","G"],PIT:["QB","T","DB","G"],
   SF:["WR","T","DI","ED"],SEA:["DB","G","RB","T"],
