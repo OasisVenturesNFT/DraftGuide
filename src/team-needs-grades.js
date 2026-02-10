@@ -57,7 +57,7 @@ const TEAM_GRADES = {
       S:    { score: 68, starter: "Hawkins / Woodson", age: 26, capHit: "~5M", note: "Dugger traded to PIT. Hawkins had breakout year. Woodson (4th rd) surprise rookie starter." },
       ST:   { score: 70, starter: "Slye / Baringer", age: null, capHit: "~3M", note: "Adequate special teams." },
     },
-    topNeeds: ["EDGE","LB","WR","S"],
+    topNeeds: ["WR","EDGE","OL","S"],
     draftPriority: "Reached Super Bowl LX (14-3) despite middling LB corps. Premium EDGE and off-ball LB are priorities to sustain window.",
   },
   BUF: {
@@ -75,7 +75,7 @@ const TEAM_GRADES = {
       S:    { score: 70, starter: "Hamlin / Forrest", age: 26, capHit: "~5M", note: "Hamlin re-signed. Forrest added. Depth thin at safety." },
       ST:   { score: 72, starter: "Bass / Martin", age: null, capHit: "~4M", note: "Tyler Bass reliable. Solid overall." },
     },
-    topNeeds: ["WR","S","OL","RB"],
+    topNeeds: ["WR","EDGE","LB","S"],
     draftPriority: "12-5 but lost Divisional Round again. Allen needs a true alpha WR1 to get over the hump. Safety depth thin. OL aging.",
   },
   NYJ: {
@@ -93,7 +93,7 @@ const TEAM_GRADES = {
       S:    { score: 58, starter: "Cisco / Oliver", age: 25, capHit: "~12M", note: "Cisco signed $10M prove-it. Oliver re-signed. Adequate." },
       ST:   { score: 60, starter: "Zuerlein", age: null, capHit: "~3M", note: "Average special teams." },
     },
-    topNeeds: ["QB","CB","DL","WR","EDGE","OL"],
+    topNeeds: ["QB","DL","WR","CB"],
     draftPriority: "3-14 — full rebuild. Traded Sauce and Q. Williams for future 1st-rounders. Need everything. QB if Fields flops. CB1 desperation.",
   },
   MIA: {
@@ -111,7 +111,7 @@ const TEAM_GRADES = {
       S:    { score: 62, starter: "Minkah Fitzpatrick", age: 29, capHit: "~14M", note: "Fitzpatrick acquired from PIT in Ramsey swap. Trade rumors persisted." },
       ST:   { score: 60, starter: "Sanders", age: null, capHit: "~3M", note: "Adequate." },
     },
-    topNeeds: ["QB","WR","EDGE","CB","OL"],
+    topNeeds: ["CB","TE","QB","OL"],
     draftPriority: "7-10. Hill injury exposed everything. Fire sale at deadline. Need impact pass rusher and CB1. QB long-term questions.",
   },
 
@@ -131,7 +131,7 @@ const TEAM_GRADES = {
       S:    { score: 70, starter: "Kyle Hamilton", age: 25, capHit: "~5M", note: "Hamilton elite safety on rookie deal." },
       ST:   { score: 82, starter: "Tucker / Koch", age: null, capHit: "~6M", note: "Justin Tucker still elite kicker." },
     },
-    topNeeds: ["WR","CB","EDGE","DL"],
+    topNeeds: ["DL","EDGE","OL","WR","DB"],
     draftPriority: "Disappointing 8-9. Lamar needs alpha WR1. CB room gutted. Pass rush needs proven closer.",
   },
   CIN: {
@@ -149,7 +149,7 @@ const TEAM_GRADES = {
       S:    { score: 62, starter: "Dax Hill / backup", age: 25, capHit: "~4M", note: "Hill adequate. Safety depth thin." },
       ST:   { score: 68, starter: "McPherson", age: null, capHit: "~5M", note: "Evan McPherson reliable." },
     },
-    topNeeds: ["OL","LB","CB","S"],
+    topNeeds: ["EDGE","DB","OL","DL"],
     draftPriority: "6-11 disaster. Burrow health is #1 concern. Lost Wilson at LB. OL still bottom-third. Protect the franchise.",
   },
   CLE: {
@@ -167,7 +167,7 @@ const TEAM_GRADES = {
       S:    { score: 55, starter: "Jenkins / Kazee", age: 28, capHit: "~5M", note: "Depth pieces only." },
       ST:   { score: 65, starter: "York", age: null, capHit: "~4M", note: "Adequate." },
     },
-    topNeeds: ["QB","WR","CB","OL","RB"],
+    topNeeds: ["QB","WR","OL","OL"],
     draftPriority: "5-12. Watson dead money albatross. Need impact players everywhere except EDGE. QB decision looming.",
   },
   PIT: {
@@ -185,7 +185,7 @@ const TEAM_GRADES = {
       S:    { score: 75, starter: "Kyle Dugger / Elliott", age: 29, capHit: "~15M", note: "Dugger acquired from NE at deadline. Elliott extended." },
       ST:   { score: 72, starter: "Boswell", age: null, capHit: "~5M", note: "Chris Boswell elite kicker." },
     },
-    topNeeds: ["QB","LB","OL","DL"],
+    topNeeds: ["QB","OL","DB","OL"],
     draftPriority: "10-7, lost WC. Rodgers retiring — QB1 is the biggest need in the 2026 draft. LB thin. OL inconsistent.",
   },
 
@@ -205,7 +205,7 @@ const TEAM_GRADES = {
       S:    { score: 78, starter: "CJ Gardner-Johnson / Pitre", age: 28, capHit: "~20M", note: "CJGJ acquired from PHI. Pitre extended $39M." },
       ST:   { score: 70, starter: "Fairbairn", age: null, capHit: "~5M", note: "Reliable." },
     },
-    topNeeds: ["OL","TE","RB","DL"],
+    topNeeds: ["DL","OL","RB","OL"],
     draftPriority: "12-5, lost Divisional. OL must be fixed after Tunsil trade. TE below average. Need to protect Stroud.",
   },
   IND: {
@@ -223,7 +223,7 @@ const TEAM_GRADES = {
       S:    { score: 78, starter: "Camryn Bynum", age: 27, capHit: "~15M", note: "Bynum signed 4yr/$60M. Reliable." },
       ST:   { score: 65, starter: "McLaughlin", age: null, capHit: "~3M", note: "Adequate." },
     },
-    topNeeds: ["QB","WR","EDGE","TE","DL"],
+    topNeeds: ["EDGE","LB","S","QB"],
     draftPriority: "8-9 after 7-2 start — epic collapse. Richardson must develop or QB is #1 need. WR thin. EDGE critical.",
   },
   JAX: {
@@ -241,7 +241,7 @@ const TEAM_GRADES = {
       S:    { score: 72, starter: "Eric Murray", age: 28, capHit: "~7M", note: "Murray signed $22.5M. Reliable." },
       ST:   { score: 72, starter: "Cooke", age: null, capHit: "~5M", note: "Cooke extended $16M." },
     },
-    topNeeds: ["EDGE","WR","DL","TE"],
+    topNeeds: ["DL","DB","RB","OL"],
     draftPriority: "13-4 surprise — lost WC. Need premium EDGE and WR1. Lloyd FA decision critical.",
   },
   TEN: {
@@ -259,7 +259,7 @@ const TEAM_GRADES = {
       S:    { score: 50, starter: "Xavier Woods", age: 29, capHit: "~3M", note: "Woods signed. Thin." },
       ST:   { score: 58, starter: "Slye / Hekker", age: null, capHit: "~4M", note: "Hekker veteran." },
     },
-    topNeeds: ["WR","CB","EDGE","S","DL"],
+    topNeeds: ["EDGE","WR","CB","OL","RB"],
     draftPriority: "3-14 — worst in AFC. Ward needs weapons desperately. WR barren. CB and EDGE critical. Full rebuild around Ward.",
   },
 
@@ -279,7 +279,7 @@ const TEAM_GRADES = {
       S:    { score: 78, starter: "Talanoa Hufanga", age: 26, capHit: "~15M", note: "Hufanga signed 3yr/$45M from SF. Impact playmaker." },
       ST:   { score: 75, starter: "Lutz", age: null, capHit: "~5M", note: "Reliable." },
     },
-    topNeeds: ["RB","WR","OL","DL"],
+    topNeeds: ["TE","LB","RB","OL"],
     draftPriority: "14-3, one game from Super Bowl. Need RB upgrade and WR help for Nix. Close to complete roster.",
   },
   KC: {
@@ -297,7 +297,7 @@ const TEAM_GRADES = {
       S:    { score: 68, starter: "Mike Edwards / backup", age: 28, capHit: "~6M", note: "Edwards signed. Depth thin." },
       ST:   { score: 72, starter: "Butker", age: 30, capHit: "~5M", note: "Butker reliable." },
     },
-    topNeeds: ["WR","OL","RB","CB","S"],
+    topNeeds: ["RB","TE","WR","OL"],
     draftPriority: "6-11 — dynasty over? Mahomes still elite but roster gutted. WR desperation. Must rebuild around Mahomes.",
   },
   LV: {
@@ -315,7 +315,7 @@ const TEAM_GRADES = {
       S:    { score: 55, starter: "Tre'von Moehrig", age: 26, capHit: "~4M", note: "Adequate." },
       ST:   { score: 72, starter: "Carlson / Cole", age: null, capHit: "~8M", note: "Cole extended $15.8M. Reliable." },
     },
-    topNeeds: ["QB","WR","CB","OL","LB"],
+    topNeeds: ["QB","EDGE","OL","OL"],
     draftPriority: "3-14 — full rebuild. Smith at 35 not the answer. Need QB, WR, and secondary overhaul.",
   },
   LAC: {
@@ -333,7 +333,7 @@ const TEAM_GRADES = {
       S:    { score: 70, starter: "Derwin James", age: 28, capHit: "~18M", note: "James impact player. Defensive anchor." },
       ST:   { score: 70, starter: "Dicker", age: null, capHit: "~3M", note: "Reliable." },
     },
-    topNeeds: ["OL","WR","CB","RB","DL"],
+    topNeeds: ["OL","OL","DL","WR"],
     draftPriority: "11-6 but OL devastated by injuries. Need depth insurance. WR1 critical for Herbert.",
   },
 
@@ -353,7 +353,7 @@ const TEAM_GRADES = {
       S:    { score: 55, starter: "Malik Hooker / backup", age: 29, capHit: "~8M", note: "Hooker adequate. Secondary needs overhaul." },
       ST:   { score: 68, starter: "Aubrey", age: null, capHit: "~3M", note: "Brandon Aubrey elite kicker." },
     },
-    topNeeds: ["EDGE","CB","S","OL","LB"],
+    topNeeds: ["CB","EDGE","WR","RB"],
     draftPriority: "7-9-1 — Parsons trade left EDGE crater. Pass rush desperate need. Secondary weak. Dak cap constrains.",
   },
   NYG: {
@@ -371,7 +371,7 @@ const TEAM_GRADES = {
       S:    { score: 55, starter: "Jason Pinnock", age: 27, capHit: "~4M", note: "Adequate." },
       ST:   { score: 62, starter: "backup", age: null, capHit: "~3M", note: "Below average." },
     },
-    topNeeds: ["OL","EDGE","CB","LB","RB","WR"],
+    topNeeds: ["OL","OL","WR","LB"],
     draftPriority: "4-13 — rebuilding around Dart and Nabers. Need everything. OL protection priority.",
   },
   PHI: {
@@ -389,7 +389,7 @@ const TEAM_GRADES = {
       S:    { score: 68, starter: "backup", age: 27, capHit: "~8M", note: "CJGJ traded to HOU. Safety vacancy." },
       ST:   { score: 72, starter: "Elliott", age: null, capHit: "~4M", note: "Reliable." },
     },
-    topNeeds: ["EDGE","S","LB","DL"],
+    topNeeds: ["TE","EDGE","CB","OL"],
     draftPriority: "Defending champs lost WC round. Pass rush inconsistent. Safety vacancy after CJGJ trade.",
   },
   WAS: {
@@ -407,7 +407,7 @@ const TEAM_GRADES = {
       S:    { score: 58, starter: "Jeremy Chinn / backup", age: 27, capHit: "~8M", note: "Adequate." },
       ST:   { score: 65, starter: "backup", age: null, capHit: "~3M", note: "Average." },
     },
-    topNeeds: ["EDGE","RB","DL","LB","S"],
+    topNeeds: ["WR","DB","EDGE","OL"],
     draftPriority: "5-12 regression. Daniels injury killed season. Need young EDGE. RB room empty. Rebuild defense.",
   },
 
@@ -427,7 +427,7 @@ const TEAM_GRADES = {
       S:    { score: 68, starter: "Byard / Brisker", age: 31, capHit: "~12M", note: "Byard aging. Brisker solid." },
       ST:   { score: 70, starter: "Santos", age: null, capHit: "~4M", note: "Santos reliable." },
     },
-    topNeeds: ["EDGE","DL","CB","S","RB"],
+    topNeeds: ["DL","DB","OL","OL"],
     draftPriority: "11-6 NFC North champs! OL overhaul worked. Premium EDGE is the missing piece to complete defense.",
   },
   DET: {
@@ -445,7 +445,7 @@ const TEAM_GRADES = {
       S:    { score: 68, starter: "Brian Branch", age: 24, capHit: "~4M", note: "Branch emerging playmaker." },
       ST:   { score: 72, starter: "Badgley / Fox", age: null, capHit: "~4M", note: "Adequate." },
     },
-    topNeeds: ["CB","EDGE","LB","DL"],
+    topNeeds: ["OL","OL","EDGE","DB"],
     draftPriority: "9-8, missed playoffs. Regression from 2024. CB1 desperate. EDGE health (Hutchinson) is question.",
   },
   GB: {
@@ -463,7 +463,7 @@ const TEAM_GRADES = {
       S:    { score: 68, starter: "Xavier McKinney", age: 27, capHit: "~12M", note: "McKinney reliable." },
       ST:   { score: 78, starter: "McManus", age: null, capHit: "~5M", note: "McManus extended. Reliable." },
     },
-    topNeeds: ["DL","WR","CB","S","LB"],
+    topNeeds: ["DL","EDGE","OL","CB"],
     draftPriority: "9-7-1, lost WC. Parsons transforms defense but Clark departure leaves DL gap. Need interior DL and WR1.",
   },
   MIN: {
@@ -481,7 +481,7 @@ const TEAM_GRADES = {
       S:    { score: 72, starter: "Harrison Smith / Theo Jackson", age: 36, capHit: "~14M", note: "Smith re-signed $10.25M. Legend at 36. Jackson extended." },
       ST:   { score: 65, starter: "Wright", age: null, capHit: "~2M", note: "Adequate." },
     },
-    topNeeds: ["OL","EDGE","DL","QB","LB"],
+    topNeeds: ["LB","WR","DL","OL"],
     draftPriority: "9-8, missed playoffs. McCarthy must develop. OL expensive but underperformed. Pass rush needs alpha.",
   },
 
@@ -501,7 +501,7 @@ const TEAM_GRADES = {
       S:    { score: 58, starter: "Jessie Bates", age: 28, capHit: "~12M", note: "Reliable." },
       ST:   { score: 65, starter: "Koo", age: null, capHit: "~5M", note: "Koo reliable." },
     },
-    topNeeds: ["QB","EDGE","DL","OL","TE"],
+    topNeeds: ["WR","TE","OL","CB","DL"],
     draftPriority: "8-9. Penix must prove he's the answer. Cousins dead money. EDGE and DL need major investment.",
   },
   CAR: {
@@ -519,7 +519,7 @@ const TEAM_GRADES = {
       S:    { score: 55, starter: "backup", age: 28, capHit: "~5M", note: "Below average." },
       ST:   { score: 62, starter: "Pineiro", age: null, capHit: "~3M", note: "Adequate." },
     },
-    topNeeds: ["WR","EDGE","OL","TE","S"],
+    topNeeds: ["OL","LB","EDGE","DL","WR"],
     draftPriority: "8-9, won weak NFC South. Young needs weapons. WR and EDGE critical needs.",
   },
   NO: {
@@ -537,7 +537,7 @@ const TEAM_GRADES = {
       S:    { score: 55, starter: "Tyrann Mathieu", age: 33, capHit: "~6M", note: "Declining." },
       ST:   { score: 65, starter: "backup", age: null, capHit: "~3M", note: "Average." },
     },
-    topNeeds: ["QB","WR","OL","EDGE","S"],
+    topNeeds: ["WR","OL","RB","EDGE"],
     draftPriority: "6-11. No franchise QB — everything flows from QB1. WR gutted. OL devastated.",
   },
   TB: {
@@ -555,7 +555,7 @@ const TEAM_GRADES = {
       S:    { score: 65, starter: "Antoine Winfield Jr.", age: 27, capHit: "~15M", note: "Elite safety. Anchor." },
       ST:   { score: 68, starter: "backup", age: null, capHit: "~3M", note: "Adequate." },
     },
-    topNeeds: ["EDGE","WR","TE","LB","OL"],
+    topNeeds: ["LB","EDGE","CB","OL"],
     draftPriority: "8-9. Evans and Godwin aging — WR succession needed. EDGE desperation. LB after David retires.",
   },
 
@@ -575,7 +575,7 @@ const TEAM_GRADES = {
       S:    { score: 58, starter: "Budda Baker", age: 30, capHit: "~12M", note: "Reliable but aging." },
       ST:   { score: 62, starter: "backup", age: null, capHit: "~3M", note: "Average." },
     },
-    topNeeds: ["EDGE","DL","CB","OL","RB"],
+    topNeeds: ["OL","EDGE","LB","QB","OL","RB"],
     draftPriority: "3-14 — worst in NFC. Rebuild defense around MHJ on offense. EDGE and DL critical.",
   },
   LAR: {
@@ -593,7 +593,7 @@ const TEAM_GRADES = {
       S:    { score: 72, starter: "Quentin Lake / Kinchens", age: 25, capHit: "~3M", note: "Young developing." },
       ST:   { score: 75, starter: "Joshua Karty", age: 24, capHit: "~2M", note: "Promising." },
     },
-    topNeeds: ["QB","CB","OL","LB"],
+    topNeeds: ["WR","DB","LB","OL"],
     draftPriority: "12-5, lost NFC Championship. Stafford at 38 — QB succession is elephant in room. CB still needs upgrade.",
   },
   SF: {
@@ -611,7 +611,7 @@ const TEAM_GRADES = {
       S:    { score: 55, starter: "Ji'Aire Brown / backup", age: 24, capHit: "~3M", note: "Hufanga left for DEN. Gap at safety." },
       ST:   { score: 72, starter: "Jake Moody", age: 26, capHit: "~4M", note: "Reliable." },
     },
-    topNeeds: ["WR","EDGE","S","OL"],
+    topNeeds: ["WR","OL","DL","EDGE"],
     draftPriority: "12-5 but WR room gutted. Need impact WR badly. EDGE stability. Safety vacant after Hufanga departure.",
   },
   SEA: {
@@ -629,7 +629,7 @@ const TEAM_GRADES = {
       S:    { score: 68, starter: "backup", age: 26, capHit: "~5M", note: "Safety adequate but not a strength." },
       ST:   { score: 70, starter: "Myers", age: null, capHit: "~5M", note: "Jason Myers reliable." },
     },
-    topNeeds: ["EDGE","RB","TE","OL","S"],
+    topNeeds: ["DB","OL","RB","OL"],
     draftPriority: "14-3, in Super Bowl LX. Need young EDGE (Lawrence aging). RB depth critical after Charbonnet ACL. TE upgrade.",
   },
 };

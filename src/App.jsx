@@ -1308,19 +1308,19 @@ const TEAM_COLORS = {
 };
 
 const TEAM_NEEDS = {
-  ARI:["QB","RB","G","T"],ATL:["WR","TE","DI","CB"],BAL:["WR","G","DL"],
-  BUF:["WR","ED","LB","DB"],CAR:["WR","DL","LB"],CHI:["DL","LB","S"],
-  CIN:["C","G","DI","S"],CLE:["QB","WR","G","T"],DAL:["RB","ED","LB","S"],
-  DEN:["RB","TE","C","LB"],DET:["C","T","ED","CB"],GB:["T","DI","CB"],
-  HOU:["RB","C","G","DI"],IND:["QB","DI","LB","S"],JAX:["C","G","DI","S"],
-  KC:["RB","WR","G","T","DL"],LV:["QB","WR","G","T","DI","LB","CB"],
-  LAC:["G","C","DL"],LAR:["QB","T","CB"],MIA:["QB","WR","G","CB"],
-  MIN:["RB","C","DB"],NE:["G","T","ED","LB"],NO:["WR","G","DL"],
-  NYG:["WR","G","T","CB"],NYJ:["QB","WR","DI","LB","CB"],
-  PHI:["TE","G","ED","CB"],PIT:["QB","WR","T","DB"],
-  SF:["WR","G","ED","S"],SEA:["RB","C","G","LB","CB"],
-  TB:["TE","G","ED","LB","CB"],TEN:["RB","WR","C","G","ED","CB"],
-  WAS:["TE","G","ED","LB","DB"],
+  ARI:["T","ED","LB","QB","G","RB"],ATL:["WR","TE","G","CB","DI"],BAL:["DI","ED","G","WR","DB"],
+  BUF:["WR","ED","LB","S"],CAR:["T","LB","ED","DL","WR"],CHI:["DI","DB","G","T"],
+  CIN:["ED","DB","G","DI"],CLE:["QB","WR","G","T"],DAL:["CB","ED","WR","RB"],
+  DEN:["TE","LB","RB","G"],DET:["T","G","ED","DB"],GB:["DI","ED","G","CB"],
+  HOU:["DI","T","RB","G"],IND:["ED","LB","S","QB"],JAX:["DI","DB","RB","G"],
+  KC:["RB","TE","WR","G"],LV:["QB","ED","G","T"],
+  LAC:["G","T","DI","WR"],LAR:["WR","DB","LB","T"],MIA:["CB","TE","QB","G"],
+  MIN:["LB","WR","DI","G"],NE:["WR","ED","T","G"],NO:["WR","G","RB","ED"],
+  NYG:["T","G","WR","LB"],NYJ:["QB","DI","WR","CB"],
+  PHI:["TE","ED","CB","G"],PIT:["QB","T","DB","G"],
+  SF:["WR","T","DI","ED"],SEA:["DB","G","RB","T"],
+  TB:["LB","ED","CB","G"],TEN:["ED","WR","CB","G","RB"],
+  WAS:["WR","DB","ED","G"],
 };
 
 // Reverse lookup: player position → teams that need it
