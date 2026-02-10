@@ -2791,6 +2791,149 @@ function MockDraftPage() {
                 )}
               </div>
 
+              {/* Draft Grade Card (team mode, my picks view) */}
+              {draftMode === "team" && resultsView === "my" && (() => {
+                const mySlots = teamPicksOwned(userTeam).filter(s => picks[s.pick]);
+                if (mySlots.length === 0) return null;
+
+                const mappedNeeds = (TEAM_NEEDS[userTeam] || []).map(n => needsMapping[n] || n);
+
+                // Grade each pick: compare player rank vs pick position
+                let totalValue = 0;
+                let needsHit = 0;
+                const pickGrades = mySlots.map(slot => {
+                  const player = picks[slot.pick];
+                  const rankDiff = slot.pick - player.r; // positive = got value (player ranked higher than pick)
+                  const isNeed = mappedNeeds.includes(player.p);
+                  if (isNeed) needsHit++;
+
+                  // Value score: how much value did you get?
+                  let valueScore;
+                  if (rankDiff >= 20) valueScore = 10;      // massive steal
+                  else if (rankDiff >= 10) valueScore = 9;   // great value
+                  else if (rankDiff >= 5) valueScore = 8;    // good value
+                  else if (rankDiff >= 0) valueScore = 7;    // fair pick
+                  else if (rankDiff >= -5) valueScore = 6;   // slight reach
+                  else if (rankDiff >= -15) valueScore = 5;  // reach
+                  else valueScore = 4;                        // big reach
+
+                  // Need bonus: +1 if fills a need
+                  const needBonus = isNeed ? 1.0 : 0;
+
+                  // Positional value bonus
+                  const posBonus = ({"QB":0.5,"EDGE":0.3,"OT":0.3,"CB":0.2,"WR":0.2,"DL":0.1}[player.p]) || 0;
+
+                  const pickScore = Math.min(10, valueScore + needBonus + posBonus);
+                  totalValue += pickScore;
+
+                  return { slot, player, rankDiff, isNeed, pickScore };
+                });
+
+                const avgScore = totalValue / mySlots.length;
+                const needPct = Math.round((needsHit / mySlots.length) * 100);
+
+                // Convert to letter grade
+                let grade, gradeColor;
+                if (avgScore >= 9.0) { grade = "A+"; gradeColor = "#22c55e"; }
+                else if (avgScore >= 8.5) { grade = "A"; gradeColor = "#22c55e"; }
+                else if (avgScore >= 8.0) { grade = "A-"; gradeColor = "#4ade80"; }
+                else if (avgScore >= 7.5) { grade = "B+"; gradeColor = "#2dd4bf"; }
+                else if (avgScore >= 7.0) { grade = "B"; gradeColor = "#2dd4bf"; }
+                else if (avgScore >= 6.5) { grade = "B-"; gradeColor = "#38bdf8"; }
+                else if (avgScore >= 6.0) { grade = "C+"; gradeColor = "#f59e0b"; }
+                else if (avgScore >= 5.5) { grade = "C"; gradeColor = "#f59e0b"; }
+                else if (avgScore >= 5.0) { grade = "C-"; gradeColor = "#f97316"; }
+                else { grade = "D"; gradeColor = "#ef4444"; }
+
+                // Find best pick (highest value over slot)
+                const bestPick = pickGrades.reduce((a, b) => a.rankDiff > b.rankDiff ? a : b);
+                // Find biggest reach
+                const worstPick = pickGrades.reduce((a, b) => a.rankDiff < b.rankDiff ? a : b);
+
+                return (
+                  <div style={{marginBottom:"clamp(10px,1.5vw,16px)"}}>
+                    {/* Grade header */}
+                    <div style={{
+                      background:"var(--dg-card)",border:"1px solid var(--dg-card-border2)",
+                      borderRadius:"12px",padding:"clamp(14px,2vw,20px)",
+                    }}>
+                      <div style={{display:"flex",alignItems:"center",gap:"clamp(14px,2.5vw,24px)"}}>
+                        {/* Big grade */}
+                        <div style={{
+                          width:"clamp(56px,8vw,72px)",height:"clamp(56px,8vw,72px)",
+                          borderRadius:"12px",background:`${gradeColor}15`,
+                          border:`2px solid ${gradeColor}40`,
+                          display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
+                        }}>
+                          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(28px,4.5vw,38px)",fontWeight:700,color:gradeColor,lineHeight:1}}>{grade}</div>
+                        </div>
+
+                        {/* Stats */}
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(14px,2vw,18px)",fontWeight:700,color:"var(--dg-text)",letterSpacing:"0.5px",textTransform:"uppercase",marginBottom:"8px"}}>Draft Grade</div>
+                          <div style={{display:"flex",gap:"clamp(12px,2vw,24px)",flexWrap:"wrap"}}>
+                            <div>
+                              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.9vw,9px)",color:"var(--dg-text-faint)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Value</div>
+                              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,2.2vw,22px)",fontWeight:700,color:"var(--dg-text)"}}>{avgScore.toFixed(1)}<span style={{fontSize:"clamp(10px,1.2vw,12px)",color:"var(--dg-text-faint)"}}>/10</span></div>
+                            </div>
+                            <div>
+                              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.9vw,9px)",color:"var(--dg-text-faint)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Needs Filled</div>
+                              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,2.2vw,22px)",fontWeight:700,color:needPct >= 60 ? "#2dd4bf" : needPct >= 40 ? "#f59e0b" : "#ef4444"}}>{needPct}%</div>
+                            </div>
+                            <div>
+                              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.9vw,9px)",color:"var(--dg-text-faint)",letterSpacing:"0.5px",textTransform:"uppercase"}}>Picks</div>
+                              <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(16px,2.2vw,22px)",fontWeight:700,color:"var(--dg-text)"}}>{mySlots.length}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Pick-by-pick value bars */}
+                      <div style={{marginTop:"clamp(10px,1.5vw,16px)",borderTop:"1px solid var(--dg-card-border)",paddingTop:"clamp(8px,1.2vw,12px)"}}>
+                        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.9vw,9px)",color:"var(--dg-text-faint)",letterSpacing:"0.5px",textTransform:"uppercase",marginBottom:"6px"}}>Pick-by-Pick Value</div>
+                        <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+                          {pickGrades.map(({slot, player, rankDiff, isNeed, pickScore}) => {
+                            const barColor = pickScore >= 8.5 ? "#22c55e" : pickScore >= 7 ? "#2dd4bf" : pickScore >= 6 ? "#f59e0b" : "#ef4444";
+                            const pc = POS_COLORS[player.p] || {bg:"#555",text:"#fff"};
+                            return (
+                              <div key={slot.pick} style={{display:"flex",alignItems:"center",gap:"clamp(4px,0.7vw,8px)"}}>
+                                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"var(--dg-text-faint)",minWidth:"clamp(18px,2.5vw,24px)",textAlign:"right"}}>#{slot.pick}</span>
+                                <span style={{background:pc.bg,color:pc.text,padding:"0px 4px",borderRadius:"2px",fontSize:"clamp(6px,0.8vw,8px)",fontWeight:700,fontFamily:"'JetBrains Mono',monospace",minWidth:"clamp(24px,3.5vw,32px)",textAlign:"center"}}>{player.p}</span>
+                                <span style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(9px,1.1vw,12px)",fontWeight:600,color:"var(--dg-text)",minWidth:"clamp(60px,10vw,100px)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{player.n}</span>
+                                <div style={{flex:1,height:"clamp(6px,0.8vw,8px)",background:"rgba(255,255,255,0.06)",borderRadius:"4px",overflow:"hidden",minWidth:"40px"}}>
+                                  <div style={{width:`${pickScore * 10}%`,height:"100%",background:barColor,borderRadius:"4px",transition:"width 0.3s"}}/>
+                                </div>
+                                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",fontWeight:600,color:barColor,minWidth:"clamp(18px,2.5vw,26px)",textAlign:"right"}}>{pickScore.toFixed(1)}</span>
+                                {isNeed && <span style={{fontSize:"clamp(7px,0.8vw,9px)",color:"#2dd4bf"}} title="Fills a team need">✓</span>}
+                                {rankDiff >= 10 && <span style={{fontSize:"clamp(7px,0.8vw,9px)",color:"#22c55e"}} title={`Steal! Ranked #${player.r}, picked #${slot.pick}`}>🔥</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Highlights */}
+                      <div style={{marginTop:"clamp(8px,1.2vw,12px)",display:"flex",gap:"clamp(8px,1.2vw,16px)",flexWrap:"wrap"}}>
+                        {bestPick.rankDiff > 0 && (
+                          <div style={{flex:1,minWidth:"140px",background:"rgba(34,197,94,0.06)",border:"1px solid rgba(34,197,94,0.15)",borderRadius:"8px",padding:"clamp(6px,1vw,10px)"}}>
+                            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.8vw,8px)",color:"#22c55e",letterSpacing:"0.5px",textTransform:"uppercase",marginBottom:"2px"}}>Best Value</div>
+                            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(11px,1.4vw,14px)",fontWeight:600,color:"var(--dg-text)"}}>{bestPick.player.n}</div>
+                            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"var(--dg-text-dim)"}}>Ranked #{bestPick.player.r}, picked #{bestPick.slot.pick} (+{bestPick.rankDiff})</div>
+                          </div>
+                        )}
+                        {worstPick.rankDiff < -3 && (
+                          <div style={{flex:1,minWidth:"140px",background:"rgba(239,68,68,0.06)",border:"1px solid rgba(239,68,68,0.15)",borderRadius:"8px",padding:"clamp(6px,1vw,10px)"}}>
+                            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(7px,0.8vw,8px)",color:"#ef4444",letterSpacing:"0.5px",textTransform:"uppercase",marginBottom:"2px"}}>Biggest Reach</div>
+                            <div style={{fontFamily:"'Oswald',sans-serif",fontSize:"clamp(11px,1.4vw,14px)",fontWeight:600,color:"var(--dg-text)"}}>{worstPick.player.n}</div>
+                            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:"clamp(8px,1vw,10px)",color:"var(--dg-text-dim)"}}>Ranked #{worstPick.player.r}, picked #{worstPick.slot.pick} ({worstPick.rankDiff})</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Results grid */}
               {(() => {
                 const showMyPicks = draftMode === "team" && resultsView === "my";
