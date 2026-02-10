@@ -1937,13 +1937,60 @@ function MockDraftPage() {
   // Execute a trade
   const needsMapping = {"QB":"QB","RB":"RB","WR":"WR","TE":"TE","T":"OT","G":"IOL","C":"IOL","OL":"IOL","DL":"DL","DI":"DL","ED":"EDGE","EDGE":"EDGE","LB":"LB","CB":"CB","S":"S","DB":"S"};
 
-  const getAutoPick = (slotAbbr, currentPicks) => {
+  // Positional value multiplier (premium positions get drafted higher)
+  const POS_VALUE = {QB:1.35,EDGE:1.2,OT:1.15,CB:1.12,WR:1.1,DL:1.05,S:1.0,LB:0.95,IOL:0.93,TE:0.9,RB:0.85};
+
+  const getAutoPick = (slotAbbr, currentPicks, pickNum) => {
     const picked = new Set(Object.values(currentPicks).map(p=>p.r));
     const avail = PLAYERS.filter(p => !picked.has(p.r));
+    if (avail.length === 0) return null;
+
     const needs = TEAM_NEEDS[slotAbbr] || [];
     const mappedNeeds = needs.map(n => needsMapping[n] || n);
-    const needMatch = avail.find(p => mappedNeeds.includes(p.p));
-    return needMatch || avail[0];
+    const round = DRAFT_ORDER.find(s=>s.pick===pickNum)?.round || 1;
+
+    // Already-filled needs: if team already picked a position earlier, reduce that need
+    const alreadyDrafted = new Set();
+    Object.entries(currentPicks).forEach(([pn, player]) => {
+      const slot = DRAFT_ORDER.find(s=>s.pick===Number(pn));
+      const owner = pickOwnership[Number(pn)] || slot?.abbr;
+      if (owner === slotAbbr) alreadyDrafted.add(player.p);
+    });
+
+    // Score each available player
+    const scored = avail.slice(0, 80).map((player, idx) => {
+      // BPA score: higher rank = higher score (inverse of rank position in available list)
+      const bpaScore = 100 - (idx * (100 / Math.min(avail.length, 80)));
+
+      // Need score: how well does this position match team needs?
+      let needScore = 0;
+      const needIdx = mappedNeeds.indexOf(player.p);
+      if (needIdx !== -1) {
+        // Priority bonus: 1st need = 40pts, 2nd = 30pts, 3rd = 22pts, 4th+ = 15pts
+        needScore = needIdx === 0 ? 40 : needIdx === 1 ? 30 : needIdx === 2 ? 22 : 15;
+        // Reduce if already drafted this position
+        if (alreadyDrafted.has(player.p)) needScore *= 0.3;
+      }
+
+      // Positional value
+      const posVal = (POS_VALUE[player.p] || 0.9) * 10;
+
+      // Slight randomness: ±8 points (makes each mock unique)
+      const jitter = (Math.random() - 0.5) * 16;
+
+      // Weighting shifts by round: early rounds favor BPA more, late rounds favor need
+      const bpaWeight = round <= 2 ? 0.55 : round <= 4 ? 0.45 : 0.35;
+      const needWeight = round <= 2 ? 0.30 : round <= 4 ? 0.40 : 0.50;
+      const posWeight = 0.10;
+      const jitterWeight = 0.05;
+
+      const total = (bpaScore * bpaWeight) + (needScore * needWeight) + (posVal * posWeight) + (jitter * jitterWeight);
+
+      return { player, total };
+    });
+
+    scored.sort((a, b) => b.total - a.total);
+    return scored[0]?.player || avail[0];
   };
 
   const executeTrade = () => {
@@ -1998,7 +2045,7 @@ function MockDraftPage() {
         if (tmpPicks[p]) { p++; continue; }
         const own = resolveOwner(p);
         if (own === myTeam) break;
-        const ap = getAutoPick(own, tmpPicks);
+        const ap = getAutoPick(own, tmpPicks, p);
         if (ap) { autopickQueue.push({pick:p, player:ap}); tmpPicks[p] = ap; }
         p++;
       }
@@ -2050,7 +2097,7 @@ function MockDraftPage() {
       if (tmpPicks[p]) { p++; continue; }
       const owner = resolveOwner(p);
       if (owner === userTeam) break;
-      const autoPick = getAutoPick(owner, tmpPicks);
+      const autoPick = getAutoPick(owner, tmpPicks, p);
       if (autoPick) {
         autopickQueue.push({pick: p, player: autoPick});
         tmpPicks[p] = autoPick;
@@ -2219,7 +2266,7 @@ function MockDraftPage() {
         for (let i = 0; i < DRAFT_ORDER.length; i++) {
           const slot = DRAFT_ORDER[i];
           if (slot.abbr === userTeam) break;
-          const autoPick = getAutoPick(slot.abbr, tmpPicks);
+          const autoPick = getAutoPick(slot.abbr, tmpPicks, slot.pick);
           if (autoPick) {
             autopickQueue.push({pick: slot.pick, player: autoPick});
             tmpPicks[slot.pick] = autoPick;
@@ -2275,7 +2322,7 @@ function MockDraftPage() {
       for (let i = 0; i < DRAFT_ORDER.length; i++) {
         const slot = DRAFT_ORDER[i];
         if (slot.abbr === team) break;
-        const autoPick = getAutoPick(slot.abbr, tmpPicks);
+        const autoPick = getAutoPick(slot.abbr, tmpPicks, slot.pick);
         if (autoPick) {
           autopickQueue.push({pick: slot.pick, player: autoPick});
           tmpPicks[slot.pick] = autoPick;
