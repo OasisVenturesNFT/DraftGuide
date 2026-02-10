@@ -3633,12 +3633,14 @@ export default function App() {
     textFaint: "#475569", textGhost: "#334155", navActive: "#f1f5f9", navInactive: "#64748b",
     navActiveBg: "rgba(45,212,191,0.08)", cardBg: "rgba(255,255,255,0.02)",
     cardBorder: "rgba(255,255,255,0.06)", rowAlt: "rgba(255,255,255,0.015)",
+    logo: "/logo-light.png",
   } : {
     bg: "#f8fafc", headerBg: "#ffffff", headerBorder: "#e5e7eb",
     headerShadow: "0 1px 3px rgba(0,0,0,0.08)", text: "#1e293b", textMuted: "#475569",
     textDim: "#64748b", textFaint: "var(--dg-text-muted)", textGhost: "#cbd5e1", navActive: "#1B2A4A",
     navInactive: "var(--dg-text-muted)", navActiveBg: "rgba(27,42,74,0.08)", cardBg: "rgba(0,0,0,0.02)",
     cardBorder: "rgba(0,0,0,0.08)", rowAlt: "rgba(0,0,0,0.02)",
+    logo: "/logo.png",
   };
 
   return (
@@ -3659,6 +3661,9 @@ export default function App() {
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:"12px",cursor:"pointer"}}
             onClick={()=>handleSetPage("HOME")}>
+            <img src={t.logo} alt="Draft Guide" style={{
+              height:"36px",width:"auto",flexShrink:0,
+            }}/>
             <div className="logo-text">
               <div style={{
                 fontFamily:"'Oswald',sans-serif",fontSize:"18px",fontWeight:700,
